@@ -608,6 +608,10 @@ namespace $namespace$&#xD;
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=2E98680C2A007D42A159A0DF464D2FB5/Name/@EntryValue">Hack</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=2E98680C2A007D42A159A0DF464D2FB5/Pattern/@EntryValue">(?&lt;=\W|^)(?&lt;TAG&gt;HACK)(\W|$)(.*)</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=2E98680C2A007D42A159A0DF464D2FB5/TodoIconStyle/@EntryValue">Warning</s:String>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=langword/@EntryIndexRemoved">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=struct/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Tuple/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=typeparam/@EntryIndexedValue">True</s:Boolean>
 	
 	</wpf:ResourceDictionary>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace ClrCoder.System.Text
@@ -28,6 +30,33 @@ namespace ClrCoder.System.Text
             }
 
             return LineEndingPattern.Replace(text, Environment.NewLine);
+        }
+
+        /// <summary>
+        /// Iterates through lines from the <paramref name="reader"/>.
+        /// </summary>
+        /// <remarks>
+        /// This method "eats" last empty line.
+        /// </remarks>
+        /// <param name="reader">Text reader.</param>
+        /// <returns>Lines enumeration.</returns>
+        /// <example>
+        /// Text "a\n" will return only one line "a".
+        /// </example>
+        public static IEnumerable<string> ReadLines(this TextReader reader)
+        {
+            for (;;)
+            {
+                string line = reader.ReadLine();
+                if (line != null)
+                {
+                    yield return line;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
     }
 }

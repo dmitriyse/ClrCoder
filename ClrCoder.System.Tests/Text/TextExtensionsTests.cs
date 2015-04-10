@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 using ClrCoder.System.Diagnostics;
@@ -14,7 +16,7 @@ namespace ClrCoder.System.Tests.Text
     /// <see cref="ClrCoder.System.Text"/> <see langword="namespace"/> related tests.
     /// </summary>
     [TestFixture]
-    public class TextTests
+    public class TextExtensionsTests
     {
         /// <summary>
         /// Benchmark test for the <see cref="TextExtensions.NormalizeLineEndings"/> method.
@@ -41,7 +43,7 @@ namespace ClrCoder.System.Tests.Text
 
             string oneMbString = sb.ToString();
 
-            CodeTimer timer = CodeTimer.Start(3);
+            CodeTimer timer = CodeTimer.Start();
             string normalizedString = oneMbString.NormalizeLineEndings();
             if (normalizedString.Length > 10)
             {
@@ -59,6 +61,23 @@ namespace ClrCoder.System.Tests.Text
         public void NormalizeLineEndingsTest(string str, string normalizedStr)
         {
             str.NormalizeLineEndings().Should().Be(normalizedStr);
+        }
+
+        /// <summary>
+        /// Test for the <see cref="TextExtensions.NormalizeLineEndings"/>
+        /// </summary>
+        /// <param name="text">Original text.</param>
+        /// <param name="lines">Expected lines in the text.</param>
+        [Test]
+        [TestCase("")]
+        [TestCase("a", "a")]
+        [TestCase("\r\n", "")]
+        [TestCase("\r\na", "", "a")]
+        [TestCase("\r\na\nb", "", "a", "b")]
+        [TestCase("\r\na\nb\n", "", "a", "b")]
+        public void ReadLinesTests(string text, params string[] lines)
+        {
+            new StringReader(text).ReadLines().ToArray().Should().BeEquivalentTo(lines);
         }
     }
 }
