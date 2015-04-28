@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1C749A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http", "ClrCoder.System.Net.Http\ClrCoder.System.Net.Http.csproj", "{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{89E7326E-916C-4D48-96FE-273EA96338A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89E7326E-916C-4D48-96FE-273EA96338A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89E7326E-916C-4D48-96FE-273EA96338A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
