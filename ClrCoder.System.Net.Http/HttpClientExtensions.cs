@@ -42,7 +42,13 @@ namespace ClrCoder.System.Net.Http
         /// <returns>Cloned <c>content</c>.</returns>
         public static async Task<HttpContent> Clone(this HttpContent content)
         {
-            return new StreamContent(await content.ReadAsStreamAsync());
+            var clonedContent = new ByteArrayContent(await content.ReadAsByteArrayAsync());
+            foreach (KeyValuePair<string, IEnumerable<string>> httpContentHeader in content.Headers)
+            {
+                clonedContent.Headers.Add(httpContentHeader.Key, httpContentHeader.Value);
+            }
+
+            return clonedContent;
         }
     }
 }
