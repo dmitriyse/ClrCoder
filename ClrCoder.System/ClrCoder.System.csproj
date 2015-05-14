@@ -46,6 +46,9 @@
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="Text\NormalizedLineEndingsReader.cs" />
     <Compile Include="Text\TextExtensions.cs" />
+    <Compile Include="Threading\ILockToken.cs" />
+    <Compile Include="Threading\KeyedMonitor.cs" />
+    <Compile Include="Collections\TtlDictionary.cs" />
     <Compile Include="TypeEx.cs" />
     <Compile Include="TypeEx{T}.cs" />
     <Compile Include="ValuedTuple{T1, T2}.cs" />
