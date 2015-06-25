@@ -222,13 +222,13 @@ namespace ClrCoder.System.Collections
                 throw new ArgumentOutOfRangeException("arrayIndex", "Index should be non negative.");
             }
 
-            if (array.Length - arrayIndex < Count)
-            {
-                throw new ArgumentException("Target array size is not enough to copy collection.");
-            }
-
             lock (_entries)
             {
+                if (array.Length - arrayIndex < Count)
+                {
+                    throw new ArgumentException("Target array size is not enough to copy collection.");
+                }
+
                 int index = arrayIndex;
                 foreach (KeyValuePair<TKey, Entry> entry in _entries)
                 {
@@ -391,7 +391,8 @@ namespace ClrCoder.System.Collections
                 {
                     Entry entry;
                     bool result = _entries.TryGetValue(key, out entry);
-                    value = entry.Value;
+                    value = result ? entry.Value : default(TValue);
+
                     return result;
                 }
             }
@@ -413,7 +414,7 @@ namespace ClrCoder.System.Collections
 
         private void ScheduleEntryRemove(TKey key, ref Entry entry, TimeSpan ttl)
         {
-            var task = ScheduleEntryRemove(key, entry.Version, ttl);
+            Task task = ScheduleEntryRemove(key, entry.Version, ttl);
         }
 
         private async Task ScheduleEntryRemove(TKey key, long version, TimeSpan ttl)
@@ -425,8 +426,8 @@ namespace ClrCoder.System.Collections
                 lock (_entries)
                 {
                     Entry entry;
-                    if (!_entries.TryGetValue(key, out entry)
-                        || entry.Version == version)
+                    if (_entries.TryGetValue(key, out entry)
+                        && entry.Version == version)
                     {
                         _entries.Remove(key);
                     }
