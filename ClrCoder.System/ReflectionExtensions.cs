@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,6 +12,11 @@ namespace ClrCoder.System
     /// </summary>
     public static class ReflectionExtensions
     {
+        //// TODO: Add methods to working with structs.
+        //// TODO: Add tests for static data members.
+        private static readonly ConcurrentDictionary<Type, DataMemberInfoesCacheEntry> DataMemberInfoesCache =
+            new ConcurrentDictionary<Type, DataMemberInfoesCacheEntry>();
+
         /// <summary>
         /// Gets type member name from the specified <c>expression</c>.
         /// </summary>
@@ -54,6 +60,7 @@ namespace ClrCoder.System
         /// <param name="value">Value to set.</param>
         public static void SetMemberValue<TObject, TValue>(this TObject obj, string memberName, TValue value)
         {
+            Type type = typeof(TObject);
             if (typeof(TObject).GetTypeInfo().IsClass)
             {
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
@@ -61,6 +68,8 @@ namespace ClrCoder.System
                 {
                     throw new ArgumentNullException("obj");
                 }
+
+                type = obj.GetType();
             }
 
             if (memberName == null)
@@ -69,21 +78,22 @@ namespace ClrCoder.System
             }
 
             Action<TObject, TValue> setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
-                memberName,
-                name =>
+                new ValuedTuple<Type, string>(type, memberName),
+                typeAndName =>
                     {
-                        Type objType = typeof(TObject);
-                        PropertyInfo propertyInfo = objType.GetRuntimeProperty(name);
-                        if (propertyInfo != null)
+                        DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(type);
+
+                        PropertyInfo propertyInfo;
+                        if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
                         {
                             // TODO: Replace to expression compilation.
                             return (o, v) => propertyInfo.SetValue(o, v);
                         }
 
-                        FieldInfo fieldInfo = objType.GetRuntimeField(name);
-                        if (fieldInfo == null)
+                        FieldInfo fieldInfo;
+                        if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
                         {
-                            throw new KeyNotFoundException("name");
+                            throw new KeyNotFoundException("Cannot find property or field with the specified name.");
                         }
 
                         // TODO: Replace to expression compilation.
@@ -94,21 +104,24 @@ namespace ClrCoder.System
         }
 
         /// <summary>
-        /// First part of the "get member value" syntax.
+        /// First part of the "get data member value" syntax.
         /// </summary>
         /// <typeparam name="TObject"><c>Object</c> type.</typeparam>
-        /// <param name="obj"><c>Object</c> to get member value from.</param>
-        /// <param name="memberName"><c>Object</c> member(field or property) name.</param>
-        /// <returns><c>Object</c> member value.</returns>
-        public static ReflectedClassMember<TObject> GetMember<TObject>(this TObject obj, string memberName)
+        /// <param name="obj"><c>Object</c> to get data member value from.</param>
+        /// <param name="memberName"><c>Object</c> data member(field or property) name.</param>
+        /// <returns><c>Object</c> data member value.</returns>
+        public static ReflectedClassDataMember<TObject> GetMember<TObject>(this TObject obj, string memberName)
         {
-            if (typeof(TObject).GetTypeInfo().IsClass)
+            Type type = typeof(TObject);
+            if (type.GetTypeInfo().IsClass)
             {
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
                 if (obj == null)
                 {
                     throw new ArgumentNullException("obj");
                 }
+
+                type = obj.GetType();
             }
 
             if (memberName == null)
@@ -116,74 +129,230 @@ namespace ClrCoder.System
                 throw new ArgumentNullException("memberName");
             }
 
-            return new ReflectedClassMember<TObject>(obj, memberName);
+            return new ReflectedClassDataMember<TObject>(type, obj, memberName);
+        }
+
+        //// TODO: add struct enumerable to improve performance.
+
+        /// <summary>
+        /// First part of the "get data member value" syntax.
+        /// </summary>
+        /// <param name="obj"><c>Object</c> to get data member value from.</param>
+        /// <returns><c>Object</c> data member value.</returns>
+        public static IReadOnlyCollection<ReflectedClassDataMember<object>> GetMembers(this object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+
+            Type type = obj.GetType();
+            DataMemberInfoesCacheEntry membersCache = GetDataMemberInfoesCache(type);
+
+            return membersCache.Fields.Values.Where(x => !x.Name.StartsWith("<") && !x.IsStatic)
+                .Union(
+                    membersCache.Properties.Values.Where(
+                        x =>
+                        (!x.CanRead || !x.GetMethod.IsStatic)
+                        && (!x.CanWrite || !x.SetMethod.IsStatic)).Cast<MemberInfo>())
+                .Select(x => new ReflectedClassDataMember<object>(type, obj, x.Name)).ToList();
+        }
+
+        private static DataMemberInfoesCacheEntry GetDataMemberInfoesCache(Type type)
+        {
+            return DataMemberInfoesCache.GetOrAdd(
+                type,
+                t => new DataMemberInfoesCacheEntry
+                    {
+                        Fields = type.GetRuntimeFields().ToDictionary(x => x.Name),
+                        Properties = type.GetRuntimeProperties().ToDictionary(x => x.Name)
+                    });
         }
 
         /// <summary>
         /// Second half of the "get member value" syntax.
         /// </summary>
         /// <typeparam name="TObject">Object type.</typeparam>
-        public struct ReflectedClassMember<TObject>
+        public struct ReflectedClassDataMember<TObject>
         {
             private readonly TObject _obj;
 
-            private readonly string _memberName;
+            private readonly string _name;
+
+            private readonly Type _type;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="ReflectedClassMember{TObject}"/> struct.
+            /// Initializes a new instance of the <see cref="ReflectedClassDataMember{TObject}"/> struct.
             /// </summary>
+            /// <param name="type">Reflection API type.</param>
             /// <param name="obj">Object to get member value from.</param>
-            /// <param name="memberName">Member name.</param>
-            internal ReflectedClassMember(TObject obj, string memberName)
+            /// <param name="name">Member name.</param>
+            internal ReflectedClassDataMember(Type type, TObject obj, string name)
             {
                 _obj = obj;
-                _memberName = memberName;
+                _name = name;
+                _type = type;
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReflectedClassDataMember{TObject}"/> struct.
+            /// </summary>
+            /// <param name="type">Type to get member of.</param>
+            /// <param name="name">Member name.</param>
+            internal ReflectedClassDataMember(Type type, string name)
+            {
+                _type = type;
+                _name = name;
+                _obj = default(TObject);
+            }
+
+            /// <summary>
+            /// Reflection API member info.
+            /// </summary>
+            public MemberInfo Info
+            {
+                get
+                {
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+
+                    PropertyInfo propertyInfo;
+                    if (cache.Properties.TryGetValue(_name, out propertyInfo))
+                    {
+                        return propertyInfo;
+                    }
+
+                    FieldInfo fieldInfo;
+                    if (!cache.Fields.TryGetValue(_name, out fieldInfo))
+                    {
+                        throw new KeyNotFoundException("Cannot find property or field with the specified name.");
+                    }
+
+                    return fieldInfo;
+                }
+            }
+
+            /// <summary>
+            /// Data member name.
+            /// </summary>
+            public string Name
+            {
+                get
+                {
+                    return _name;
+                }
+            }
+
+            /// <summary>
+            /// Data member type.
+            /// </summary>
+            public Type Type
+            {
+                get
+                {
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+
+                    PropertyInfo propertyInfo;
+                    if (cache.Properties.TryGetValue(_name, out propertyInfo))
+                    {
+                        return propertyInfo.PropertyType;
+                    }
+
+                    FieldInfo fieldInfo;
+                    if (!cache.Fields.TryGetValue(_name, out fieldInfo))
+                    {
+                        throw new KeyNotFoundException("Cannot find property or field with the specified name.");
+                    }
+
+                    return fieldInfo.FieldType;
+                }
+            }
+
+            /// <summary>
+            /// Data member accessibility.
+            /// </summary>
+            public bool IsPublic
+            {
+                get
+                {
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+
+                    PropertyInfo propertyInfo;
+                    if (cache.Properties.TryGetValue(_name, out propertyInfo))
+                    {
+                        return propertyInfo.CanRead && propertyInfo.GetMethod.IsPublic;
+                    }
+
+                    FieldInfo fieldInfo;
+                    if (!cache.Fields.TryGetValue(_name, out fieldInfo))
+                    {
+                        throw new KeyNotFoundException("Cannot find property or field with the specified name.");
+                    }
+
+                    return fieldInfo.IsPublic;
+                }
             }
 
             /// <summary>
             /// Gets value member value.
             /// </summary>
             /// <typeparam name="TValue">Value type.</typeparam>
-            /// <returns>Value of the object member.</returns>
+            /// <returns>Value of the <c>object</c> member.</returns>
             public TValue Value<TValue>()
             {
+                Type typeLocal = _type;
                 Func<TObject, TValue> getter = GetterCache<TObject, TValue>.Getters.GetOrAdd(
-                    _memberName,
-                    name =>
+                    new ValuedTuple<Type, string>(typeLocal, _name),
+                    typeAndName =>
                         {
-                            Type objType = typeof(TObject);
-                            PropertyInfo propertyInfo = objType.GetRuntimeProperty(name);
+                            DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(typeLocal);
 
-                            if (propertyInfo != null)
+                            PropertyInfo propertyInfo;
+                            if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
                             {
                                 // TODO: Replace to expression compilation.
                                 return o => (TValue)propertyInfo.GetValue(o);
                             }
 
-                            FieldInfo fieldInfo = objType.GetRuntimeField(name);
-                            if (fieldInfo == null)
+                            FieldInfo fieldInfo;
+                            if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
                             {
-                                // TODO: Replace to expression compilation.
-                                throw new KeyNotFoundException("name");
+                                throw new KeyNotFoundException("Cannot find property or field with the specified name.");
                             }
 
+                            // TODO: Replace to expression compilation.
                             return o => (TValue)fieldInfo.GetValue(o);
                         });
 
                 return getter.Invoke(_obj);
             }
+
+            /// <summary>
+            /// Gets untyped value.
+            /// </summary>
+            /// <returns>Member value.</returns>
+            public dynamic Value()
+            {
+                return Value<Object>();
+            }
+        }
+
+        private struct DataMemberInfoesCacheEntry
+        {
+            public Dictionary<string, PropertyInfo> Properties;
+
+            public Dictionary<string, FieldInfo> Fields;
         }
 
         private static class SetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<string, Action<TObject, TValue>> Setters =
-                new ConcurrentDictionary<string, Action<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>> Setters =
+                new ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>>();
         }
 
         private static class GetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<string, Func<TObject, TValue>> Getters =
-                new ConcurrentDictionary<string, Func<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>> Getters =
+                new ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>>();
         }
     }
 }
