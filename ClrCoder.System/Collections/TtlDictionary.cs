@@ -392,6 +392,33 @@ namespace ClrCoder.System.Collections
                     Entry entry;
                     bool result = _entries.TryGetValue(key, out entry);
                     value = result ? entry.Value : default(TValue);
+                    _entries.Remove(key);
+                    return result;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tries to get <c>value</c> by the specified <c>key</c> and remove <c>this</c> <c>value</c>.
+        /// </summary>
+        /// <param name="key">Search <c>key</c>.</param>
+        /// <param name="value">Found <c>value</c>.</param>
+        /// <returns><see langword="true"/> if <c>value</c> was found, otherwise <see langword="false"/>.</returns>
+        public bool TryGetAndRemoveValue(TKey key, out TValue value)
+        {
+            // ReSharper disable once CompareNonConstrainedGenericWithNull
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
+
+            using (_keyedMonitor.Lock(key))
+            {
+                lock (_entries)
+                {
+                    Entry entry;
+                    bool result = _entries.TryGetValue(key, out entry);
+                    value = result ? entry.Value : default(TValue);
 
                     return result;
                 }
