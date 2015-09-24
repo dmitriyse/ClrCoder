@@ -33,15 +33,30 @@ namespace ClrCoder.System
         {
             if (rnd == null)
             {
-                throw new ArgumentNullException("rnd");
+                throw new ArgumentNullException(nameof(rnd));
             }
 
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             return collection[rnd.Next(collection.Count)];
+        }
+
+        /// <summary>
+        /// Gets exception short description in form ExceptionType: Message.
+        /// </summary>
+        /// <param name="ex"><c>Exception</c> to get short description for.</param>
+        /// <returns>Short description string.</returns>
+        public static string GetShortDescription(this Exception ex)
+        {
+            if (ex == null)
+            {
+                throw new ArgumentNullException(nameof(ex));
+            }
+
+            return $"{ex.GetType().Name}: {ex.Message}";
         }
     }
 }
