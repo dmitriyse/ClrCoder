@@ -53,6 +53,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BclProductivityExtensionsTest.cs" />
     <Compile Include="Collections\TtlDictionaryTest.cs" />
     <Compile Include="ParseExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

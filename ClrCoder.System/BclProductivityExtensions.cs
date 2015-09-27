@@ -58,5 +58,43 @@ namespace ClrCoder.System
 
             return $"{ex.GetType().Name}: {ex.Message}";
         }
+
+        /// <summary>
+        /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the 
+        /// <paramref name="comparand"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of source value.</typeparam>
+        /// <param name="source">Source value.</param>
+        /// <param name="comparand">Value to replace.</param>
+        /// <param name="substitute">Replacement value.</param>
+        /// <returns><paramref name="substitute"/> when <paramref name="source"/> is equals to the 
+        /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.</returns>
+        public static T Replace<T>(this T source, T comparand, T substitute)
+            where T : IEquatable<T>
+        {
+            return source.Equals(comparand) ? substitute : source;
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="int"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="int"/>.</param>
+        /// <returns>Parsed integer value or null if string is null or invalid integer.</returns>
+        public static int? ToInt(this string str)
+        {
+            int result;
+            return str != null && int.TryParse(str, out result) ? (int?)result : null;
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="decimal"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="decimal"/>.</param>
+        /// <returns>Parsed integer value or null if string is null or invalid decimal.</returns>
+        public static decimal? ToDecimal(this string str)
+        {
+            decimal result;
+            return str != null && decimal.TryParse(str, out result) ? (decimal?)result : null;
+        }
     }
 }
