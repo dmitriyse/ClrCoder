@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ClrCoder.System
 {
@@ -90,11 +91,165 @@ namespace ClrCoder.System
         /// Converts string to <see langword="decimal"/>.
         /// </summary>
         /// <param name="str">String to convert to <see langword="decimal"/>.</param>
-        /// <returns>Parsed integer value or null if string is null or invalid decimal.</returns>
+        /// <returns>Parsed decimal value or null if string is null or invalid decimal.</returns>
         public static decimal? ToDecimal(this string str)
         {
             decimal result;
             return str != null && decimal.TryParse(str, out result) ? (decimal?)result : null;
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="bool"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="bool"/>.</param>
+        /// <returns>Parsed bool value or null if string is null or invalid decimal.</returns>
+        public static bool? ToBool(this string str)
+        {
+            bool result;
+            return str != null && bool.TryParse(str, out result) ? (bool?)result : null;
+        }
+
+        /// <summary>
+        /// Gets value from <c>dictionary</c> and returns default value if the specified <c>key</c> is not found.
+        /// </summary>
+        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
+        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
+        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
+        /// <param name="key">Key to search value.</param>
+        /// <returns>Value for the specified key or default value.</returns>
+        public static TValue GetOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
+            TValue result;
+
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+
+            return default(TValue);
+        }
+
+        /// <summary>
+        /// Verifies that <c>sequence</c> is empty or even <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="T">Sequence element type.</typeparam>
+        /// <param name="sequence">Sequence to test.</param>
+        /// <returns>true, if sequence is null or empty.</returns>
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> sequence)
+        {
+            return sequence == null || !sequence.Any();
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <param name="action"><c>Action</c> to call.</param>
+        public static void SafeInvoke(this Action action)
+        {
+            action?.Invoke();
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T1"><c>Type</c> of the argument 1.</typeparam>
+        /// <param name="action"><c>Action</c> to call.</param>
+        /// <param name="arg1"><c>Action</c> argument 1.</param>
+        public static void SafeInvoke<T1>(this Action<T1> action, T1 arg1)
+        {
+            action?.Invoke(arg1);
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T1"><c>Type</c> of the argument 1.</typeparam>
+        /// <typeparam name="T2"><c>Type</c> of the argument 2.</typeparam>
+        /// <param name="action"><c>Action</c> to call.</param>
+        /// <param name="arg1"><c>Action</c> argument 1.</param>
+        /// <param name="arg2"><c>Action</c> argument 2.</param>
+        public static void SafeInvoke<T1, T2>(this Action<T1, T2> action, T1 arg1, T2 arg2)
+        {
+            action?.Invoke(arg1, arg2);
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T1"><c>Type</c> of the argument 1.</typeparam>
+        /// <typeparam name="T2"><c>Type</c> of the argument 2.</typeparam>
+        /// <typeparam name="T3"><c>Type</c> of the argument 3.</typeparam>
+        /// <param name="action"><c>Action</c> to call.</param>
+        /// <param name="arg1"><c>Action</c> argument 1.</param>
+        /// <param name="arg2"><c>Action</c> argument 2.</param>
+        /// <param name="arg3"><c>Action</c> argument 3.</param>
+        public static void SafeInvoke<T1, T2, T3>(this Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3)
+        {
+            action?.Invoke(arg1, arg2, arg3);
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T1"><c>Type</c> of the argument 1.</typeparam>
+        /// <typeparam name="T2"><c>Type</c> of the argument 2.</typeparam>
+        /// <typeparam name="T3"><c>Type</c> of the argument 3.</typeparam>
+        /// <typeparam name="T4"><c>Type</c> of the argument 4.</typeparam>
+        /// <param name="action"><c>Action</c> to call.</param>
+        /// <param name="arg1"><c>Action</c> argument 1.</param>
+        /// <param name="arg2"><c>Action</c> argument 2.</param>
+        /// <param name="arg3"><c>Action</c> argument 3.</param>
+        /// <param name="arg4"><c>Action</c> argument 4.</param>
+        public static void SafeInvoke<T1, T2, T3, T4>(
+            this Action<T1, T2, T3, T4> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4)
+        {
+            action?.Invoke(arg1, arg2, arg3, arg4);
+        }
+
+        /// <summary>
+        /// Calls <c>action</c> if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T1"><c>Type</c> of the argument 1.</typeparam>
+        /// <typeparam name="T2"><c>Type</c> of the argument 2.</typeparam>
+        /// <typeparam name="T3"><c>Type</c> of the argument 3.</typeparam>
+        /// <typeparam name="T4"><c>Type</c> of the argument 4.</typeparam>
+        /// <typeparam name="T5"><c>Type</c> of the argument 5.</typeparam>
+        /// <param name="action"><c>Action</c> to call.</param>
+        /// <param name="arg1"><c>Action</c> argument 1.</param>
+        /// <param name="arg2"><c>Action</c> argument 2.</param>
+        /// <param name="arg3"><c>Action</c> argument 3.</param>
+        /// <param name="arg4"><c>Action</c> argument 4.</param>
+        /// <param name="arg5"><c>Action</c> argument 5.</param>
+        public static void SafeInvoke<T1, T2, T3, T4, T5>(
+            this Action<T1, T2, T3, T4, T5> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
+            T5 arg5)
+        {
+            action?.Invoke(arg1, arg2, arg3, arg4, arg5);
+        }
+
+        /// <summary>
+        /// Calls event handler if it is not <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of event args.</typeparam>
+        /// <param name="eventHandler">Event handler <see langword="delegate"/>.</param>
+        /// <param name="sender">Sender of the event.</param>
+        /// <param name="eventArgs">Event arguments.</param>
+        public static void SafeInvoke<T>(this EventHandler<T> eventHandler, object sender, T eventArgs)
+        {
+            eventHandler?.Invoke(sender, eventArgs);
         }
     }
 }

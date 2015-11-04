@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System", "ClrCoder.System\ClrCoder.System.csproj", "{89FC62E1-2872-4BC5-99C7-91EC30500926}"
 EndProject
@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1C749A
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http", "ClrCoder.System.Net.Http\ClrCoder.System.Net.Http.csproj", "{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http.Tests", "ClrCoder.System.Net.Http.Tests\ClrCoder.System.Net.Http.Tests.csproj", "{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
