@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-
+﻿// <copyright file="TextExtensions.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Text
 {
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.IO;
+    using global::System.Text.RegularExpressions;
+
     /// <summary>
     /// Text related extension methods.
     /// </summary>
     public static class TextExtensions
     {
-        private static readonly Regex LineEndingPattern = new Regex(
-            "(\r\n)|\r|\n",
-            RegexOptions.CultureInvariant);
+        private static readonly Regex LineEndingPattern = new Regex("(\r\n)|\r|\n", RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Normalizes line endings inside string.
@@ -26,7 +28,7 @@ namespace ClrCoder.System.Text
         {
             if (text == null)
             {
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
 
             return LineEndingPattern.Replace(text, Environment.NewLine);
@@ -47,7 +49,7 @@ namespace ClrCoder.System.Text
         {
             for (;;)
             {
-                string line = reader.ReadLine();
+                var line = reader.ReadLine();
                 if (line != null)
                 {
                     yield return line;

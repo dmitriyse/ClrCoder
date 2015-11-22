@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
-
+﻿// <copyright file="DictionaryEx.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Collections
 {
+    using global::System.Collections.Generic;
+
     /// <summary>
     /// Represents a collection of keys and values.
     /// </summary>

@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
+﻿// <copyright file="BclProductivityExtensions.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.Linq;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Extensions for core BCL classes designed to boost development productivity.
     /// </summary>
+    [PublicAPI]
     public static class BclProductivityExtensions
     {
         /// <summary>
@@ -46,70 +53,6 @@ namespace ClrCoder.System
         }
 
         /// <summary>
-        /// Gets exception short description in form ExceptionType: Message.
-        /// </summary>
-        /// <param name="ex"><c>Exception</c> to get short description for.</param>
-        /// <returns>Short description string.</returns>
-        public static string GetShortDescription(this Exception ex)
-        {
-            if (ex == null)
-            {
-                throw new ArgumentNullException(nameof(ex));
-            }
-
-            return $"{ex.GetType().Name}: {ex.Message}";
-        }
-
-        /// <summary>
-        /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the 
-        /// <paramref name="comparand"/>.
-        /// </summary>
-        /// <typeparam name="T">Type of source value.</typeparam>
-        /// <param name="source">Source value.</param>
-        /// <param name="comparand">Value to replace.</param>
-        /// <param name="substitute">Replacement value.</param>
-        /// <returns><paramref name="substitute"/> when <paramref name="source"/> is equals to the 
-        /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.</returns>
-        public static T Replace<T>(this T source, T comparand, T substitute)
-            where T : IEquatable<T>
-        {
-            return source.Equals(comparand) ? substitute : source;
-        }
-
-        /// <summary>
-        /// Converts string to <see langword="int"/>.
-        /// </summary>
-        /// <param name="str">String to convert to <see langword="int"/>.</param>
-        /// <returns>Parsed integer value or null if string is null or invalid integer.</returns>
-        public static int? ToInt(this string str)
-        {
-            int result;
-            return str != null && int.TryParse(str, out result) ? (int?)result : null;
-        }
-
-        /// <summary>
-        /// Converts string to <see langword="decimal"/>.
-        /// </summary>
-        /// <param name="str">String to convert to <see langword="decimal"/>.</param>
-        /// <returns>Parsed decimal value or null if string is null or invalid decimal.</returns>
-        public static decimal? ToDecimal(this string str)
-        {
-            decimal result;
-            return str != null && decimal.TryParse(str, out result) ? (decimal?)result : null;
-        }
-
-        /// <summary>
-        /// Converts string to <see langword="bool"/>.
-        /// </summary>
-        /// <param name="str">String to convert to <see langword="bool"/>.</param>
-        /// <returns>Parsed bool value or null if string is null or invalid decimal.</returns>
-        public static bool? ToBool(this string str)
-        {
-            bool result;
-            return str != null && bool.TryParse(str, out result) ? (bool?)result : null;
-        }
-
-        /// <summary>
         /// Gets value from <c>dictionary</c> and returns default value if the specified <c>key</c> is not found.
         /// </summary>
         /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
@@ -135,6 +78,21 @@ namespace ClrCoder.System
         }
 
         /// <summary>
+        /// Gets exception short description in form ExceptionType: Message.
+        /// </summary>
+        /// <param name="ex"><c>Exception</c> to get short description for.</param>
+        /// <returns>Short description string.</returns>
+        public static string GetShortDescription(this Exception ex)
+        {
+            if (ex == null)
+            {
+                throw new ArgumentNullException(nameof(ex));
+            }
+
+            return $"{ex.GetType().Name}: {ex.Message}";
+        }
+
+        /// <summary>
         /// Verifies that <c>sequence</c> is empty or even <see langword="null"/>.
         /// </summary>
         /// <typeparam name="T">Sequence element type.</typeparam>
@@ -143,6 +101,21 @@ namespace ClrCoder.System
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> sequence)
         {
             return sequence == null || !sequence.Any();
+        }
+
+        /// <summary>
+        /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the 
+        /// <paramref name="comparand"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of source value.</typeparam>
+        /// <param name="source">Source value.</param>
+        /// <param name="comparand">Value to replace.</param>
+        /// <param name="substitute">Replacement value.</param>
+        /// <returns><paramref name="substitute"/> when <paramref name="source"/> is equals to the 
+        /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.</returns>
+        public static T Replace<T>(this T source, T comparand, T substitute) where T : IEquatable<T>
+        {
+            return source.Equals(comparand) ? substitute : source;
         }
 
         /// <summary>
@@ -206,10 +179,10 @@ namespace ClrCoder.System
         /// <param name="arg3"><c>Action</c> argument 3.</param>
         /// <param name="arg4"><c>Action</c> argument 4.</param>
         public static void SafeInvoke<T1, T2, T3, T4>(
-            this Action<T1, T2, T3, T4> action,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
+            this Action<T1, T2, T3, T4> action, 
+            T1 arg1, 
+            T2 arg2, 
+            T3 arg3, 
             T4 arg4)
         {
             action?.Invoke(arg1, arg2, arg3, arg4);
@@ -230,11 +203,11 @@ namespace ClrCoder.System
         /// <param name="arg4"><c>Action</c> argument 4.</param>
         /// <param name="arg5"><c>Action</c> argument 5.</param>
         public static void SafeInvoke<T1, T2, T3, T4, T5>(
-            this Action<T1, T2, T3, T4, T5> action,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            T4 arg4,
+            this Action<T1, T2, T3, T4, T5> action, 
+            T1 arg1, 
+            T2 arg2, 
+            T3 arg3, 
+            T4 arg4, 
             T5 arg5)
         {
             action?.Invoke(arg1, arg2, arg3, arg4, arg5);
@@ -250,6 +223,39 @@ namespace ClrCoder.System
         public static void SafeInvoke<T>(this EventHandler<T> eventHandler, object sender, T eventArgs)
         {
             eventHandler?.Invoke(sender, eventArgs);
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="bool"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="bool"/>.</param>
+        /// <returns>Parsed bool value or null if string is null or invalid decimal.</returns>
+        public static bool? ToBool(this string str)
+        {
+            bool result;
+            return str != null && bool.TryParse(str, out result) ? (bool?)result : null;
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="decimal"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="decimal"/>.</param>
+        /// <returns>Parsed decimal value or null if string is null or invalid decimal.</returns>
+        public static decimal? ToDecimal(this string str)
+        {
+            decimal result;
+            return str != null && decimal.TryParse(str, out result) ? (decimal?)result : null;
+        }
+
+        /// <summary>
+        /// Converts string to <see langword="int"/>.
+        /// </summary>
+        /// <param name="str">String to convert to <see langword="int"/>.</param>
+        /// <returns>Parsed integer value or null if string is null or invalid integer.</returns>
+        public static int? ToInt(this string str)
+        {
+            int result;
+            return str != null && int.TryParse(str, out result) ? (int?)result : null;
         }
     }
 }

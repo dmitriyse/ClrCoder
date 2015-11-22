@@ -1,13 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿// <copyright file="ValuedTuple{T1}.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+    using global::System.Collections.Generic;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Valued alternative to the <see cref="Tuple{T1}"/> class. <br/>
     /// TODO: Optimize performance. 
     /// </summary>
     /// <typeparam name="T1">First item type.</typeparam>
+    [PublicAPI]
     public struct ValuedTuple<T1> : IEquatable<ValuedTuple<T1>>
     {
         /// <summary>
@@ -16,12 +23,32 @@ namespace ClrCoder.System
         public readonly T1 Item1;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ValuedTuple{T1, T2}"/> struct.
+        /// Initializes a new instance of the <see cref="ValuedTuple{T1}"/> struct.
         /// </summary>
         /// <param name="item1">Item1 value.</param>
         public ValuedTuple(T1 item1)
         {
             Item1 = item1;
+        }
+
+        /// <summary>
+        /// Cast <see langword="operator"/>.
+        /// </summary>
+        /// <param name="tuple">Tuple to cast.</param>
+        /// <returns>Item1 value.</returns>
+        public static implicit operator T1(ValuedTuple<T1> tuple)
+        {
+            return tuple.Item1;
+        }
+
+        /// <summary>
+        /// Cast <see langword="operator"/>.
+        /// </summary>
+        /// <param name="item1">Value to cast to tuple.</param>
+        /// <returns>Tuple with the specified value.</returns>
+        public static implicit operator ValuedTuple<T1>(T1 item1)
+        {
+            return new ValuedTuple<T1>(item1);
         }
 
         /// <summary>
@@ -44,26 +71,6 @@ namespace ClrCoder.System
         public static bool operator !=(ValuedTuple<T1> left, ValuedTuple<T1> right)
         {
             return !left.Equals(right);
-        }
-
-        /// <summary>
-        /// Cast <see langword="operator"/>.
-        /// </summary>
-        /// <param name="tuple">Tuple to cast.</param>
-        /// <returns>Item1 value.</returns>
-        public static implicit operator T1(ValuedTuple<T1> tuple)
-        {
-            return tuple.Item1;
-        }
-
-        /// <summary>
-        /// Cast <see langword="operator"/>.
-        /// </summary>
-        /// <param name="item1">Value to cast to tuple.</param>
-        /// <returns>Tuple with the specified value.</returns>
-        public static implicit operator ValuedTuple<T1>(T1 item1)
-        {
-            return new ValuedTuple<T1>(item1);
         }
 
         /// <inheritdoc/>

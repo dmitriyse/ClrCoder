@@ -1,14 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿// <copyright file="ValuedTuple{T1,T2}.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+    using global::System.Collections.Generic;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Valued alternative to the <see cref="Tuple{T1,T2}"/> class.<br/>
-    /// TODO: Optimize performance. 
+    /// TODO: Optimize performance.
     /// </summary>
     /// <typeparam name="T1">First item type.</typeparam>
     /// <typeparam name="T2">Second item type.</typeparam>
+    [PublicAPI]
     public struct ValuedTuple<T1, T2> : IEquatable<ValuedTuple<T1, T2>>
     {
         /// <summary>

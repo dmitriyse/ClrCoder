@@ -1,11 +1,18 @@
-﻿using System;
-
+﻿// <copyright file="AlternativeResult.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Helper exception for alternative flow pattern.
     /// </summary>
     /// <typeparam name="T"><c>Type</c> of a value, to be used in alternative flow.</typeparam>
+    [PublicAPI]
     public class AlternativeResult<T> : Exception
     {
         /// <summary>

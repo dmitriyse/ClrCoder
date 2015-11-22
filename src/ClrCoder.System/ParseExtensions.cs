@@ -1,31 +1,20 @@
-﻿using System;
-using System.Globalization;
-
+﻿// <copyright file="ParseExtensions.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+    using global::System.Globalization;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Parsing related extensions.
     /// </summary>
+    [PublicAPI]
     public static class ParseExtensions
     {
-        /// <summary>
-        /// Parses <see langword="double"/> value encoded in any culture.
-        /// </summary>
-        /// <remarks>
-        /// Full information about decimal mark can be found here http://en.wikipedia.org/wiki/Decimal_mark.
-        /// </remarks>
-        /// <param name="doubleString">String with double value.</param>
-        /// <returns>Parsed value.</returns>
-        public static double ParseAnyDouble(this string doubleString)
-        {
-            if (doubleString == null)
-            {
-                throw new ArgumentNullException("doubleString");
-            }
-
-            return double.Parse(doubleString.Replace(',', '.'), CultureInfo.InvariantCulture);
-        }
-
         /// <summary>
         /// Parses <see langword="decimal"/> value encoded in any culture.
         /// </summary>
@@ -45,23 +34,21 @@ namespace ClrCoder.System
         }
 
         /// <summary>
-        /// Tries to parse <see langword="double"/> value from the specified string.
+        /// Parses <see langword="double"/> value encoded in any culture.
         /// </summary>
-        /// <param name="doubleString">String to parse value from.</param>
-        /// <param name="parsedValue">Parsed value or default double value.</param>
-        /// <returns>true, if value was successfully parsed, false otherwise.</returns>
-        public static bool TryParseAnyDouble(this string doubleString, out double parsedValue)
+        /// <remarks>
+        /// Full information about decimal mark can be found here http://en.wikipedia.org/wiki/Decimal_mark.
+        /// </remarks>
+        /// <param name="doubleString">String with double value.</param>
+        /// <returns>Parsed value.</returns>
+        public static double ParseAnyDouble(this string doubleString)
         {
             if (doubleString == null)
             {
                 throw new ArgumentNullException("doubleString");
             }
 
-            return double.TryParse(
-                doubleString.Replace(',', '.'),
-                NumberStyles.Any,
-                CultureInfo.InvariantCulture,
-                out parsedValue);
+            return double.Parse(doubleString.Replace(',', '.'), CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -78,9 +65,29 @@ namespace ClrCoder.System
             }
 
             return decimal.TryParse(
-                decimalString.Replace(',', '.'),
-                NumberStyles.Any,
-                CultureInfo.InvariantCulture,
+                decimalString.Replace(',', '.'), 
+                NumberStyles.Any, 
+                CultureInfo.InvariantCulture, 
+                out parsedValue);
+        }
+
+        /// <summary>
+        /// Tries to parse <see langword="double"/> value from the specified string.
+        /// </summary>
+        /// <param name="doubleString">String to parse value from.</param>
+        /// <param name="parsedValue">Parsed value or default double value.</param>
+        /// <returns>true, if value was successfully parsed, false otherwise.</returns>
+        public static bool TryParseAnyDouble(this string doubleString, out double parsedValue)
+        {
+            if (doubleString == null)
+            {
+                throw new ArgumentNullException("doubleString");
+            }
+
+            return double.TryParse(
+                doubleString.Replace(',', '.'), 
+                NumberStyles.Any, 
+                CultureInfo.InvariantCulture, 
                 out parsedValue);
         }
     }

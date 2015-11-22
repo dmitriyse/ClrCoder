@@ -1,10 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-
+﻿// <copyright file="CodeTimer.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Diagnostics
 {
+    using global::System;
+    using global::System.Diagnostics;
+    using global::System.Globalization;
+    using global::System.Runtime.CompilerServices;
+
     /// <summary>
     /// Lightweight timer for microbenchmarks.
     /// </summary>
@@ -31,13 +35,7 @@ namespace ClrCoder.System.Diagnostics
         /// <summary>
         /// Time in seconds elapsed from timer start.
         /// </summary>
-        public double Time
-        {
-            get
-            {
-                return GetTimeFromAppStart() - _startTime;
-            }
-        }
+        public double Time => GetTimeFromAppStart() - _startTime;
 
         /// <summary>
         /// Forced class warmup (ensures that class constructor was called).
@@ -74,7 +72,7 @@ namespace ClrCoder.System.Diagnostics
         {
             if (precision < 0 || precision > 100)
             {
-                throw new ArgumentOutOfRangeException("precision");
+                throw new ArgumentOutOfRangeException(nameof(precision));
             }
 
             return new CodeTimer(GetTimeFromAppStart(), precision);

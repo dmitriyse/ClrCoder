@@ -27,8 +27,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ClrCoder.System.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\ClrCoder.System.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,8 +37,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>ClrCoder.System.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AlternativeResult.cs" />
@@ -51,17 +50,20 @@
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="RegexFluentExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="Text\NormalizedLineEndingsReader.cs" />
     <Compile Include="Text\TextExtensions.cs" />
     <Compile Include="Threading\ILockToken.cs" />
     <Compile Include="Threading\KeyedMonitor.cs" />
     <Compile Include="Collections\TtlDictionary.cs" />
     <Compile Include="TypeEx.cs" />
-    <Compile Include="TypeEx{T}.cs" />
-    <Compile Include="ValuedTuple{T1, T2}.cs" />
+    <Compile Include="TypeEx{TType}.cs" />
+    <Compile Include="ValuedTuple{T1,T2}.cs" />
     <Compile Include="ValuedTuple{T1}.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations.PCL328, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.10.0.0\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\JetBrains.Annotations.PCL328.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Collections.Concurrent">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.5\Profile\Profile111\System.Collections.Concurrent.dll</HintPath>
     </Reference>
@@ -70,7 +72,9 @@
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClrCoder.System.ruleset" />
     <None Include="packages.config" />
+    <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.0-beta016\analyzers\dotnet\cs\Newtonsoft.Json.dll" />

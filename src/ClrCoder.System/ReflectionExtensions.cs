@@ -1,21 +1,84 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-
+﻿// <copyright file="ReflectionExtensions.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System
 {
+    using global::System;
+    using global::System.Collections.Concurrent;
+    using global::System.Collections.Generic;
+    using global::System.Linq;
+    using global::System.Linq.Expressions;
+    using global::System.Reflection;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Reflection extension methods.
     /// </summary>
+    [PublicAPI]
     public static class ReflectionExtensions
     {
         //// TODO: Add methods to working with structs.
         //// TODO: Add tests for static data members.
         private static readonly ConcurrentDictionary<Type, DataMemberInfoesCacheEntry> DataMemberInfoesCache =
             new ConcurrentDictionary<Type, DataMemberInfoesCacheEntry>();
+
+        /// <summary>
+        /// First part of the "get data member value" syntax.
+        /// </summary>
+        /// <typeparam name="TObject"><c>Object</c> type.</typeparam>
+        /// <param name="obj"><c>Object</c> to get data member value from.</param>
+        /// <param name="memberName"><c>Object</c> data member(field or property) name.</param>
+        /// <returns><c>Object</c> data member value.</returns>
+        public static ReflectedClassDataMember<TObject> GetMember<TObject>(this TObject obj, string memberName)
+        {
+            var type = typeof(TObject);
+            if (type.GetTypeInfo().IsClass)
+            {
+                // ReSharper disable once CompareNonConstrainedGenericWithNull
+                if (obj == null)
+                {
+                    throw new ArgumentNullException(nameof(obj));
+                }
+
+                type = obj.GetType();
+            }
+
+            if (memberName == null)
+            {
+                throw new ArgumentNullException(nameof(memberName));
+            }
+
+            return new ReflectedClassDataMember<TObject>(type, obj, memberName);
+        }
+
+        //// TODO: add struct enumerable to improve performance.
+
+        /// <summary>
+        /// First part of the "get data member value" syntax.
+        /// </summary>
+        /// <param name="obj"><c>Object</c> to get data member value from.</param>
+        /// <returns><c>Object</c> data member value.</returns>
+        public static IReadOnlyCollection<ReflectedClassDataMember<object>> GetMembers(this object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            var type = obj.GetType();
+            var membersCache = GetDataMemberInfoesCache(type);
+
+            return
+                membersCache.Fields.Values.Where(x => !x.Name.StartsWith("<") && !x.IsStatic)
+                    .Union(
+                        membersCache.Properties.Values.Where(
+                            x => (!x.CanRead || !x.GetMethod.IsStatic) && (!x.CanWrite || !x.SetMethod.IsStatic))
+                            .Cast<MemberInfo>())
+                    .Select(x => new ReflectedClassDataMember<object>(type, obj, x.Name))
+                    .ToList();
+        }
 
         /// <summary>
         /// Gets type member name from the specified <c>expression</c>.
@@ -31,20 +94,17 @@ namespace ClrCoder.System
         /// <param name="obj"><c>Object</c>, used only for type inferring.</param>
         /// <param name="expression"><c>Expression</c> with <c>object</c> member access.</param>
         /// <returns><c>Object</c> member name.</returns>
-        public static string NameOf<TObject, TResult>(
-            this TObject obj,
-            Expression<Func<TObject, TResult>> expression)
+        public static string NameOf<TObject, TResult>(this TObject obj, Expression<Func<TObject, TResult>> expression)
         {
             if (expression == null)
             {
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             }
 
             var memberExpression = expression.Body as MemberExpression;
             if (memberExpression == null)
             {
-                throw new NotSupportedException(
-                    "Expression does not contains type member access.");
+                throw new NotSupportedException("Expression does not contains type member access.");
             }
 
             return memberExpression.Member.Name;
@@ -60,13 +120,13 @@ namespace ClrCoder.System
         /// <param name="value">Value to set.</param>
         public static void SetMemberValue<TObject, TValue>(this TObject obj, string memberName, TValue value)
         {
-            Type type = typeof(TObject);
+            var type = typeof(TObject);
             if (typeof(TObject).GetTypeInfo().IsClass)
             {
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
                 if (obj == null)
                 {
-                    throw new ArgumentNullException("obj");
+                    throw new ArgumentNullException(nameof(obj));
                 }
 
                 type = obj.GetType();
@@ -74,14 +134,14 @@ namespace ClrCoder.System
 
             if (memberName == null)
             {
-                throw new ArgumentNullException("memberName");
+                throw new ArgumentNullException(nameof(memberName));
             }
 
-            Action<TObject, TValue> setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
-                new ValuedTuple<Type, string>(type, memberName),
+            var setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
+                new ValuedTuple<Type, string>(type, memberName), 
                 typeAndName =>
                     {
-                        DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(type);
+                        var cache = GetDataMemberInfoesCache(type);
 
                         PropertyInfo propertyInfo;
                         if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
@@ -103,68 +163,14 @@ namespace ClrCoder.System
             setter.Invoke(obj, value);
         }
 
-        /// <summary>
-        /// First part of the "get data member value" syntax.
-        /// </summary>
-        /// <typeparam name="TObject"><c>Object</c> type.</typeparam>
-        /// <param name="obj"><c>Object</c> to get data member value from.</param>
-        /// <param name="memberName"><c>Object</c> data member(field or property) name.</param>
-        /// <returns><c>Object</c> data member value.</returns>
-        public static ReflectedClassDataMember<TObject> GetMember<TObject>(this TObject obj, string memberName)
-        {
-            Type type = typeof(TObject);
-            if (type.GetTypeInfo().IsClass)
-            {
-                // ReSharper disable once CompareNonConstrainedGenericWithNull
-                if (obj == null)
-                {
-                    throw new ArgumentNullException("obj");
-                }
-
-                type = obj.GetType();
-            }
-
-            if (memberName == null)
-            {
-                throw new ArgumentNullException("memberName");
-            }
-
-            return new ReflectedClassDataMember<TObject>(type, obj, memberName);
-        }
-
-        //// TODO: add struct enumerable to improve performance.
-
-        /// <summary>
-        /// First part of the "get data member value" syntax.
-        /// </summary>
-        /// <param name="obj"><c>Object</c> to get data member value from.</param>
-        /// <returns><c>Object</c> data member value.</returns>
-        public static IReadOnlyCollection<ReflectedClassDataMember<object>> GetMembers(this object obj)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException("obj");
-            }
-
-            Type type = obj.GetType();
-            DataMemberInfoesCacheEntry membersCache = GetDataMemberInfoesCache(type);
-
-            return membersCache.Fields.Values.Where(x => !x.Name.StartsWith("<") && !x.IsStatic)
-                .Union(
-                    membersCache.Properties.Values.Where(
-                        x =>
-                        (!x.CanRead || !x.GetMethod.IsStatic)
-                        && (!x.CanWrite || !x.SetMethod.IsStatic)).Cast<MemberInfo>())
-                .Select(x => new ReflectedClassDataMember<object>(type, obj, x.Name)).ToList();
-        }
-
         private static DataMemberInfoesCacheEntry GetDataMemberInfoesCache(Type type)
         {
             return DataMemberInfoesCache.GetOrAdd(
-                type,
-                t => new DataMemberInfoesCacheEntry
+                type, 
+                t =>
+                new DataMemberInfoesCacheEntry
                     {
-                        Fields = type.GetRuntimeFields().ToDictionary(x => x.Name),
+                        Fields = type.GetRuntimeFields().ToDictionary(x => x.Name), 
                         Properties = type.GetRuntimeProperties().ToDictionary(x => x.Name)
                     });
         }
@@ -173,6 +179,7 @@ namespace ClrCoder.System
         /// Second half of the "get member value" syntax.
         /// </summary>
         /// <typeparam name="TObject">Object type.</typeparam>
+        [PublicAPI]
         public struct ReflectedClassDataMember<TObject>
         {
             private readonly TObject _obj;
@@ -213,7 +220,7 @@ namespace ClrCoder.System
             {
                 get
                 {
-                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+                    var cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(_name, out propertyInfo))
@@ -234,13 +241,7 @@ namespace ClrCoder.System
             /// <summary>
             /// Data member name.
             /// </summary>
-            public string Name
-            {
-                get
-                {
-                    return _name;
-                }
-            }
+            public string Name => this._name;
 
             /// <summary>
             /// Data member type.
@@ -249,7 +250,7 @@ namespace ClrCoder.System
             {
                 get
                 {
-                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+                    var cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(_name, out propertyInfo))
@@ -274,7 +275,7 @@ namespace ClrCoder.System
             {
                 get
                 {
-                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
+                    var cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(_name, out propertyInfo))
@@ -299,29 +300,31 @@ namespace ClrCoder.System
             /// <returns>Value of the <c>object</c> member.</returns>
             public TValue Value<TValue>()
             {
-                Type typeLocal = _type;
-                Func<TObject, TValue> getter = GetterCache<TObject, TValue>.Getters.GetOrAdd(
-                    new ValuedTuple<Type, string>(typeLocal, _name),
-                    typeAndName =>
-                        {
-                            DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(typeLocal);
-
-                            PropertyInfo propertyInfo;
-                            if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
+                var typeLocal = _type;
+                var getter =
+                    GetterCache<TObject, TValue>.Getters.GetOrAdd(
+                        new ValuedTuple<Type, string>(typeLocal, _name), 
+                        typeAndName =>
                             {
+                                var cache = GetDataMemberInfoesCache(typeLocal);
+
+                                PropertyInfo propertyInfo;
+                                if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
+                                {
+                                    // TODO: Replace to expression compilation.
+                                    return o => (TValue)propertyInfo.GetValue(o);
+                                }
+
+                                FieldInfo fieldInfo;
+                                if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
+                                {
+                                    throw new KeyNotFoundException(
+                                        "Cannot find property or field with the specified name.");
+                                }
+
                                 // TODO: Replace to expression compilation.
-                                return o => (TValue)propertyInfo.GetValue(o);
-                            }
-
-                            FieldInfo fieldInfo;
-                            if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
-                            {
-                                throw new KeyNotFoundException("Cannot find property or field with the specified name.");
-                            }
-
-                            // TODO: Replace to expression compilation.
-                            return o => (TValue)fieldInfo.GetValue(o);
-                        });
+                                return o => (TValue)fieldInfo.GetValue(o);
+                            });
 
                 return getter.Invoke(_obj);
             }
@@ -332,7 +335,7 @@ namespace ClrCoder.System
             /// <returns>Member value.</returns>
             public dynamic Value()
             {
-                return Value<Object>();
+                return Value<object>();
             }
         }
 
@@ -343,16 +346,16 @@ namespace ClrCoder.System
             public Dictionary<string, FieldInfo> Fields;
         }
 
-        private static class SetterCache<TObject, TValue>
-        {
-            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>> Setters =
-                new ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>>();
-        }
-
         private static class GetterCache<TObject, TValue>
         {
             public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>> Getters =
                 new ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>>();
+        }
+
+        private static class SetterCache<TObject, TValue>
+        {
+            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>> Setters =
+                new ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>>();
         }
     }
 }

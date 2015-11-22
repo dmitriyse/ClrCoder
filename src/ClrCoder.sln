@@ -18,6 +18,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http.Tests", "ClrCoder.System.Net.Http.Tests\ClrCoder.System.Net.Http.Tests.csproj", "{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5DE7A5A2-0190-4737-B205-9E82CF24B4A9}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\C# Style settings.html = ..\docs\C# Style settings.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

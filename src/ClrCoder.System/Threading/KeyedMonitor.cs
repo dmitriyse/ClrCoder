@@ -1,7 +1,12 @@
-﻿using System.Threading;
-
+﻿// <copyright file="KeyedMonitor.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Threading
 {
+    using global::System;
+    using global::System.Threading;
+
     /// <summary>
     /// Collection of synchronization root objects accessable by arbitrary keys.
     /// </summary>
@@ -13,28 +18,27 @@ namespace ClrCoder.System.Threading
     public class KeyedMonitor<T>
     {
         //// TODO: Add strict checks. (double dispose for example).
-        
         private readonly Token[] _tokens = new Token[0x1000];
 
         /// <summary>
-        /// Initializes a new instance of the class <see cref="KeyedMonitor{T}"/>.
+        /// Initializes a new instance of the <see cref="KeyedMonitor{T}"/> class.
         /// </summary>
         public KeyedMonitor()
         {
-            for (int i = 0; i < _tokens.Length; i++)
+            for (var i = 0; i < _tokens.Length; i++)
             {
                 _tokens[i] = new Token();
             }
         }
 
         /// <summary>
-        /// Locks a sync root that corresponds to the specified key.
+        /// Locks a sync root that corresponds to the specified <c>key</c>.
         /// </summary>
-        /// <param name="key">Target resource key.</param>
-        /// <returns>Lock token, use <see cref="ILockToken.Dispose"/> to release lock.</returns>
+        /// <param name="key">Target resource <c>key</c>.</param>
+        /// <returns>Lock token, use <see cref="IDisposable.Dispose"/> to release lock.</returns>
         public ILockToken Lock(T key)
         {
-            int tokenIndex = key.GetHashCode() & 0xFFF;
+            var tokenIndex = key.GetHashCode() & 0xFFF;
             Monitor.Enter(_tokens[tokenIndex]);
             return _tokens[tokenIndex];
         }
