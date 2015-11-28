@@ -9,9 +9,12 @@ namespace ClrCoder.System.Diagnostics
     using global::System.Globalization;
     using global::System.Runtime.CompilerServices;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Lightweight timer for microbenchmarks.
     /// </summary>
+    [PublicAPI]
     public struct CodeTimer
     {
         private static readonly Stopwatch TimerFromStart;

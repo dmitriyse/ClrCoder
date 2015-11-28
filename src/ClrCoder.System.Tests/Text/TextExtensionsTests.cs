@@ -1,56 +1,28 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-
-using ClrCoder.System.Diagnostics;
-using ClrCoder.System.Text;
-
-using FluentAssertions;
-
-using NUnit.Framework;
-
+﻿// <copyright file="TextExtensionsTests.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Tests.Text
 {
+    using global::System;
+    using global::System.IO;
+    using global::System.Linq;
+    using global::System.Text;
+
+    using System.Text;
+
+    using Diagnostics;
+
+    using FluentAssertions;
+
+    using NUnit.Framework;
+
     /// <summary>
-    /// <see cref="ClrCoder.System.Text"/> <see langword="namespace"/> related tests.
+    /// <see cref="System.Text"/> <see langword="namespace"/> related tests.
     /// </summary>
     [TestFixture]
     public class TextExtensionsTests
     {
-        /// <summary>
-        /// Benchmark test for the <see cref="TextExtensions.NormalizeLineEndings"/> method.
-        /// </summary>
-        [Test]
-        [Category("Benchmark")]
-        public void RegexNewlineNormalizerTest()
-        {
-            CodeTimer.WarmUp();
-
-            var sb = new StringBuilder();
-            int length = 1024 * 1024 / sizeof(char);
-            string[] words =
-                {
-                    "Dummy", "\r", "\n", "\r\n", " ", "hello", "world", "this", "is", "text", "!",
-                    "benchmark", "for", "text"
-                };
-            var rnd = new Random(0);
-
-            while (sb.Length < length)
-            {
-                sb.Append(rnd.From(words));
-            }
-
-            string oneMbString = sb.ToString();
-
-            CodeTimer timer = CodeTimer.Start();
-            string normalizedString = oneMbString.NormalizeLineEndings();
-            if (normalizedString.Length > 10)
-            {
-                Console.WriteLine("String normalization speed = {0:F2} Mb/s", 1.0 / timer.Time);
-            }
-        }
-
         /// <summary>
         /// Test for the <see cref="TextExtensions.NormalizeLineEndings"/> method.
         /// </summary>
@@ -78,6 +50,39 @@ namespace ClrCoder.System.Tests.Text
         public void ReadLinesTests(string text, params string[] lines)
         {
             new StringReader(text).ReadLines().ToArray().Should().BeEquivalentTo(lines);
+        }
+
+        /// <summary>
+        /// Benchmark test for the <see cref="TextExtensions.NormalizeLineEndings"/> method.
+        /// </summary>
+        [Test]
+        [Category("Benchmark")]
+        public void RegexNewlineNormalizerTest()
+        {
+            CodeTimer.WarmUp();
+
+            var sb = new StringBuilder();
+            var length = 1024 * 1024 / sizeof(char);
+            string[] words =
+                {
+                    "Dummy", "\r", "\n", "\r\n", " ", "hello", "world", "this", "is", "text", "!", 
+                    "benchmark", "for", "text"
+                };
+            var rnd = new Random(0);
+
+            while (sb.Length < length)
+            {
+                sb.Append(rnd.From(words));
+            }
+
+            var oneMbString = sb.ToString();
+
+            var timer = CodeTimer.Start();
+            var normalizedString = oneMbString.NormalizeLineEndings();
+            if (normalizedString.Length > 10)
+            {
+                Console.WriteLine("String normalization speed = {0:F2} Mb/s", 1.0 / timer.Time);
+            }
         }
     }
 }

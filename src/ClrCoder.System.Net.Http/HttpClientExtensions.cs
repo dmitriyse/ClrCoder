@@ -1,12 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-
+﻿// <copyright file="HttpClientExtensions.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Net.Http
 {
+    using global::System.Net.Http;
+    using global::System.Threading.Tasks;
+
+    using JetBrains.Annotations;
+
     /// <summary>
-    /// Extensions fro the http client api.
+    /// Extensions fro the http client API.
     /// </summary>
+    [PublicAPI]
     public static class HttpClientExtensions
     {
         /// <summary>
@@ -17,7 +23,7 @@ namespace ClrCoder.System.Net.Http
         public static async Task<HttpRequestMessage> Clone(this HttpRequestMessage message)
         {
             var newMessage = new HttpRequestMessage(message.Method, message.RequestUri);
-            foreach (KeyValuePair<string, IEnumerable<string>> header in message.Headers)
+            foreach (var header in message.Headers)
             {
                 newMessage.Headers.Add(header.Key, header.Value);
             }
@@ -27,7 +33,7 @@ namespace ClrCoder.System.Net.Http
                 newMessage.Content = await message.Content.Clone();
             }
 
-            foreach (KeyValuePair<string, object> property in message.Properties)
+            foreach (var property in message.Properties)
             {
                 newMessage.Properties.Add(property.Key, property.Value);
             }
@@ -43,7 +49,7 @@ namespace ClrCoder.System.Net.Http
         public static async Task<HttpContent> Clone(this HttpContent content)
         {
             var clonedContent = new ByteArrayContent(await content.ReadAsByteArrayAsync());
-            foreach (KeyValuePair<string, IEnumerable<string>> httpContentHeader in content.Headers)
+            foreach (var httpContentHeader in content.Headers)
             {
                 clonedContent.Headers.Add(httpContentHeader.Key, httpContentHeader.Value);
             }

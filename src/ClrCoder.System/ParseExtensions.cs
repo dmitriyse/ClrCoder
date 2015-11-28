@@ -27,7 +27,7 @@ namespace ClrCoder.System
         {
             if (decimalString == null)
             {
-                throw new ArgumentNullException("decimalString");
+                throw new ArgumentNullException(nameof(decimalString));
             }
 
             return decimal.Parse(decimalString.Replace(',', '.'), CultureInfo.InvariantCulture);
@@ -45,7 +45,7 @@ namespace ClrCoder.System
         {
             if (doubleString == null)
             {
-                throw new ArgumentNullException("doubleString");
+                throw new ArgumentNullException(nameof(doubleString));
             }
 
             return double.Parse(doubleString.Replace(',', '.'), CultureInfo.InvariantCulture);
@@ -61,7 +61,7 @@ namespace ClrCoder.System
         {
             if (decimalString == null)
             {
-                throw new ArgumentNullException("decimalString");
+                throw new ArgumentNullException(nameof(decimalString));
             }
 
             return decimal.TryParse(
@@ -81,7 +81,7 @@ namespace ClrCoder.System
         {
             if (doubleString == null)
             {
-                throw new ArgumentNullException("doubleString");
+                throw new ArgumentNullException(nameof(doubleString));
             }
 
             return double.TryParse(

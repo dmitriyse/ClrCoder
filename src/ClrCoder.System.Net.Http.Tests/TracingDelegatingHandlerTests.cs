@@ -1,12 +1,16 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
-
-using Newtonsoft.Json;
-
-using NUnit.Framework;
-
+﻿// <copyright file="TracingDelegatingHandlerTests.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Net.Http.Tests
 {
+    using global::System.Diagnostics;
+    using global::System.Net.Http;
+
+    using Newtonsoft.Json;
+
+    using NUnit.Framework;
+
     /// <summary>
     /// Tests for the class <see cref="TracingDelegatingHandler"/>.
     /// </summary>

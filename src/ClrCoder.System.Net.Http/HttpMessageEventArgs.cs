@@ -1,11 +1,18 @@
-﻿using System;
-using System.Net.Http;
-
+﻿// <copyright file="HttpMessageEventArgs.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Net.Http
 {
+    using global::System;
+    using global::System.Net.Http;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Request log entry.
     /// </summary>
+    [PublicAPI]
     public class HttpMessageEventArgs : EventArgs
     {
         /// <summary>
@@ -19,12 +26,12 @@ namespace ClrCoder.System.Net.Http
         /// <param name="responseMessage">Http response message.</param>
         /// <param name="exception">Request error exception. </param>
         public HttpMessageEventArgs(
-            DateTime timeStamp,
-            TimeSpan duration,
-            string requestBody,
-            string responseBody,
-            HttpRequestMessage requestMessage,
-            HttpResponseMessage responseMessage,
+            DateTime timeStamp, 
+            TimeSpan duration, 
+            string requestBody, 
+            string responseBody, 
+            HttpRequestMessage requestMessage, 
+            HttpResponseMessage responseMessage, 
             Exception exception)
         {
             TimeStamp = timeStamp;
@@ -37,14 +44,14 @@ namespace ClrCoder.System.Net.Http
         }
 
         /// <summary>
-        /// Request start time in UTC.
-        /// </summary>
-        public DateTime TimeStamp { get; private set; }
-
-        /// <summary>
         /// Request duration.
         /// </summary>
         public TimeSpan Duration { get; private set; }
+
+        /// <summary>
+        /// Request error exception.
+        /// </summary>
+        public Exception Exception { get; private set; }
 
         /// <summary>
         /// Request content.
@@ -52,14 +59,14 @@ namespace ClrCoder.System.Net.Http
         public string RequestBody { get; private set; }
 
         /// <summary>
-        /// Response body.
-        /// </summary>
-        public string ResponseBody { get; private set; }
-
-        /// <summary>
         /// Http request message.
         /// </summary>
         public HttpRequestMessage RequestMessage { get; private set; }
+
+        /// <summary>
+        /// Response body.
+        /// </summary>
+        public string ResponseBody { get; private set; }
 
         /// <summary>
         /// Http response message.
@@ -67,8 +74,8 @@ namespace ClrCoder.System.Net.Http
         public HttpResponseMessage ResponseMessage { get; set; }
 
         /// <summary>
-        /// Request error exception.
+        /// Request start time in UTC.
         /// </summary>
-        public Exception Exception { get; private set; }
+        public DateTime TimeStamp { get; private set; }
     }
 }

@@ -1,13 +1,22 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-
+﻿// <copyright file="TracingDelegatingHandler.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Net.Http
 {
+    using global::System;
+    using global::System.Net.Http;
+    using global::System.Threading;
+    using global::System.Threading.Tasks;
+
+    using JetBrains.Annotations;
+
+    //// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
+
     /// <summary>
     /// Message handler, with request logging.
     /// </summary>
+    [PublicAPI]
     public class TracingDelegatingHandler : DelegatingHandler
     {
         /// <summary>
@@ -24,12 +33,22 @@ namespace ClrCoder.System.Net.Http
         /// </summary>
         public event EventHandler<HttpMessageEventArgs> MessageProcessed;
 
+        /// <summary>
+        /// Raises <see cref="MessageProcessed"/> event.
+        /// </summary>
+        /// <param name="e">Event argument.</param>
+        protected virtual void OnMessageProcessed(HttpMessageEventArgs e)
+        {
+            MessageProcessed?.Invoke(this, e);
+        }
+
         /// <inheritdoc/>
         protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
+            HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
-            DateTime startTime = DateTime.UtcNow;
+            var startTime = DateTime.UtcNow;
+
             // Allows to load
             string requestBody = null;
 
@@ -60,17 +79,17 @@ namespace ClrCoder.System.Net.Http
                     // Mute error.
                 }
 
-                TimeSpan duration = DateTime.UtcNow - startTime;
+                var duration = DateTime.UtcNow - startTime;
                 try
                 {
                     OnMessageProcessed(
                         new HttpMessageEventArgs(
-                            startTime,
-                            duration,
-                            requestBody,
-                            responseBody,
-                            request,
-                            response,
+                            startTime, 
+                            duration, 
+                            requestBody, 
+                            responseBody, 
+                            request, 
+                            response, 
                             null));
                 }
                 catch
@@ -82,7 +101,7 @@ namespace ClrCoder.System.Net.Http
             }
             catch (Exception ex)
             {
-                TimeSpan duration = DateTime.UtcNow - startTime;
+                var duration = DateTime.UtcNow - startTime;
                 try
                 {
                     OnMessageProcessed(
@@ -95,15 +114,6 @@ namespace ClrCoder.System.Net.Http
 
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Raises <see cref="MessageProcessed"/> event.
-        /// </summary>
-        /// <param name="e">Event argument.</param>
-        protected virtual void OnMessageProcessed(HttpMessageEventArgs e)
-        {
-            MessageProcessed?.Invoke(this, e);
         }
     }
 }

@@ -1,14 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-
-using FluentAssertions;
-
-using JetBrains.Annotations;
-
-using NUnit.Framework;
-
+﻿// <copyright file="ReflectionExtensionsTest.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
 namespace ClrCoder.System.Tests
 {
+    using FluentAssertions;
+
+    using global::System.Diagnostics.CodeAnalysis;
+    using global::System.Linq;
+
+    using JetBrains.Annotations;
+
+    using NUnit.Framework;
+
     /// <summary>
     /// Test for the <see cref="ReflectionExtensions"/> methods.
     /// </summary>
@@ -43,18 +47,6 @@ namespace ClrCoder.System.Tests
         /// Type member name should be enumerated.
         /// </summary>
         [Test]
-        public void Type_members_should_be_enumerated()
-        {
-            var dc = new DummyClass();
-            dc.GetMembers()
-                .Select(x => x.Name)
-                .ShouldBeEquivalentTo(new[] { "TestField", "TestProperty", "_privateField", "PrivateProperty" });
-        }
-
-        /// <summary>
-        /// Type member name should be enumerated.
-        /// </summary>
-        [Test]
         public void Type_members_accessiblity_should_be_determined()
         {
             var dc = new DummyClass();
@@ -64,14 +56,30 @@ namespace ClrCoder.System.Tests
             dc.GetMember("PrivateProperty").IsPublic.Should().BeFalse();
         }
 
+        /// <summary>
+        /// Type member name should be enumerated.
+        /// </summary>
+        [Test]
+        public void Type_members_should_be_enumerated()
+        {
+            var dc = new DummyClass();
+            dc.GetMembers()
+                .Select(x => x.Name)
+                .ShouldBeEquivalentTo(new[] { "TestField", "TestProperty", "_privateField", "PrivateProperty" });
+        }
+
+#pragma warning disable CS0649, CS0169
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", 
+            Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Required for reflection tests.")]
         private class DummyClass
         {
+            [UsedImplicitly]
             public static string StaticField;
 
+            [UsedImplicitly]
             private static double PrivateStaticField;
 
-            [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate",
-                Justification = "Reviewed. Suppression is OK here.")]
             [UsedImplicitly]
             public int TestField;
 
@@ -81,13 +89,15 @@ namespace ClrCoder.System.Tests
             [UsedImplicitly]
             public static string StaticProperty { get; private set; }
 
+            [UsedImplicitly]
+            private static double PrivateStaticProperty { get; set; }
+
+            [UsedImplicitly]
             public string TestProperty { get; set; }
 
             [UsedImplicitly]
             protected string PrivateProperty { get; private set; }
-
-            [UsedImplicitly]
-            private static double PrivateStaticProperty { get; set; }
         }
+#pragma warning restore CS0649, CS0169
     }
 }
