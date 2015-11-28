@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System", "ClrCoder.System\ClrCoder.System.csproj", "{89FC62E1-2872-4BC5-99C7-91EC30500926}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder", "ClrCoder\ClrCoder.csproj", "{89FC62E1-2872-4BC5-99C7-91EC30500926}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Tests", "ClrCoder.System.Tests\ClrCoder.System.Tests.csproj", "{89E7326E-916C-4D48-96FE-273EA96338A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.Tests", "ClrCoder.Tests\ClrCoder.Tests.csproj", "{89E7326E-916C-4D48-96FE-273EA96338A8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1C749AB4-44D9-48AB-BF88-AEE2247B262A}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,9 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1C749A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http", "ClrCoder.System.Net.Http\ClrCoder.System.Net.Http.csproj", "{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.Net.Http", "ClrCoder.Net.Http\ClrCoder.Net.Http.csproj", "{503C2C5E-B2CC-4D69-BA19-741FBB00DFA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.System.Net.Http.Tests", "ClrCoder.System.Net.Http.Tests\ClrCoder.System.Net.Http.Tests.csproj", "{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.Net.Http.Tests", "ClrCoder.Net.Http.Tests\ClrCoder.Net.Http.Tests.csproj", "{F90619BB-A1EA-4415-B8D0-0E2D2FBBD8F2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5DE7A5A2-0190-4737-B205-9E82CF24B4A9}"
 	ProjectSection(SolutionItems) = preProject
