@@ -220,16 +220,16 @@ namespace ClrCoder
             {
                 get
                 {
-                    var cache = GetDataMemberInfoesCache(this._type);
+                    var cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
-                    if (cache.Properties.TryGetValue(this._name, out propertyInfo))
+                    if (cache.Properties.TryGetValue(_name, out propertyInfo))
                     {
                         return propertyInfo;
                     }
 
                     FieldInfo fieldInfo;
-                    if (!cache.Fields.TryGetValue(this._name, out fieldInfo))
+                    if (!cache.Fields.TryGetValue(_name, out fieldInfo))
                     {
                         throw new KeyNotFoundException("Cannot find property or field with the specified name.");
                     }
@@ -241,7 +241,7 @@ namespace ClrCoder
             /// <summary>
             /// Data member name.
             /// </summary>
-            public string Name => this._name;
+            public string Name => _name;
 
             /// <summary>
             /// Data member type.
@@ -250,16 +250,16 @@ namespace ClrCoder
             {
                 get
                 {
-                    var cache = GetDataMemberInfoesCache(this._type);
+                    var cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
-                    if (cache.Properties.TryGetValue(this._name, out propertyInfo))
+                    if (cache.Properties.TryGetValue(_name, out propertyInfo))
                     {
                         return propertyInfo.PropertyType;
                     }
 
                     FieldInfo fieldInfo;
-                    if (!cache.Fields.TryGetValue(this._name, out fieldInfo))
+                    if (!cache.Fields.TryGetValue(_name, out fieldInfo))
                     {
                         throw new KeyNotFoundException("Cannot find property or field with the specified name.");
                     }

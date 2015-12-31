@@ -257,5 +257,15 @@ namespace ClrCoder
             int result;
             return str != null && int.TryParse(str, out result) ? (int?)result : null;
         }
+
+        /// <summary>
+        /// Converts timespan to <see langword="double"/> seconds value;
+        /// </summary>
+        /// <param name="timeSpan">Time span to convert.</param>
+        /// <returns>Time span in seconds.</returns>
+        public static double ToSeconds(this TimeSpan timeSpan)
+        {
+            return timeSpan.Ticks / (double)TimeSpan.TicksPerSecond;
+        }
     }
 }

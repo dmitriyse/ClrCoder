@@ -37,6 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\ClrCoder.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\ClrCoder.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -46,10 +47,21 @@
     <Compile Include="AlternativeResult.cs" />
     <Compile Include="Collections\DictionaryEx.cs" />
     <Compile Include="Collections\LazyDictionary.cs" />
+    <Compile Include="ComponentModel\Container.cs" />
+    <Compile Include="ComponentModel\ContainerConfig.cs" />
+    <Compile Include="ComponentModel\ContainerNodeKey.cs" />
+    <Compile Include="ComponentModel\IContainer.cs" />
+    <Compile Include="ComponentModel\IContainerConfig.cs" />
+    <Compile Include="ComponentModel\IContainerLease.cs" />
+    <Compile Include="ComponentModel\IContainerNodeConfig.cs" />
+    <Compile Include="ConvertEx.cs" />
     <Compile Include="Diagnostics\CodeTimer.cs" />
     <Compile Include="Net\Http\HttpClientExtensions.cs" />
     <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandler.cs" />
+    <Compile Include="ObjectModel\Freezable.cs" />
+    <Compile Include="ObjectModel\IDeepCloneable.cs" />
+    <Compile Include="ObjectModel\IFreezable.cs" />
     <Compile Include="ParseExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BclProductivityExtensions.cs" />
@@ -62,8 +74,11 @@
     <Compile Include="Collections\TtlDictionary.cs" />
     <Compile Include="TypeEx.cs" />
     <Compile Include="TypeEx{TType}.cs" />
+    <Compile Include="Validation\VxCore.cs" />
+    <Compile Include="Validation\VxValidationException.cs" />
     <Compile Include="ValuedTuple{T1,T2}.cs" />
     <Compile Include="ValuedTuple{T1}.cs" />
+    <Compile Include="Vx.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ClrCoder.ruleset">
@@ -73,6 +88,7 @@
       <Link>stylecop.json</Link>
     </AdditionalFiles>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
