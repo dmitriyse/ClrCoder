@@ -1,9 +1,10 @@
 {
   "locked": false,
-  "version": 1,
+  "version": 2,
   "targets": {
     ".NETPortable,Version=v4.6,Profile=Profile151": {
-      "JetBrains.Annotations/10.0.0": {
+      "JetBrains.Annotations/10.1.4": {
+        "type": "package",
         "compile": {
           "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/JetBrains.Annotations.PCL328.dll": {}
         },
@@ -12,8 +13,9 @@
         }
       },
       "Microsoft.Bcl/1.1.10": {
+        "type": "package",
         "dependencies": {
-          "Microsoft.Bcl.Build": "[1.0.14, )"
+          "Microsoft.Bcl.Build": "1.0.14"
         },
         "compile": {
           "lib/portable-net451+win81+wpa81/_._": {}
@@ -22,11 +24,14 @@
           "lib/portable-net451+win81+wpa81/_._": {}
         }
       },
-      "Microsoft.Bcl.Build/1.0.14": {},
+      "Microsoft.Bcl.Build/1.0.14": {
+        "type": "package"
+      },
       "Microsoft.Net.Http/2.2.29": {
+        "type": "package",
         "dependencies": {
-          "Microsoft.Bcl": "[1.1.10, )",
-          "Microsoft.Bcl.Build": "[1.0.14, )"
+          "Microsoft.Bcl": "1.1.10",
+          "Microsoft.Bcl.Build": "1.0.14"
         },
         "compile": {
           "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.dll": {},
@@ -37,7 +42,8 @@
           "lib/portable-net45+win8+wpa81/System.Net.Http.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.3": {
+        "type": "package",
         "compile": {
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         },
@@ -45,7 +51,8 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
-      "NodaTime/1.3.1": {
+      "NodaTime/1.3.2": {
+        "type": "package",
         "frameworkAssemblies": [
           "System.Xml"
         ],
@@ -56,10 +63,11 @@
           "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+XamariniOS1/NodaTime.dll": {}
         }
       },
-      "NodaTime.Serialization.JsonNet/1.3.1": {
+      "NodaTime.Serialization.JsonNet/1.3.2": {
+        "type": "package",
         "dependencies": {
-          "Newtonsoft.Json": "[4.5.11, )",
-          "NodaTime": "[1.3.0, )"
+          "Newtonsoft.Json": "4.5.11",
+          "NodaTime": "1.3.0"
         },
         "compile": {
           "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/NodaTime.Serialization.JsonNet.dll": {}
@@ -68,102 +76,107 @@
           "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/NodaTime.Serialization.JsonNet.dll": {}
         }
       },
-      "StyleCop.Analyzers/1.0.0-rc1": {}
+      "StyleCop.Analyzers/1.0.0": {
+        "type": "package"
+      }
     }
   },
   "libraries": {
-    "JetBrains.Annotations/10.0.0": {
-      "sha512": "vyadsDFnDDbR2NK3P++l9AA5ogM+cWlj8kQl8NV9m+LZyEYxjQndZZL/noqb5g8pYpCNellecxtVFdUZ979UWg==",
-      "type": "Package",
+    "JetBrains.Annotations/10.1.4": {
+      "sha512": "5WN2N7ba4yGPShBdIPkqPveu7AjFNeGeLpMIJpFfkjK7MPPNN6hqMCh1ZU8ohaAwdBiWdrWrZ1uEIGYv0Keelg==",
+      "type": "package",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
+        "JetBrains.Annotations.10.1.4.nupkg.sha512",
         "JetBrains.Annotations.nuspec",
+        "lib/dotnet/JetBrains.Annotations.Dotnet.dll",
+        "lib/dotnet/JetBrains.Annotations.Dotnet.xml",
         "lib/net20/JetBrains.Annotations.dll",
         "lib/net20/JetBrains.Annotations.xml",
         "lib/portable-net4+sl4+wp7+netcore45/JetBrains.Annotations.PCL1.dll",
         "lib/portable-net4+sl4+wp7+netcore45/JetBrains.Annotations.PCL1.xml",
         "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/JetBrains.Annotations.PCL328.dll",
-        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/JetBrains.Annotations.PCL328.xml",
-        "package/services/metadata/core-properties/c6cfc38082154b4cb0a67d2c21f2e054.psmdcp"
+        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/JetBrains.Annotations.PCL328.xml"
       ]
     },
     "Microsoft.Bcl/1.1.10": {
       "sha512": "+tTqoh/M1pyL8El3qLy30EcwnAtyvFoDZJtdG9Cbg/WdFbh4N8kyrq198XHuEL7lnJbeD0DRO8jcX5IIOh05cQ==",
       "type": "Package",
       "files": [
+        "License-Stable.rtf",
+        "Microsoft.Bcl.nuspec",
         "[Content_Types].xml",
         "_rels/.rels",
+        "lib/Xamarin.iOS10/_._",
         "lib/monoandroid/_._",
         "lib/monotouch/_._",
-        "lib/net40/ensureRedirect.xml",
         "lib/net40/System.IO.dll",
         "lib/net40/System.IO.xml",
         "lib/net40/System.Runtime.dll",
         "lib/net40/System.Runtime.xml",
         "lib/net40/System.Threading.Tasks.dll",
         "lib/net40/System.Threading.Tasks.xml",
+        "lib/net40/ensureRedirect.xml",
         "lib/net45/_._",
-        "lib/portable-net40+sl4+win8/ensureRedirect.xml",
-        "lib/portable-net40+sl4+win8/System.IO.dll",
-        "lib/portable-net40+sl4+win8/System.IO.xml",
-        "lib/portable-net40+sl4+win8/System.Runtime.dll",
-        "lib/portable-net40+sl4+win8/System.Runtime.xml",
-        "lib/portable-net40+sl4+win8/System.Threading.Tasks.dll",
-        "lib/portable-net40+sl4+win8/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.IO.dll",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.IO.xml",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Runtime.dll",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Runtime.xml",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Threading.Tasks.dll",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl4+win8+wp8+wpa81/ensureRedirect.xml",
+        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.IO.dll",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.IO.xml",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.Runtime.dll",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.Runtime.xml",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.Threading.Tasks.dll",
         "lib/portable-net40+sl4+win8+wp8+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+sl5+win8+wp8+wpa81/ensureRedirect.xml",
+        "lib/portable-net40+sl4+win8+wp8+wpa81/ensureRedirect.xml",
+        "lib/portable-net40+sl4+win8/System.IO.dll",
+        "lib/portable-net40+sl4+win8/System.IO.xml",
+        "lib/portable-net40+sl4+win8/System.Runtime.dll",
+        "lib/portable-net40+sl4+win8/System.Runtime.xml",
+        "lib/portable-net40+sl4+win8/System.Threading.Tasks.dll",
+        "lib/portable-net40+sl4+win8/System.Threading.Tasks.xml",
+        "lib/portable-net40+sl4+win8/ensureRedirect.xml",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.IO.dll",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.IO.xml",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.Runtime.dll",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.Runtime.xml",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.Threading.Tasks.dll",
         "lib/portable-net40+sl5+win8+wp8+wpa81/System.Threading.Tasks.xml",
-        "lib/portable-net40+win8/ensureRedirect.xml",
-        "lib/portable-net40+win8/System.IO.dll",
-        "lib/portable-net40+win8/System.IO.xml",
-        "lib/portable-net40+win8/System.Runtime.dll",
-        "lib/portable-net40+win8/System.Runtime.xml",
-        "lib/portable-net40+win8/System.Threading.Tasks.dll",
-        "lib/portable-net40+win8/System.Threading.Tasks.xml",
-        "lib/portable-net40+win8+wp8+wpa81/ensureRedirect.xml",
+        "lib/portable-net40+sl5+win8+wp8+wpa81/ensureRedirect.xml",
         "lib/portable-net40+win8+wp8+wpa81/System.IO.dll",
         "lib/portable-net40+win8+wp8+wpa81/System.IO.xml",
         "lib/portable-net40+win8+wp8+wpa81/System.Runtime.dll",
         "lib/portable-net40+win8+wp8+wpa81/System.Runtime.xml",
         "lib/portable-net40+win8+wp8+wpa81/System.Threading.Tasks.dll",
         "lib/portable-net40+win8+wp8+wpa81/System.Threading.Tasks.xml",
+        "lib/portable-net40+win8+wp8+wpa81/ensureRedirect.xml",
+        "lib/portable-net40+win8/System.IO.dll",
+        "lib/portable-net40+win8/System.IO.xml",
+        "lib/portable-net40+win8/System.Runtime.dll",
+        "lib/portable-net40+win8/System.Runtime.xml",
+        "lib/portable-net40+win8/System.Threading.Tasks.dll",
+        "lib/portable-net40+win8/System.Threading.Tasks.xml",
+        "lib/portable-net40+win8/ensureRedirect.xml",
         "lib/portable-net45+win8+wp8+wpa81/_._",
         "lib/portable-net45+win8+wpa81/_._",
-        "lib/portable-net451+win81/_._",
         "lib/portable-net451+win81+wpa81/_._",
+        "lib/portable-net451+win81/_._",
         "lib/portable-win81+wp81+wpa81/_._",
-        "lib/sl4/System.IO.dll",
-        "lib/sl4/System.IO.xml",
-        "lib/sl4/System.Runtime.dll",
-        "lib/sl4/System.Runtime.xml",
-        "lib/sl4/System.Threading.Tasks.dll",
-        "lib/sl4/System.Threading.Tasks.xml",
-        "lib/sl4-windowsphone71/ensureRedirect.xml",
         "lib/sl4-windowsphone71/System.IO.dll",
         "lib/sl4-windowsphone71/System.IO.xml",
         "lib/sl4-windowsphone71/System.Runtime.dll",
         "lib/sl4-windowsphone71/System.Runtime.xml",
         "lib/sl4-windowsphone71/System.Threading.Tasks.dll",
         "lib/sl4-windowsphone71/System.Threading.Tasks.xml",
+        "lib/sl4-windowsphone71/ensureRedirect.xml",
+        "lib/sl4/System.IO.dll",
+        "lib/sl4/System.IO.xml",
+        "lib/sl4/System.Runtime.dll",
+        "lib/sl4/System.Runtime.xml",
+        "lib/sl4/System.Threading.Tasks.dll",
+        "lib/sl4/System.Threading.Tasks.xml",
         "lib/sl5/System.IO.dll",
         "lib/sl5/System.IO.xml",
         "lib/sl5/System.Runtime.dll",
@@ -173,9 +186,6 @@
         "lib/win8/_._",
         "lib/wp8/_._",
         "lib/wpa81/_._",
-        "lib/Xamarin.iOS10/_._",
-        "License-Stable.rtf",
-        "Microsoft.Bcl.nuspec",
         "package/services/metadata/core-properties/b43ef6ce7de9447f9f8b39e2e41a185e.psmdcp"
       ]
     },
@@ -183,19 +193,19 @@
       "sha512": "cDLKSvNvRa519hplsbSoYqO69TjdDIhfjtKUM0g20/nVROoWsGav9KCI9HtnGjLmdV1+TcUUDhbotcllibjPEA==",
       "type": "Package",
       "files": [
+        "License-Stable.rtf",
+        "Microsoft.Bcl.Build.nuspec",
         "[Content_Types].xml",
         "_rels/.rels",
         "content/net40/_._",
         "content/netcore45/_._",
         "content/portable-net40+win8+sl4+wp71+wpa81/_._",
-        "content/sl4/_._",
         "content/sl4-windowsphone71/_._",
-        "License-Stable.rtf",
-        "Microsoft.Bcl.Build.nuspec",
+        "content/sl4/_._",
         "package/services/metadata/core-properties/ded9cfb683144eaba586f13af4ae979c.psmdcp",
         "tools/Install.ps1",
-        "tools/Microsoft.Bcl.Build.targets",
         "tools/Microsoft.Bcl.Build.Tasks.dll",
+        "tools/Microsoft.Bcl.Build.targets",
         "tools/Uninstall.ps1"
       ]
     },
@@ -203,76 +213,76 @@
       "sha512": "fc4CPEewJ30Xgal+fSq1lYIBt582A7eKlAL7O4HXiYAiTp2VTnA4osSvk7T2n8aS4xTCPVJusQk3yKLT0XSpkg==",
       "type": "Package",
       "files": [
+        "License-Stable.rtf",
+        "Microsoft.Net.Http.nuspec",
         "[Content_Types].xml",
         "_rels/.rels",
-        "lib/monoandroid/System.Net.Http.Extensions.dll",
+        "lib/Xamarin.iOS10/System.Net.Http.Extensions.XML",
+        "lib/Xamarin.iOS10/System.Net.Http.Extensions.dll",
+        "lib/Xamarin.iOS10/System.Net.Http.Primitives.dll",
+        "lib/Xamarin.iOS10/System.Net.Http.Primitives.xml",
         "lib/monoandroid/System.Net.Http.Extensions.XML",
+        "lib/monoandroid/System.Net.Http.Extensions.dll",
         "lib/monoandroid/System.Net.Http.Primitives.dll",
         "lib/monoandroid/System.Net.Http.Primitives.xml",
-        "lib/monotouch/System.Net.Http.Extensions.dll",
         "lib/monotouch/System.Net.Http.Extensions.XML",
+        "lib/monotouch/System.Net.Http.Extensions.dll",
         "lib/monotouch/System.Net.Http.Primitives.dll",
         "lib/monotouch/System.Net.Http.Primitives.xml",
-        "lib/net40/ensureRedirect.xml",
-        "lib/net40/System.Net.Http.dll",
-        "lib/net40/System.Net.Http.Extensions.dll",
         "lib/net40/System.Net.Http.Extensions.XML",
+        "lib/net40/System.Net.Http.Extensions.dll",
         "lib/net40/System.Net.Http.Primitives.dll",
         "lib/net40/System.Net.Http.Primitives.xml",
         "lib/net40/System.Net.Http.WebRequest.dll",
         "lib/net40/System.Net.Http.WebRequest.xml",
+        "lib/net40/System.Net.Http.dll",
         "lib/net40/System.Net.Http.xml",
-        "lib/net45/ensureRedirect.xml",
-        "lib/net45/System.Net.Http.Extensions.dll",
+        "lib/net40/ensureRedirect.xml",
         "lib/net45/System.Net.Http.Extensions.XML",
+        "lib/net45/System.Net.Http.Extensions.dll",
         "lib/net45/System.Net.Http.Primitives.dll",
         "lib/net45/System.Net.Http.Primitives.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.dll",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Extensions.dll",
+        "lib/net45/ensureRedirect.xml",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Extensions.XML",
-        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Primitives.dll",
+        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Extensions.dll",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Primitives.XML",
+        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.Primitives.dll",
+        "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.dll",
         "lib/portable-net40+sl4+win8+wp71+wpa81/System.Net.Http.xml",
-        "lib/portable-net45+win8/ensureRedirect.xml",
-        "lib/portable-net45+win8/System.Net.Http.Extensions.dll",
-        "lib/portable-net45+win8/System.Net.Http.Extensions.XML",
-        "lib/portable-net45+win8/System.Net.Http.Primitives.dll",
-        "lib/portable-net45+win8/System.Net.Http.Primitives.xml",
-        "lib/portable-net45+win8+wpa81/ensureRedirect.xml",
-        "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.dll",
+        "lib/portable-net40+sl4+win8+wp71+wpa81/ensureRedirect.xml",
         "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.XML",
+        "lib/portable-net45+win8+wpa81/System.Net.Http.Extensions.dll",
         "lib/portable-net45+win8+wpa81/System.Net.Http.Primitives.dll",
         "lib/portable-net45+win8+wpa81/System.Net.Http.Primitives.xml",
-        "lib/sl4-windowsphone71/System.Net.Http.dll",
-        "lib/sl4-windowsphone71/System.Net.Http.Extensions.dll",
+        "lib/portable-net45+win8+wpa81/ensureRedirect.xml",
+        "lib/portable-net45+win8/System.Net.Http.Extensions.XML",
+        "lib/portable-net45+win8/System.Net.Http.Extensions.dll",
+        "lib/portable-net45+win8/System.Net.Http.Primitives.dll",
+        "lib/portable-net45+win8/System.Net.Http.Primitives.xml",
+        "lib/portable-net45+win8/ensureRedirect.xml",
         "lib/sl4-windowsphone71/System.Net.Http.Extensions.XML",
-        "lib/sl4-windowsphone71/System.Net.Http.Primitives.dll",
+        "lib/sl4-windowsphone71/System.Net.Http.Extensions.dll",
         "lib/sl4-windowsphone71/System.Net.Http.Primitives.XML",
+        "lib/sl4-windowsphone71/System.Net.Http.Primitives.dll",
+        "lib/sl4-windowsphone71/System.Net.Http.dll",
         "lib/sl4-windowsphone71/System.Net.Http.xml",
-        "lib/win8/System.Net.Http.Extensions.dll",
         "lib/win8/System.Net.Http.Extensions.XML",
+        "lib/win8/System.Net.Http.Extensions.dll",
         "lib/win8/System.Net.Http.Primitives.dll",
         "lib/win8/System.Net.Http.Primitives.xml",
-        "lib/wpa81/System.Net.Http.Extensions.dll",
         "lib/wpa81/System.Net.Http.Extensions.XML",
+        "lib/wpa81/System.Net.Http.Extensions.dll",
         "lib/wpa81/System.Net.Http.Primitives.dll",
         "lib/wpa81/System.Net.Http.Primitives.xml",
-        "lib/Xamarin.iOS10/System.Net.Http.Extensions.dll",
-        "lib/Xamarin.iOS10/System.Net.Http.Extensions.XML",
-        "lib/Xamarin.iOS10/System.Net.Http.Primitives.dll",
-        "lib/Xamarin.iOS10/System.Net.Http.Primitives.xml",
-        "License-Stable.rtf",
-        "Microsoft.Net.Http.nuspec",
         "package/services/metadata/core-properties/9ad4325e7ab9496288f2be824bbc6161.psmdcp"
       ]
     },
-    "Newtonsoft.Json/7.0.1": {
-      "sha512": "q3V4KLetMLnt1gpAVWgtXnHjKs0UG/RalBc29u2ZKxd5t5Ze4JBL5WiiYIklJyK/5CRiIiNwigVQUo0FgbsuWA==",
-      "type": "Package",
+    "Newtonsoft.Json/8.0.3": {
+      "sha512": "KGsYQdS2zLH+H8x2cZaSI7e+YZ4SFIbyy1YJQYl6GYBWjf5o4H1A68nxyq+WTyVSOJQ4GqS/DiPE+UseUizgMg==",
+      "type": "package",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
+        "Newtonsoft.Json.8.0.3.nupkg.sha512",
+        "Newtonsoft.Json.nuspec",
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
         "lib/net35/Newtonsoft.Json.dll",
@@ -285,50 +295,42 @@
         "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.xml",
-        "Newtonsoft.Json.nuspec",
-        "package/services/metadata/core-properties/49e907fc018c4c7ab632e6d4ad4766f8.psmdcp",
         "tools/install.ps1"
       ]
     },
-    "NodaTime/1.3.1": {
-      "sha512": "qAEVNG9I/kbTC+ClG3vxW+J487YURJbR7lyKCgxSPak04OP0l6lfdbz4XgxbQC28rQMzbBvVFTUovZxrLHRLXA==",
-      "type": "Package",
+    "NodaTime/1.3.2": {
+      "sha512": "iIV8xtLH7JhElTag7wMzP8YkZcSvFUcHZfGZhl3npzVz7V7y0T1JJOeqS/UcY3epq9480jcuUO2jzo8ewhQmlg==",
+      "type": "package",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
+        "NodaTime.1.3.2.nupkg.sha512",
+        "NodaTime.nuspec",
         "lib/net35-Client/NodaTime.dll",
         "lib/net35-Client/NodaTime.xml",
         "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+XamariniOS1/NodaTime.dll",
-        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+XamariniOS1/NodaTime.xml",
-        "NodaTime.nuspec",
-        "package/services/metadata/core-properties/16731ebb684445f8baaeff16044efa44.psmdcp"
+        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1+XamariniOS1/NodaTime.xml"
       ]
     },
-    "NodaTime.Serialization.JsonNet/1.3.1": {
-      "sha512": "pl0KmFRmn77giYqsdJwFrhvQBKOEk83BTiWM5Dd4RdWy3biy5CFT12Ftk+GfioIgRBZde00ne4CqflUKlhNU9g==",
-      "type": "Package",
+    "NodaTime.Serialization.JsonNet/1.3.2": {
+      "sha512": "Lt8mM81QTbwxSMY6IpX2IKkA7SXTw0Ki8VTX9yMTdwnXJv0D2o5gtCultHoy6YvM6lQ9D+mJGUaz6tf3fWrH8g==",
+      "type": "package",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
+        "NodaTime.Serialization.JsonNet.1.3.2.nupkg.sha512",
+        "NodaTime.Serialization.JsonNet.nuspec",
         "lib/net35-Client/NodaTime.Serialization.JsonNet.dll",
         "lib/net35-Client/NodaTime.Serialization.JsonNet.xml",
         "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/NodaTime.Serialization.JsonNet.dll",
-        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/NodaTime.Serialization.JsonNet.xml",
-        "NodaTime.Serialization.JsonNet.nuspec",
-        "package/services/metadata/core-properties/d0befec2d6fe45de8f8f1ba0a71e3987.psmdcp"
+        "lib/portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1/NodaTime.Serialization.JsonNet.xml"
       ]
     },
-    "StyleCop.Analyzers/1.0.0-rc1": {
-      "sha512": "sw9IEEQiNDL7nJQxyrUaskPvRS4hsJuk8soImMtCTcuTP9RePRYNE2BcpJZ2RyfPdUE7fG1WtedQ7jsH64xEUw==",
-      "type": "Package",
+    "StyleCop.Analyzers/1.0.0": {
+      "sha512": "NT0qdVF8gfXn6YcajL/s9orWNbO9NAr9AM8MDHIxXHstMvxi7+viLxAlZIoWRAA25Cs4O91qFcMt06cL/61TjQ==",
+      "type": "package",
       "files": [
-        "[Content_Types].xml",
-        "_rels/.rels",
+        "StyleCop.Analyzers.1.0.0.nupkg.sha512",
+        "StyleCop.Analyzers.nuspec",
         "analyzers/dotnet/cs/Newtonsoft.Json.dll",
         "analyzers/dotnet/cs/StyleCop.Analyzers.CodeFixes.dll",
         "analyzers/dotnet/cs/StyleCop.Analyzers.dll",
-        "package/services/metadata/core-properties/df86cb1a1e0048eba80605c1bc99edb1.psmdcp",
-        "StyleCop.Analyzers.nuspec",
         "tools/install.ps1",
         "tools/uninstall.ps1"
       ]
@@ -336,12 +338,12 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "JetBrains.Annotations >= 10.0.0",
+      "JetBrains.Annotations >= 10.1.4",
       "Microsoft.Net.Http >= 2.2.29",
-      "Newtonsoft.Json >= 7.0.1",
-      "NodaTime >= 1.3.1",
-      "NodaTime.Serialization.JsonNet >= 1.3.1",
-      "StyleCop.Analyzers >= 1.0.0-rc1"
+      "Newtonsoft.Json >= 8.0.3",
+      "NodaTime >= 1.3.2",
+      "NodaTime.Serialization.JsonNet >= 1.3.2",
+      "StyleCop.Analyzers >= 1.0.0"
     ],
     ".NETPortable,Version=v4.6,Profile=Profile151": []
   }
