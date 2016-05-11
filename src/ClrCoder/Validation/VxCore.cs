@@ -15,10 +15,7 @@ namespace ClrCoder.Validation
         /// <param name="callerFilePath">Calling member file path.</param>
         /// <param name="callerLineNumber">Calling member line number.</param>
         /// <param name="args">Method arguments that was passed to failed method.</param>
-        public static void Throw(
-            string callerFilePath, 
-            int callerLineNumber, 
-            params object[] args)
+        public static void Throw(string callerFilePath, int callerLineNumber, params object[] args)
         {
             throw new VxValidationException(callerFilePath, callerLineNumber, args);
         }

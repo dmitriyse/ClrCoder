@@ -35,8 +35,7 @@ namespace ClrCoder.ComponentModel
         /// <inheritdoc/>
         public Task<IContainerLease> Resolve(ContainerNodeKey key)
         {
-            if (!(
-                     key != default(ContainerNodeKey)))
+            if (!(key != default(ContainerNodeKey)))
             {
                 Vx.Throw(key);
             }

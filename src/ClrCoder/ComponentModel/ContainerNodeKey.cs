@@ -21,8 +21,7 @@ namespace ClrCoder.ComponentModel
         /// <param name="key">Node extended key.</param>
         public ContainerNodeKey(Type type, [CanBeNull] object key)
         {
-            if (!(
-                     type != null))
+            if (!(type != null))
             {
                 // ReSharper disable once ExpressionIsAlwaysNull
                 Vx.Throw(type, key);
