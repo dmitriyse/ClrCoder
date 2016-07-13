@@ -6,6 +6,7 @@ namespace ClrCoder
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     using JetBrains.Annotations;
@@ -244,7 +245,14 @@ namespace ClrCoder
         public static decimal? ToDecimal(this string str)
         {
             decimal result;
-            return str != null && decimal.TryParse(str, out result) ? (decimal?)result : null;
+            return str != null
+                   && decimal.TryParse(
+                       str.Replace(",", "."),
+                       NumberStyles.Any,
+                       CultureInfo.InvariantCulture,
+                       out result)
+                       ? (decimal?)result
+                       : null;
         }
 
         /// <summary>

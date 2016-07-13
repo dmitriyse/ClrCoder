@@ -20,16 +20,10 @@ namespace ClrCoder.Tests
         /// <param name="decimalString">String to parse.</param>
         /// <param name="result">Expected parse result.</param>
         [Test]
-        [TestCase("0.4", 0.4)]
-        public void ToDecimalTest(string decimalString, double? result)
+        [TestCase("0.4", 0.4d)]
+        public void ToDecimalTest(string decimalString, decimal? result)
         {
-            decimal? expectedResult = null;
-            if (result != null)
-            {
-                expectedResult = (decimal)result.Value;
-            }
-
-            decimalString.ToDecimal().Should().Be(expectedResult);
+            decimalString.ToDecimal().Should().Be(result);
         }
     }
 }
