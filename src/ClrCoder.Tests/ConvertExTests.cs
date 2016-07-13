@@ -4,6 +4,8 @@
 // </copyright>
 namespace ClrCoder.Tests
 {
+    using System.Reflection;
+
     using FluentAssertions;
 
     using NUnit.Framework;
@@ -20,7 +22,7 @@ namespace ClrCoder.Tests
         [Test]
         public void ToTraceJsonTest()
         {
-            TestContext.WriteLine(ConvertEx.ToTraceJson(typeof(ConvertEx).Assembly));
+            TestContext.WriteLine(ConvertEx.ToTraceJson(typeof(ConvertEx).GetTypeInfo().Assembly));
             ConvertEx.ToTraceJson(null).Should().Be("null");
         }
     }

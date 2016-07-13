@@ -48,7 +48,7 @@ namespace ClrCoder.Tests
         {
             var str = "tst";
             var testSize = 10000000;
-            Trace.WriteLine(GetExpressionName(() => str));
+            TestContext.Out.WriteLine(GetExpressionName(() => str));
 
             var stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < testSize; i++)

@@ -24,7 +24,8 @@ namespace ClrCoder
                                            PreserveReferencesHandling =
                                                PreserveReferencesHandling.Objects, 
                                            Formatting = Formatting.Indented, 
-                                       };
+                                           ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
             DefaultTraceSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
         }
 
