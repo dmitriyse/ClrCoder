@@ -70,5 +70,5 @@ UpgradeLog*.htm
 StyleCop.Cache
 
 #------------------
-
+*.lock.json
 packages/
