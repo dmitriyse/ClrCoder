@@ -142,4 +142,12 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <NUnitDll Include="$(TargetPath)">
+      <InProject>false</InProject>
+    </NUnitDll>
+  </ItemGroup>
+  <Target Name="RegisterNUnit" AfterTargets="AfterBuild">
+    <WriteLinesToFile File="$(SolutionDir)\nunit-list.txt" Lines="@(NUnitDll)" Overwrite="false" />
+  </Target>
 </Project>
