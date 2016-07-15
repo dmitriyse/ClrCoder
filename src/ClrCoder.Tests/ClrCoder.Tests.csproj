@@ -98,10 +98,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ClrCoder.ruleset">
-      <Link>ClrCoder.ruleset</Link>
+      <Link>Properties\ClrCoder.ruleset</Link>
     </None>
     <AdditionalFiles Include="..\stylecop.json">
-      <Link>stylecop.json</Link>
+      <Link>Properties\stylecop.json</Link>
     </AdditionalFiles>
     <None Include="app.config" />
     <None Include="packages.config" />
