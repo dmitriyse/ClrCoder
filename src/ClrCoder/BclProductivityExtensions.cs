@@ -247,9 +247,9 @@ namespace ClrCoder
             decimal result;
             return str != null
                    && decimal.TryParse(
-                       str.Replace(",", "."),
-                       NumberStyles.Any,
-                       CultureInfo.InvariantCulture,
+                       str.Replace(",", "."), 
+                       NumberStyles.Any, 
+                       CultureInfo.InvariantCulture, 
                        out result)
                        ? (decimal?)result
                        : null;

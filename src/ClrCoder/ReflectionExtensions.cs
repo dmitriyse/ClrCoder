@@ -74,7 +74,7 @@ namespace ClrCoder
                 membersCache.Fields.Values.Where(x => !x.Name.StartsWith("<") && !x.IsStatic)
                     .Union(
                         membersCache.Properties.Values.Where(
-                            x => (!x.CanRead || !x.GetMethod.IsStatic) && (!x.CanWrite || !x.SetMethod.IsStatic))
+                                x => (!x.CanRead || !x.GetMethod.IsStatic) && (!x.CanWrite || !x.SetMethod.IsStatic))
                             .Cast<MemberInfo>())
                     .Select(x => new ReflectedClassDataMember<object>(type, obj, x.Name))
                     .ToList();
@@ -168,11 +168,11 @@ namespace ClrCoder
             return DataMemberInfoesCache.GetOrAdd(
                 type, 
                 t =>
-                new DataMemberInfoesCacheEntry
-                    {
-                        Fields = type.GetRuntimeFields().ToDictionary(x => x.Name), 
-                        Properties = type.GetRuntimeProperties().ToDictionary(x => x.Name)
-                    });
+                    new DataMemberInfoesCacheEntry
+                        {
+                            Fields = type.GetRuntimeFields().ToDictionary(x => x.Name), 
+                            Properties = type.GetRuntimeProperties().ToDictionary(x => x.Name)
+                        });
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace ClrCoder
                                 if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
                                 {
                                     throw new KeyNotFoundException(
-                                        "Cannot find property or field with the specified name.");
+                                              "Cannot find property or field with the specified name.");
                                 }
 
                                 // TODO: Replace to expression compilation.

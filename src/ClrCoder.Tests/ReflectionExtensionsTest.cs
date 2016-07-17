@@ -70,7 +70,7 @@ namespace ClrCoder.Tests
 
 #pragma warning disable CS0649, CS0169
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", 
-            Justification = "Reviewed. Suppression is OK here.")]
+             Justification = "Reviewed. Suppression is OK here.")]
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Required for reflection tests.")]
         private class DummyClass
         {
