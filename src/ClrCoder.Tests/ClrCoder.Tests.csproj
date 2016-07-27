@@ -17,7 +17,6 @@
     <RestorePackages>true</RestorePackages>
     <ForceLegacyNuGet>true</ForceLegacyNuGet>
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,6 +31,29 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\ClrCoder.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\ClrCoder.Tests.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-PCL|AnyCPU' ">
+    <ClrCoderTargetFramework>PCL</ClrCoderTargetFramework>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\ClrCoder.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\ClrCoder.Tests.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-PCL|AnyCPU' ">
+    <ClrCoderTargetFramework>PCL</ClrCoderTargetFramework>
+	<DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -108,12 +130,24 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ClrCoder\ClrCoder.csproj">
-      <Project>{89fc62e1-2872-4bc5-99c7-91ec30500926}</Project>
-      <Name>ClrCoder</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <Choose>
+	<When Condition="'ClrCoderTargetFramework' == 'PCL'">
+	  <ItemGroup >
+		<ProjectReference Include="..\ClrCoder\ClrCoder.PCL.csproj">
+		  <Project>{f1fc250c-dfec-467e-acaa-33dd1d10ced0}</Project>
+		  <Name>ClrCoder</Name>
+		</ProjectReference>
+	  </ItemGroup>
+	</When>
+	<Otherwise>
+	  <ItemGroup>
+		<ProjectReference Include="..\ClrCoder\ClrCoder.csproj">
+		  <Project>{89fc62e1-2872-4bc5-99c7-91ec30500926}</Project>
+		  <Name>ClrCoder</Name>
+		</ProjectReference>
+	  </ItemGroup>
+	</Otherwise>
+  </Choose>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
