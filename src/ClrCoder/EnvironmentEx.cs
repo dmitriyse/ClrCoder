@@ -2,8 +2,11 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder
 {
+    using System.IO;
+
     using JetBrains.Annotations;
 
     /// <summary>
@@ -12,8 +15,6 @@ namespace ClrCoder
     [PublicAPI]
     public static class EnvironmentEx
     {
-        private static bool _isInitialized = false;
-
         //// ReSharper disable once InconsistentNaming
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace ClrCoder
         public static OSFamilyTypes OSFamily { get; private set; }
 
 #if PCL
+        private static bool _isInitialized = false;
 
         /// <summary>
         /// Initializes environment.
@@ -37,6 +39,22 @@ namespace ClrCoder
             OSFamily = osFamily ?? default(OSFamilyTypes);
         }
 
+#else
+        /// <summary>
+        /// Initializes static members of the <see cref="EnvironmentEx"/> class.
+        /// </summary>
+        static EnvironmentEx()
+        {
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                OSFamily = OSFamilyTypes.Windows;
+            }
+            else
+            {
+                // TOOD: Add support for different families.
+                OSFamily = OSFamilyTypes.Linux;
+            }
+        }
 #endif
     }
 }
