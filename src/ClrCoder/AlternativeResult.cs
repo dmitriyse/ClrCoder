@@ -21,7 +21,7 @@ namespace ClrCoder
         /// <param name="result">Value, that should be handled in alternative flow.</param>
         public AlternativeResult(T result)
         {
-            this.Result = result;
+            Result = result;
         }
 
         /// <summary>
