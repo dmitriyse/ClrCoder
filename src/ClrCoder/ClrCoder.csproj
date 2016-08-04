@@ -12,11 +12,12 @@
     <AssemblyName>ClrCoder</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <ForceLegacyNuGet>true</ForceLegacyNuGet>
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -90,19 +91,19 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=10.1.5.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\JetBrains.Annotations.10.1.5\lib\net\JetBrains.Annotations.dll</HintPath>
+      <HintPath>..\..\..\..\src\packages\JetBrains.Annotations.10.1.5\lib\net\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\src\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160707\lib\net45\NodaTime.dll</HintPath>
+      <HintPath>..\..\..\..\src\packages\NodaTime.2.0.0-alpha20160707\lib\net45\NodaTime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime.Serialization.JsonNet, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160707\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
+      <HintPath>..\..\..\..\src\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160707\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

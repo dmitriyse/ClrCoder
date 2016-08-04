@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ClrCoder.Tests</RootNamespace>
     <AssemblyName>ClrCoder.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -17,6 +17,7 @@
     <RestorePackages>true</RestorePackages>
     <ForceLegacyNuGet>true</ForceLegacyNuGet>
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,7 +54,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-PCL|AnyCPU' ">
     <ClrCoderTargetFramework>PCL</ClrCoderTargetFramework>
-	<DebugType>pdbonly</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -131,22 +132,22 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>
-	<When Condition="'ClrCoderTargetFramework' == 'PCL'">
-	  <ItemGroup >
-		<ProjectReference Include="..\ClrCoder\ClrCoder.PCL.csproj">
-		  <Project>{f1fc250c-dfec-467e-acaa-33dd1d10ced0}</Project>
-		  <Name>ClrCoder</Name>
-		</ProjectReference>
-	  </ItemGroup>
-	</When>
-	<Otherwise>
-	  <ItemGroup>
-		<ProjectReference Include="..\ClrCoder\ClrCoder.csproj">
-		  <Project>{89fc62e1-2872-4bc5-99c7-91ec30500926}</Project>
-		  <Name>ClrCoder</Name>
-		</ProjectReference>
-	  </ItemGroup>
-	</Otherwise>
+    <When Condition="'ClrCoderTargetFramework' == 'PCL'">
+      <ItemGroup>
+        <ProjectReference Include="..\ClrCoder\ClrCoder.PCL.csproj">
+          <Project>{f1fc250c-dfec-467e-acaa-33dd1d10ced0}</Project>
+          <Name>ClrCoder</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <ProjectReference Include="..\ClrCoder\ClrCoder.csproj">
+          <Project>{89fc62e1-2872-4bc5-99c7-91ec30500926}</Project>
+          <Name>ClrCoder</Name>
+        </ProjectReference>
+      </ItemGroup>
+    </Otherwise>
   </Choose>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

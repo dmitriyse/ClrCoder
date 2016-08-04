@@ -21,7 +21,7 @@
   "frameworks": {
     "netcoreapp1.0": {
       "imports": "dnxcore50",
-   	  "compilationOptions":{"define": ["PCL"]}
-	}
+      "buildOptions": { "define": [ "PCL" ] }
+    }
   }
 }
