@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5DE7A5A2-0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.PCL", "ClrCoder\ClrCoder.PCL.csproj", "{F1FC250C-DFEC-467E-ACAA-33DD1D10CED0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrCoder.AspNetCore", "ClrCoder.AspNetCore\ClrCoder.AspNetCore.csproj", "{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,14 @@ Global
 		{F1FC250C-DFEC-467E-ACAA-33DD1D10CED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1FC250C-DFEC-467E-ACAA-33DD1D10CED0}.Release-PCL|Any CPU.ActiveCfg = Release|Any CPU
 		{F1FC250C-DFEC-467E-ACAA-33DD1D10CED0}.Release-PCL|Any CPU.Build.0 = Release|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Debug-PCL|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Debug-PCL|Any CPU.Build.0 = Debug|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Release-PCL|Any CPU.ActiveCfg = Release|Any CPU
+		{FA0155EC-8FB6-4FEC-BFBF-57B10C96CF2E}.Release-PCL|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

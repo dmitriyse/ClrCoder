@@ -109,6 +109,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BclBehaviorTests.cs" />
     <Compile Include="BclProductivityExtensionsTest.cs" />
     <Compile Include="Collections\TtlDictionaryTest.cs" />
     <Compile Include="ConvertExTests.cs" />
