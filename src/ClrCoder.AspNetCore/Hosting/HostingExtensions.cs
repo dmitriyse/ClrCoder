@@ -5,13 +5,14 @@
 namespace ClrCoder.AspNetCore.Hosting
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.DependencyInjection;
 
     using Mono.Unix;
     using Mono.Unix.Native;
@@ -38,14 +39,7 @@ namespace ClrCoder.AspNetCore.Hosting
             builder.ConfigureServices(
                 services =>
                     {
-                        var lifeTimeService =
-                            services.FirstOrDefault(x => x.ServiceType == typeof(IApplicationLifetime))?
-                                .ImplementationInstance as IApplicationLifetime;
-
-                        if (lifeTimeService != null)
-                        {
-                            Task.Factory.StartNew(MonitorUnixSignals, lifeTimeService, TaskCreationOptions.LongRunning);
-                        }
+                        services.AddSingleton(typeof(IStartupFilter), new StartupFilterForUnixSignals(services));
                     });
             return builder;
         }
@@ -82,6 +76,28 @@ namespace ClrCoder.AspNetCore.Hosting
             }
 
             // Unreachable code.
+        }
+
+        private class StartupFilterForUnixSignals : IStartupFilter
+        {
+            private readonly IServiceCollection _services;
+
+            public StartupFilterForUnixSignals(IServiceCollection services)
+            {
+                _services = services;
+            }
+
+            public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+            {
+                var lifeTimeService = _services.BuildServiceProvider().GetRequiredService<IApplicationLifetime>();
+
+                if (lifeTimeService != null)
+                {
+                    Task.Factory.StartNew(MonitorUnixSignals, lifeTimeService, TaskCreationOptions.LongRunning);
+                }
+
+                return next;
+            }
         }
     }
 }
