@@ -41,11 +41,11 @@ namespace ClrCoder.Tests
                         {
                             // This code block actually executed, but NUnit skips this event.
                             // Inspect this message in Debug output window.
-                            Trace.WriteLine("Gracefull termination");
+                            TestContext.Out.WriteLine("Gracefull termination");
                         }
 
                         // Right after the catch runtime will rise ThreadAbortException again.
-                        Trace.WriteLine("Unreachable code!");
+                        TestContext.Out.WriteLine("Unreachable code!");
                     }, 
                 TaskCreationOptions.LongRunning);
             task.Wait(TimeSpan.FromSeconds(1)).Should().BeFalse();
