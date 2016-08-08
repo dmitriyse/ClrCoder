@@ -46,36 +46,39 @@ namespace ClrCoder.AspNetCore.Hosting
 
         private static void MonitorUnixSignals(object lifeTimeServiceObj)
         {
-            var lifeTimeService = (IApplicationLifetime)lifeTimeServiceObj;
-            try
+            if (EnvironmentEx.OSFamily.HasFlag(OSFamilyTypes.Posix))
             {
-                using (var sigInt = new UnixSignal(Signum.SIGINT))
-                using (var sigTerm = new UnixSignal(Signum.SIGTERM))
+                var lifeTimeService = (IApplicationLifetime)lifeTimeServiceObj;
+                try
                 {
-                    var signals = new[] { sigInt, sigTerm };
-                    for (;;)
+                    using (var sigInt = new UnixSignal(Signum.SIGINT))
+                    using (var sigTerm = new UnixSignal(Signum.SIGTERM))
                     {
-                        var id = UnixSignal.WaitAny(signals);
-
-                        if (id >= 0 && id < signals.Length)
+                        var signals = new[] { sigInt, sigTerm };
+                        for (;;)
                         {
-                            if (signals[id].IsSet)
+                            var id = UnixSignal.WaitAny(signals);
+
+                            if (id >= 0 && id < signals.Length)
                             {
-                                break;
+                                if (signals[id].IsSet)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
+
+                    // This place is only reachable, if SIGINT or SIGTERM signaled.
+                    lifeTimeService.StopApplication();
+                }
+                catch (ThreadAbortException)
+                {
+                    // Place for some gracefull termination.
                 }
 
-                // This place is only reachable, if SIGINT or SIGTERM signaled.
-                lifeTimeService.StopApplication();
+                // Unreachable code.
             }
-            catch (ThreadAbortException)
-            {
-                // Place for some gracefull termination.
-            }
-
-            // Unreachable code.
         }
 
         private class StartupFilterForUnixSignals : IStartupFilter
