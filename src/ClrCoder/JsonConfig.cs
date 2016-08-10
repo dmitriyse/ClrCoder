@@ -24,23 +24,30 @@ namespace ClrCoder
     {
         static JsonConfig()
         {
+            SerializerSettings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
 #if !PCL
-            Serializer.ConfigureForNodaTime(DateTimeZoneProviders.Bcl);
+            SerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 #else
-            Serializer.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+            SerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 #endif
+            Serializer = JsonSerializer.Create(SerializerSettings);
         }
 
         /// <summary>
         /// Default serializer for json configuration files.
         /// </summary>
-        public static JsonSerializer Serializer { get; set; } =
-            JsonSerializer.Create(
-                new JsonSerializerSettings
-                    {
-                        Formatting = Formatting.Indented, 
-                        ContractResolver = new CamelCasePropertyNamesContractResolver()
-                    });
+        public static JsonSerializer Serializer { get; set; }
+
+        /// <summary>
+        /// Default config serializer settings.
+        /// </summary>
+        public static JsonSerializerSettings SerializerSettings { get; private set; }
 
 #if !PCL
 

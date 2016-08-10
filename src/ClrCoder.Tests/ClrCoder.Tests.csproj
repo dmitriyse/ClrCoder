@@ -81,11 +81,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160707\lib\net45\NodaTime.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\lib\net45\NodaTime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime.Serialization.JsonNet, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160707\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160729\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -166,6 +166,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets'))" />
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -189,4 +190,5 @@
   <Target Name="RegisterNUnit" AfterTargets="AfterBuild">
     <WriteLinesToFile File="$(SolutionDir)\nunit-list.txt" Lines="@(NUnitDll)" Overwrite="false" />
   </Target>
+  <Import Project="$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets" Condition="Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" />
 </Project>

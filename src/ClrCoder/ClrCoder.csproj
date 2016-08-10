@@ -18,6 +18,8 @@
     <ForceLegacyNuGet>true</ForceLegacyNuGet>
     <ResolveNuGetPackages>false</ResolveNuGetPackages>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -100,11 +102,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160707\lib\net45\NodaTime.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\lib\net45\NodaTime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NodaTime.Serialization.JsonNet, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160707\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160729\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -125,10 +127,12 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets'))" />
   </Target>
   <Target Name="CleanNUnitList" BeforeTargets="PrepareForBuild">
     <Delete Files="$(SolutionDir)\nunit-list.txt" />
   </Target>
+  <Import Project="$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets" Condition="Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
