@@ -4,6 +4,7 @@
 // </copyright>
 namespace ClrCoder
 {
+    using System;
     using System.IO;
 
     using JetBrains.Annotations;
@@ -40,7 +41,18 @@ namespace ClrCoder
         /// Checks if application executed under Linux OS.
         /// </summary>
         public static OSFamilyTypes OSFamily { get; private set; }
-
+#if !PCL
+        /// <summary>
+        /// Directory with binary files.
+        /// </summary>
+        public static string BinPath
+        {
+            get
+            {
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
+        }
+#endif
 #if PCL
 
 /// <summary>
@@ -56,7 +68,7 @@ namespace ClrCoder
 
             OSFamily = osFamily ?? default(OSFamilyTypes);
         }
-
 #endif
+
     }
 }

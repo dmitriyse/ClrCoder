@@ -54,6 +54,7 @@
     <Compile Include="ConvertEx.cs" />
     <Compile Include="Diagnostics\CodeTimer.cs" />
     <Compile Include="EnvironmentEx.cs" />
+    <Compile Include="JsonConfig.cs" />
     <Compile Include="Net\Http\HttpClientExtensions.cs" />
     <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandler.cs" />

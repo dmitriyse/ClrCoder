@@ -5,6 +5,7 @@
 namespace ClrCoder.Tests
 {
     using System;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -77,6 +78,19 @@ namespace ClrCoder.Tests
                 TaskCreationOptions.LongRunning);
             task.Wait(TimeSpan.FromSeconds(1)).Should().BeFalse();
 #endif
+        }
+
+        /// <summary>
+        /// Path.Combine behavior test.
+        /// </summary>
+        /// <param name="a">First part.</param>
+        /// <param name="b">Second part.</param>
+        /// <param name="expected">Expected combined path.</param>
+        [Test]
+        [TestCase("c:\\test.com", "abc", "c:\\test.com\\abc")]
+        public void PathCombineTest(string a, string b, string expected)
+        {
+            Path.Combine(a, b).Should().Be(expected);
         }
     }
 }
