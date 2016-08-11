@@ -90,7 +90,7 @@ namespace ClrCoder.Tests
         [TestCase("c:\\test.com", "abc", "c:\\test.com\\abc")]
         public void PathCombineTest(string a, string b, string expected)
         {
-            Path.Combine(a, b).Should().Be(expected);
+            Path.Combine(a, b).Replace("/", "\\").Should().Be(expected);
         }
     }
 }
