@@ -8,6 +8,8 @@ namespace ClrCoder
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
 
     using JetBrains.Annotations;
 
@@ -105,6 +107,30 @@ namespace ClrCoder
         }
 
         /// <summary>
+        /// Checks that exception is non critical and can be muted/handled.
+        /// </summary>
+        /// <param name="ex">Exception to check.</param>
+        /// <remarks>
+        /// Next exceptions cannot be processed:
+        /// <see cref="StackOverflowException"/>,
+        /// <see cref="OutOfMemoryException"/>,
+        /// <see cref="ThreadAbortException"/>.
+        /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
+        /// </remarks>
+        /// <returns><see langword="true"/>, if exception can be muted/handled.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsProcessable([NotNull] this Exception ex)
+        {
+#if DEBUG
+            return
+                !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
+                  || ex is NotImplementedException);
+#else
+            return !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException);
+#endif
+        }
+
+        /// <summary>
         /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the 
         /// <paramref name="comparand"/>.
         /// </summary>
@@ -117,6 +143,34 @@ namespace ClrCoder
         public static T Replace<T>(this T source, T comparand, T substitute) where T : IEquatable<T>
         {
             return source.Equals(comparand) ? substitute : source;
+        }
+
+        /// <summary>
+        /// Rethrows critical exceptions that usually should not be processed.
+        /// </summary>
+        /// <param name="ex">Exception to check.</param>
+        /// <remarks>
+        /// Next exceptions cannot be processed:
+        /// <see cref="StackOverflowException"/>,
+        /// <see cref="OutOfMemoryException"/>,
+        /// <see cref="ThreadAbortException"/>.
+        /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
+        /// </remarks>
+        public static void RethrowUnprocessable([NotNull] this Exception ex)
+        {
+#if DEBUG
+            if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
+                || ex is NotImplementedException)
+            {
+                throw ex;
+            }
+
+#else
+            if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException)
+            {
+                throw ex;
+            }
+#endif
         }
 
         /// <summary>

@@ -11,10 +11,6 @@ namespace ClrCoder
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
-
-    using NodaTime;
-    using NodaTime.Serialization.JsonNet;
 
     /// <summary>
     /// Utils for json configuration files.
@@ -24,18 +20,8 @@ namespace ClrCoder
     {
         static JsonConfig()
         {
-            SerializerSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            SerializerSettings = JsonDefaults.JsonConfigSerializerSettings;
 
-#if !PCL
-            SerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-#else
-            SerializerSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-#endif
             Serializer = JsonSerializer.Create(SerializerSettings);
         }
 

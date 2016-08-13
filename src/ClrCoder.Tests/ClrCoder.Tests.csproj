@@ -113,6 +113,7 @@
     <Compile Include="BclProductivityExtensionsTest.cs" />
     <Compile Include="Collections\TtlDictionaryTest.cs" />
     <Compile Include="ConvertExTests.cs" />
+    <Compile Include="JsonNetBehaviorTests.cs" />
     <Compile Include="JsonConfigTest.cs" />
     <Compile Include="MicroBenchmarks.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandlerTests.cs" />

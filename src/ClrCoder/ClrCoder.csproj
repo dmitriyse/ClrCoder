@@ -44,8 +44,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AlternativeResult.cs" />
+    <Compile Include="CallerInfo.cs" />
     <Compile Include="Collections\DictionaryEx.cs" />
     <Compile Include="Collections\LazyDictionary.cs" />
+    <Compile Include="Collections\SafeList.cs" />
     <Compile Include="ComponentModel\Container.cs" />
     <Compile Include="ComponentModel\ContainerConfig.cs" />
     <Compile Include="ComponentModel\ContainerNodeKey.cs" />
@@ -54,9 +56,13 @@
     <Compile Include="ComponentModel\IContainerLease.cs" />
     <Compile Include="ComponentModel\IContainerNodeConfig.cs" />
     <Compile Include="ConvertEx.cs" />
+    <Compile Include="CryptoUtils.cs" />
     <Compile Include="Diagnostics\CodeTimer.cs" />
+    <Compile Include="EncodingEx.cs" />
     <Compile Include="EnvironmentEx.cs" />
     <Compile Include="JsonConfig.cs" />
+    <Compile Include="JsonDefaults.cs" />
+    <Compile Include="Logging\IJsonLogger.cs" />
     <Compile Include="Net\Http\HttpClientExtensions.cs" />
     <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandler.cs" />
@@ -71,7 +77,9 @@
     <Compile Include="RegexFluentExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Text\TextExtensions.cs" />
+    <Compile Include="Threading\DeferredHandler.cs" />
     <Compile Include="Threading\ILockToken.cs" />
+    <Compile Include="Logging\JLogEntry.cs" />
     <Compile Include="Threading\KeyedMonitor.cs" />
     <Compile Include="Collections\TtlDictionary.cs" />
     <Compile Include="TypeEx.cs" />
