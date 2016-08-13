@@ -19,6 +19,7 @@ namespace ClrCoder
         private static bool _isInitialized = false;
 
 #else
+
         /// <summary>
         /// Initializes static members of the <see cref="EnvironmentEx"/> class.
         /// </summary>
@@ -34,14 +35,18 @@ namespace ClrCoder
                 OSFamily = OSFamilyTypes.Linux;
             }
         }
+
 #endif
+
         //// ReSharper disable once InconsistentNaming
 
         /// <summary>
         /// Checks if application executed under Linux OS.
         /// </summary>
         public static OSFamilyTypes OSFamily { get; private set; }
+
 #if !PCL
+
         /// <summary>
         /// Directory with binary files.
         /// </summary>
@@ -69,6 +74,5 @@ namespace ClrCoder
             OSFamily = osFamily ?? default(OSFamilyTypes);
         }
 #endif
-
     }
 }

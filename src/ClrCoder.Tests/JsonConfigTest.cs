@@ -7,6 +7,7 @@ namespace ClrCoder.Tests
     using System.IO;
 
     using FluentAssertions;
+
     using NUnit.Framework;
 
     /// <summary>
@@ -16,6 +17,7 @@ namespace ClrCoder.Tests
     public class JsonConfigTest
     {
 #if !PCL
+
         /// <summary>
         /// Config file load test.
         /// </summary>
