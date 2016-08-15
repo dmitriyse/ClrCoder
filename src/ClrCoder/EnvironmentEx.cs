@@ -50,13 +50,12 @@ namespace ClrCoder
         /// <summary>
         /// Directory with binary files.
         /// </summary>
-        public static string BinPath
-        {
-            get
-            {
-                return AppDomain.CurrentDomain.BaseDirectory;
-            }
-        }
+        public static string BinPath => AppDomain.CurrentDomain.BaseDirectory;
+
+        /// <summary>
+        /// Checks that mono runtime.
+        /// </summary>
+        public static bool IsMonoRuntime => Type.GetType("Mono.Runtime") != null;
 #endif
 #if PCL
 
