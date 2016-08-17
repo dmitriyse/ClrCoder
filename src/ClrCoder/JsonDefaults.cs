@@ -7,6 +7,7 @@ namespace ClrCoder
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
     using NodaTime;
@@ -67,6 +68,8 @@ namespace ClrCoder
                 // Using IANA tokens for time zones for better compatibility with all world (non only ms-*).
                 settings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 
+                // Forcing all statuses to be transfered as a string.
+                settings.Converters.Add(new StringEnumConverter());
                 return settings;
             }
         }
