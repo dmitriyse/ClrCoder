@@ -47,7 +47,7 @@ namespace ClrCoder.Tests
 
                         // Right after the catch runtime will rise ThreadAbortException again.
                         TestContext.Out.WriteLine("Unreachable code!");
-                    }, 
+                    },
                 TaskCreationOptions.LongRunning);
             task.Wait(TimeSpan.FromSeconds(1)).Should().BeFalse();
 #else

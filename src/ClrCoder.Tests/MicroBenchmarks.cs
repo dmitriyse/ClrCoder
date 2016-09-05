@@ -37,7 +37,7 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine(testSize * 1000.0 / stopwatch.ElapsedMilliseconds);
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine(testSize * 1000.0 / stopwatch.ElapsedMilliseconds);
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine(testSize * 1000.0 / stopwatch.ElapsedMilliseconds);
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine(testSize * 1000.0 / stopwatch.ElapsedMilliseconds);
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>

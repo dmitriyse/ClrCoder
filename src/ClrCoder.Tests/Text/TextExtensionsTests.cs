@@ -63,10 +63,10 @@ namespace ClrCoder.Tests.Text
             CodeTimer.WarmUp();
 
             var sb = new StringBuilder();
-            var length = 1024 * 1024 / sizeof(char);
+            var length = (1024 * 1024) / sizeof(char);
             string[] words =
                 {
-                    "Dummy", "\r", "\n", "\r\n", " ", "hello", "world", "this", "is", "text", "!", 
+                    "Dummy", "\r", "\n", "\r\n", " ", "hello", "world", "this", "is", "text", "!",
                     "benchmark", "for", "text"
                 };
             var rnd = new Random(0);

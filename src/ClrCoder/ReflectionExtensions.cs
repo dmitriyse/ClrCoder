@@ -138,7 +138,7 @@ namespace ClrCoder
             }
 
             var setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
-                new ValuedTuple<Type, string>(type, memberName), 
+                new ValuedTuple<Type, string>(type, memberName),
                 typeAndName =>
                     {
                         var cache = GetDataMemberInfoesCache(type);
@@ -166,11 +166,11 @@ namespace ClrCoder
         private static DataMemberInfoesCacheEntry GetDataMemberInfoesCache(Type type)
         {
             return DataMemberInfoesCache.GetOrAdd(
-                type, 
+                type,
                 t =>
                     new DataMemberInfoesCacheEntry
                         {
-                            Fields = type.GetRuntimeFields().ToDictionary(x => x.Name), 
+                            Fields = type.GetRuntimeFields().ToDictionary(x => x.Name),
                             Properties = type.GetRuntimeProperties().ToDictionary(x => x.Name)
                         });
         }
@@ -303,7 +303,7 @@ namespace ClrCoder
                 var typeLocal = this._type;
                 var getter =
                     GetterCache<TObject, TValue>.Getters.GetOrAdd(
-                        new ValuedTuple<Type, string>(typeLocal, this._name), 
+                        new ValuedTuple<Type, string>(typeLocal, this._name),
                         typeAndName =>
                             {
                                 var cache = GetDataMemberInfoesCache(typeLocal);

@@ -21,8 +21,8 @@ namespace ClrCoder
         {
             DefaultTraceSettings = new JsonSerializerSettings
                                        {
-                                           PreserveReferencesHandling = PreserveReferencesHandling.Objects, 
-                                           Formatting = Formatting.Indented, 
+                                           PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                                           Formatting = Formatting.Indented,
                                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                                        };
             DefaultTraceSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);

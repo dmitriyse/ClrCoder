@@ -65,9 +65,9 @@ namespace ClrCoder
             }
 
             return decimal.TryParse(
-                decimalString.Replace(',', '.'), 
-                NumberStyles.Any, 
-                CultureInfo.InvariantCulture, 
+                decimalString.Replace(',', '.'),
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
                 out parsedValue);
         }
 
@@ -85,9 +85,9 @@ namespace ClrCoder
             }
 
             return double.TryParse(
-                doubleString.Replace(',', '.'), 
-                NumberStyles.Any, 
-                CultureInfo.InvariantCulture, 
+                doubleString.Replace(',', '.'),
+                NumberStyles.Any,
+                CultureInfo.InvariantCulture,
                 out parsedValue);
         }
     }

@@ -234,10 +234,10 @@ namespace ClrCoder
         /// <param name="arg3"><c>Action</c> argument 3.</param>
         /// <param name="arg4"><c>Action</c> argument 4.</param>
         public static void SafeInvoke<T1, T2, T3, T4>(
-            this Action<T1, T2, T3, T4> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
+            this Action<T1, T2, T3, T4> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
             T4 arg4)
         {
             action?.Invoke(arg1, arg2, arg3, arg4);
@@ -258,11 +258,11 @@ namespace ClrCoder
         /// <param name="arg4"><c>Action</c> argument 4.</param>
         /// <param name="arg5"><c>Action</c> argument 5.</param>
         public static void SafeInvoke<T1, T2, T3, T4, T5>(
-            this Action<T1, T2, T3, T4, T5> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            T4 arg4, 
+            this Action<T1, T2, T3, T4, T5> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
             T5 arg5)
         {
             action?.Invoke(arg1, arg2, arg3, arg4, arg5);
@@ -301,9 +301,9 @@ namespace ClrCoder
             decimal result;
             return str != null
                    && decimal.TryParse(
-                       str.Replace(",", "."), 
-                       NumberStyles.Any, 
-                       CultureInfo.InvariantCulture, 
+                       str.Replace(",", "."),
+                       NumberStyles.Any,
+                       CultureInfo.InvariantCulture,
                        out result)
                        ? (decimal?)result
                        : null;

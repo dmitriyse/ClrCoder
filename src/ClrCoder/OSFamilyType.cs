@@ -18,21 +18,21 @@ namespace ClrCoder
         /// <summary>
         /// Portable environment or unknown yet platform.
         /// </summary>
-        Portable = 0, 
+        Portable = 0,
 
         /// <summary>
         /// Windows OS family.
         /// </summary>
-        Windows = 0x1, 
+        Windows = 0x1,
 
         /// <summary>
         /// Linux OS family.
         /// </summary>
-        Linux = 0x02 | Posix, 
+        Linux = 0x02 | Posix,
 
         /// <summary>
         /// Posix OS - any Linux,Unix,MacOS, etc.
         /// </summary>
-        Posix = 0x1000, 
+        Posix = 0x1000,
     }
 }

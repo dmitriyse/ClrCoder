@@ -26,12 +26,12 @@ namespace ClrCoder.Net.Http
         /// <param name="responseMessage">Http response message.</param>
         /// <param name="exception">Request error exception. </param>
         public HttpMessageEventArgs(
-            DateTime timeStamp, 
-            TimeSpan duration, 
-            string requestBody, 
-            string responseBody, 
-            HttpRequestMessage requestMessage, 
-            HttpResponseMessage responseMessage, 
+            DateTime timeStamp,
+            TimeSpan duration,
+            string requestBody,
+            string responseBody,
+            HttpRequestMessage requestMessage,
+            HttpResponseMessage responseMessage,
             Exception exception)
         {
             this.TimeStamp = timeStamp;

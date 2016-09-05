@@ -155,11 +155,11 @@ namespace ClrCoder.Threading
         /// <param name="arg5">Argument 5.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Defer<T1, T2, T3, T4, T5>(
-            Action<T1, T2, T3, T4, T5> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            T4 arg4, 
+            Action<T1, T2, T3, T4, T5> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
             T5 arg5)
         {
             if (_deferThreadAborted)
@@ -190,12 +190,12 @@ namespace ClrCoder.Threading
         /// <param name="arg6">Argument 6.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Defer<T1, T2, T3, T4, T5, T6>(
-            Action<T1, T2, T3, T4, T5, T6> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            T4 arg4, 
-            T5 arg5, 
+            Action<T1, T2, T3, T4, T5, T6> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
+            T5 arg5,
             T6 arg6)
         {
             if (_deferThreadAborted)
@@ -228,13 +228,13 @@ namespace ClrCoder.Threading
         /// <param name="arg7">Argument 7.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Defer<T1, T2, T3, T4, T5, T6, T7>(
-            Action<T1, T2, T3, T4, T5, T6, T7> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            T4 arg4, 
-            T5 arg5, 
-            T6 arg6, 
+            Action<T1, T2, T3, T4, T5, T6, T7> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
+            T5 arg5,
+            T6 arg6,
             T7 arg7)
         {
             if (_deferThreadAborted)
@@ -269,14 +269,14 @@ namespace ClrCoder.Threading
         /// <param name="arg8">Argument 8.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Defer<T1, T2, T3, T4, T5, T6, T7, T8>(
-            Action<T1, T2, T3, T4, T5, T6, T7, T8> action, 
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            T4 arg4, 
-            T5 arg5, 
-            T6 arg6, 
-            T7 arg7, 
+            Action<T1, T2, T3, T4, T5, T6, T7, T8> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
+            T5 arg5,
+            T6 arg6,
+            T7 arg7,
             T8 arg8)
         {
             if (_deferThreadAborted)

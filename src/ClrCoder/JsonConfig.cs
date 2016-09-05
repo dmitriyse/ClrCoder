@@ -5,11 +5,12 @@
 namespace ClrCoder
 {
 #if !PCL
-    using System.IO;
 #endif
+    using System.IO;
 
     using JetBrains.Annotations;
 
+    using Newtonsoft.Json;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -46,9 +47,11 @@ namespace ClrCoder
         public static T Load<T>(string fileName)
         {
             using (var sr = new StreamReader(File.OpenRead(fileName)))
-            using (var jsonReader = new JsonTextReader(sr))
             {
-                return Serializer.Deserialize<T>(jsonReader);
+                using (var jsonReader = new JsonTextReader(sr))
+                {
+                    return Serializer.Deserialize<T>(jsonReader);
+                }
             }
         }
 

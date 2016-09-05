@@ -25,7 +25,7 @@ namespace ClrCoder
         [ContractAnnotation("=>halt")]
         [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument", Justification = "This is very special case.")]
         public static void Throw(
-            [CallerFilePath] string callerFilePath = null, 
+            [CallerFilePath] string callerFilePath = null,
             [CallerLineNumber] int callerLineNumber = 0)
         {
             VxCore.Throw(callerFilePath, callerLineNumber);
@@ -41,8 +41,8 @@ namespace ClrCoder
         [MethodImpl(MethodImplOptions.NoInlining)]
         [ContractAnnotation("=>halt")]
         public static void Throw<T>(
-            T arg1, 
-            [CallerFilePath] string callerFilePath = null, 
+            T arg1,
+            [CallerFilePath] string callerFilePath = null,
             [CallerLineNumber] int callerLineNumber = 0)
         {
             VxCore.Throw(callerFilePath, callerLineNumber, arg1);
@@ -60,9 +60,9 @@ namespace ClrCoder
         [MethodImpl(MethodImplOptions.NoInlining)]
         [ContractAnnotation("=>halt")]
         public static void Throw<T1, T2>(
-            T1 arg1, 
-            T2 arg2, 
-            [CallerFilePath] string callerFilePath = null, 
+            T1 arg1,
+            T2 arg2,
+            [CallerFilePath] string callerFilePath = null,
             [CallerLineNumber] int callerLineNumber = 0)
         {
             VxCore.Throw(callerFilePath, callerLineNumber, arg1, arg2);
@@ -82,10 +82,10 @@ namespace ClrCoder
         [MethodImpl(MethodImplOptions.NoInlining)]
         [ContractAnnotation("=>halt")]
         public static void Throw<T1, T2, T3>(
-            T1 arg1, 
-            T2 arg2, 
-            T3 arg3, 
-            [CallerFilePath] string callerFilePath = null, 
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            [CallerFilePath] string callerFilePath = null,
             [CallerLineNumber] int callerLineNumber = 0)
         {
             VxCore.Throw(callerFilePath, callerLineNumber, arg1, arg2, arg3);

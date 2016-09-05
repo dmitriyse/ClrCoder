@@ -52,18 +52,20 @@ namespace ClrCoder.AspNetCore.Hosting
                 try
                 {
                     using (var sigInt = new UnixSignal(Signum.SIGINT))
-                    using (var sigTerm = new UnixSignal(Signum.SIGTERM))
                     {
-                        var signals = new[] { sigInt, sigTerm };
-                        for (;;)
+                        using (var sigTerm = new UnixSignal(Signum.SIGTERM))
                         {
-                            var id = UnixSignal.WaitAny(signals);
-
-                            if (id >= 0 && id < signals.Length)
+                            var signals = new[] { sigInt, sigTerm };
+                            for (;;)
                             {
-                                if (signals[id].IsSet)
+                                var id = UnixSignal.WaitAny(signals);
+
+                                if (id >= 0 && id < signals.Length)
                                 {
-                                    break;
+                                    if (signals[id].IsSet)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }

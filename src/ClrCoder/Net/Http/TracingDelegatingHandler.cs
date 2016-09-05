@@ -44,7 +44,7 @@ namespace ClrCoder.Net.Http
 
         /// <inheritdoc/>
         protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, 
+            HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             var startTime = DateTime.UtcNow;
@@ -84,12 +84,12 @@ namespace ClrCoder.Net.Http
                 {
                     this.OnMessageProcessed(
                         new HttpMessageEventArgs(
-                            startTime, 
-                            duration, 
-                            requestBody, 
-                            responseBody, 
-                            request, 
-                            response, 
+                            startTime,
+                            duration,
+                            requestBody,
+                            responseBody,
+                            request,
+                            response,
                             null));
                 }
                 catch
