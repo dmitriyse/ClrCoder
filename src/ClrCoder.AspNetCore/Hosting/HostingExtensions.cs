@@ -39,7 +39,9 @@ namespace ClrCoder.AspNetCore.Hosting
             builder.ConfigureServices(
                 services =>
                     {
-                        services.AddSingleton(typeof(IStartupFilter), new StartupFilterForUnixSignals(services));
+                        services.AddSingleton(
+                            typeof(IStartupFilter),
+                            serviceProvider => new StartupFilterForUnixSignals(serviceProvider));
                     });
             return builder;
         }
@@ -85,16 +87,17 @@ namespace ClrCoder.AspNetCore.Hosting
 
         private class StartupFilterForUnixSignals : IStartupFilter
         {
-            private readonly IServiceCollection _services;
+            [NotNull]
+            private readonly IServiceProvider _serviceProvider;
 
-            public StartupFilterForUnixSignals(IServiceCollection services)
+            public StartupFilterForUnixSignals([NotNull] IServiceProvider serviceProvider)
             {
-                _services = services;
+                _serviceProvider = serviceProvider;
             }
 
             public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
             {
-                var lifeTimeService = _services.BuildServiceProvider().GetRequiredService<IApplicationLifetime>();
+                var lifeTimeService = _serviceProvider.GetRequiredService<IApplicationLifetime>();
 
                 if (lifeTimeService != null)
                 {

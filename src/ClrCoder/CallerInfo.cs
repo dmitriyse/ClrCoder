@@ -4,6 +4,7 @@
 // </copyright>
 namespace ClrCoder
 {
+    using System;
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
@@ -20,8 +21,18 @@ namespace ClrCoder
         /// <param name="filePath">Caller file path.</param>
         /// <param name="memberName">Caller member name.</param>
         /// <param name="lineNumber">Caller line number.</param>
-        public CallerInfo(string filePath, string memberName, int lineNumber)
+        public CallerInfo([NotNull] string filePath, [NotNull] string memberName, int lineNumber)
         {
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
+            if (memberName == null)
+            {
+                throw new ArgumentNullException(nameof(memberName));
+            }
+
             FilePath = filePath;
             MemberName = memberName;
             LineNumber = lineNumber;
@@ -30,11 +41,13 @@ namespace ClrCoder
         /// <summary>
         /// Caller file path.
         /// </summary>
+        [NotNull]
         public string FilePath { get; private set; }
 
         /// <summary>
         /// Caller member name.
         /// </summary>
+        [NotNull]
         public string MemberName { get; private set; }
 
         /// <summary>

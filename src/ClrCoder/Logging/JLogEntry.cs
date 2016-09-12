@@ -4,6 +4,7 @@
 // </copyright>
 namespace ClrCoder.Logging
 {
+    using System;
     using System.Collections.Generic;
 
     using JetBrains.Annotations;
@@ -23,6 +24,27 @@ namespace ClrCoder.Logging
         /// Extension data contains nen specified in class properties.
         /// </summary>
         [JsonExtensionData]
+        [CanBeNull]
         public virtual Dictionary<string, JToken> ExtensionData { get; set; }
+
+        /// <summary>
+        /// Sets extension data property.
+        /// </summary>
+        /// <param name="key">Extension data property name.</param>
+        /// <param name="value">Extension data value.</param>
+        public void SetExtensionData([NotNull] string key, [CanBeNull] JToken value)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (ExtensionData == null)
+            {
+                ExtensionData = new Dictionary<string, JToken>();
+            }
+
+            ExtensionData[key] = value;
+        }
     }
 }

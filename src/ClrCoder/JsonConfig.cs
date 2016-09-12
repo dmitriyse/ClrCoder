@@ -11,7 +11,6 @@ namespace ClrCoder
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Utils for json configuration files.

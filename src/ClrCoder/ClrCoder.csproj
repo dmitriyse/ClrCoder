@@ -62,7 +62,9 @@
     <Compile Include="EnvironmentEx.cs" />
     <Compile Include="JsonConfig.cs" />
     <Compile Include="JsonDefaults.cs" />
+    <Compile Include="Logging\FileAppenderLogger.cs" />
     <Compile Include="Logging\IJsonLogger.cs" />
+    <Compile Include="Logging\LogEntriesSerializer.cs" />
     <Compile Include="Net\Http\HttpClientExtensions.cs" />
     <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandler.cs" />
@@ -103,6 +105,10 @@
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=10.1.5.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\JetBrains.Annotations.10.1.5\lib\net\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MoreLinq, Version=1.4.18916.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\src\packages\morelinq.1.4.0\lib\net35\MoreLinq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
