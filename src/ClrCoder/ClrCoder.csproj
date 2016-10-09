@@ -60,6 +60,7 @@
     <Compile Include="Diagnostics\CodeTimer.cs" />
     <Compile Include="EncodingEx.cs" />
     <Compile Include="EnvironmentEx.cs" />
+    <Compile Include="IO\PathEx.cs" />
     <Compile Include="JsonConfig.cs" />
     <Compile Include="JsonDefaults.cs" />
     <Compile Include="Logging\FileAppenderLogger.cs" />
