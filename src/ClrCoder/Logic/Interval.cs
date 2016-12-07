@@ -1,4 +1,8 @@
-﻿namespace ClrCoder.Logic
+﻿// <copyright file="Interval.cs" company="ClrCoder project">
+// Copyright (c) ClrCoder project. All rights reserved.
+// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// </copyright>
+namespace ClrCoder.Logic
 {
     using System;
 
@@ -53,7 +57,7 @@
         public bool Contains(T value)
         {
             // ReSharper disable ReplaceWithSingleAssignment.True
-            bool result = true;
+            var result = true;
             if (Start != null && value.CompareTo(Start.Value) < 0)
             {
                 result = false;
