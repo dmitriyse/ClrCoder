@@ -66,6 +66,11 @@
     <Compile Include="Logging\FileAppenderLogger.cs" />
     <Compile Include="Logging\IJsonLogger.cs" />
     <Compile Include="Logging\LogEntriesSerializer.cs" />
+    <Compile Include="Logic\Interval.cs" />
+    <Compile Include="Logic\MultiInterval.cs" />
+    <Compile Include="Logic\NullBiggestClassComparer.cs" />
+    <Compile Include="Logic\NullBiggestComparer.cs" />
+    <Compile Include="Logic\NullBiggestNullableComparer.cs" />
     <Compile Include="Net\Http\HttpClientExtensions.cs" />
     <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandler.cs" />
