@@ -35,7 +35,7 @@ namespace ClrCoder
 
             FilePath = filePath;
             MemberName = memberName;
-            LineNumber = lineNumber;
+            LineNumber = lineNumber; 
         }
 
         /// <summary>
