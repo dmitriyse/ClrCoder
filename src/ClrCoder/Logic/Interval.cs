@@ -8,6 +8,8 @@ namespace ClrCoder.Logic
 
     using JetBrains.Annotations;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Abstract inteval on some comparable dimension.
     /// </summary>
@@ -21,6 +23,7 @@ namespace ClrCoder.Logic
         /// </summary>
         /// <param name="start">Interval start (inclusive).</param>
         /// <param name="endExclusive">Interval end (exclusive).</param>
+        [JsonConstructor]
         public Interval(T? start, T? endExclusive)
             : this()
         {
@@ -37,6 +40,7 @@ namespace ClrCoder.Logic
         /// <summary>
         /// The <c>interval</c> has zero length.
         /// </summary>
+        [JsonIgnore]
         public bool IsEmpty => Start != null && Start.Equals(EndExclusive);
 
         /// <summary>

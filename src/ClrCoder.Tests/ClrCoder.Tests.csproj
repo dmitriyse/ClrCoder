@@ -115,6 +115,7 @@
     <Compile Include="ConvertExTests.cs" />
     <Compile Include="JsonNetBehaviorTests.cs" />
     <Compile Include="JsonConfigTest.cs" />
+    <Compile Include="Logic\IntervalTests.cs" />
     <Compile Include="MicroBenchmarks.cs" />
     <Compile Include="Net\Http\TracingDelegatingHandlerTests.cs" />
     <Compile Include="ParseExtensionsTests.cs" />
