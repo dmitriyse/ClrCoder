@@ -86,6 +86,7 @@
     <Compile Include="RegexFluentExtensions.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Text\TextExtensions.cs" />
+    <Compile Include="Threading\DedicatedThreadWorker.cs" />
     <Compile Include="Threading\DeferredHandler.cs" />
     <Compile Include="Threading\ILockToken.cs" />
     <Compile Include="Logging\JLogEntry.cs" />
