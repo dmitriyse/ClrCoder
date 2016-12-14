@@ -296,7 +296,15 @@ namespace ClrCoder.Threading
                 for (;;)
                 {
                     var deferredAction = _deferredQueue.Take();
-                    deferredAction();
+                    try
+                    {
+                        deferredAction();
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: Hack
+                        Console.WriteLine(ex);
+                    }
                 }
             }
             catch (ThreadAbortException)
