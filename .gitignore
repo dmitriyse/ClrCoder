@@ -71,5 +71,5 @@ StyleCop.Cache
 
 #------------------
 *.lock.json
-packages/
-nunit-list.txt
+src/packages/
+src/nunit-list.txt
