@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{89FC62E1-2872-4BC5-99C7-91EC30500926}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ClrCoder</RootNamespace>
+    <AssemblyName>ClrCoder</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <ForceLegacyNuGet>true</ForceLegacyNuGet>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\ClrCoder.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\ClrCoder.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\ClrCoder.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Release\ClrCoder.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="AlternativeResult.cs" />
+    <Compile Include="CallerInfo.cs" />
+    <Compile Include="Collections\DictionaryEx.cs" />
+    <Compile Include="Collections\LazyDictionary.cs" />
+    <Compile Include="Collections\SafeList.cs" />
+    <Compile Include="ComponentModel\Container.cs" />
+    <Compile Include="ComponentModel\ContainerConfig.cs" />
+    <Compile Include="ComponentModel\ContainerNodeKey.cs" />
+    <Compile Include="ComponentModel\IContainer.cs" />
+    <Compile Include="ComponentModel\IContainerConfig.cs" />
+    <Compile Include="ComponentModel\IContainerLease.cs" />
+    <Compile Include="ComponentModel\IContainerNodeConfig.cs" />
+    <Compile Include="ConvertEx.cs" />
+    <Compile Include="CryptoUtils.cs" />
+    <Compile Include="Diagnostics\CodeTimer.cs" />
+    <Compile Include="EncodingEx.cs" />
+    <Compile Include="EnvironmentEx.cs" />
+    <Compile Include="IO\PathEx.cs" />
+    <Compile Include="Json\JsonConfig.cs" />
+    <Compile Include="Json\JsonDefaults.cs" />
+    <Compile Include="Json\JsonExtensions.cs" />
+    <Compile Include="Logging\FileAppenderLogger.cs" />
+    <Compile Include="Logging\IJsonLogger.cs" />
+    <Compile Include="Logging\LogEntriesSerializer.cs" />
+    <Compile Include="Logic\Interval.cs" />
+    <Compile Include="Logic\MultiInterval.cs" />
+    <Compile Include="Logic\NullBiggestClassComparer.cs" />
+    <Compile Include="Logic\NullBiggestComparer.cs" />
+    <Compile Include="Logic\NullBiggestNullableComparer.cs" />
+    <Compile Include="Net\Http\HttpClientExtensions.cs" />
+    <Compile Include="Net\Http\HttpMessageEventArgs.cs" />
+    <Compile Include="Net\Http\TracingDelegatingHandler.cs" />
+    <Compile Include="ObjectModel\Freezable.cs" />
+    <Compile Include="ObjectModel\IDeepCloneable.cs" />
+    <Compile Include="ObjectModel\IFreezable.cs" />
+    <Compile Include="OSFamilyType.cs" />
+    <Compile Include="ParseExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BclProductivityExtensions.cs" />
+    <Compile Include="ReflectionExtensions.cs" />
+    <Compile Include="RegexFluentExtensions.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="Text\TextExtensions.cs" />
+    <Compile Include="Threading\DedicatedThreadWorker.cs" />
+    <Compile Include="Threading\DeferredHandler.cs" />
+    <Compile Include="Threading\ILockToken.cs" />
+    <Compile Include="Logging\JLogEntry.cs" />
+    <Compile Include="Threading\KeyedMonitor.cs" />
+    <Compile Include="Collections\TtlDictionary.cs" />
+    <Compile Include="TypeEx.cs" />
+    <Compile Include="TypeEx{TType}.cs" />
+    <Compile Include="Validation\VxCore.cs" />
+    <Compile Include="Validation\VxValidationException.cs" />
+    <Compile Include="ValuedTuple{T1,T2}.cs" />
+    <Compile Include="ValuedTuple{T1}.cs" />
+    <Compile Include="Vx.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\ClrCoder.ruleset">
+      <Link>Properties\ClrCoder.ruleset</Link>
+    </None>
+    <AdditionalFiles Include="..\stylecop.json">
+      <Link>Properties\stylecop.json</Link>
+    </AdditionalFiles>
+    <None Include="app.config" />
+    <None Include="packages.ClrCoder.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=10.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MoreLinq, Version=1.4.18916.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\src\packages\morelinq.1.4.0\lib\net35\MoreLinq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NodaTime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\lib\net45\NodaTime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NodaTime.Serialization.JsonNet, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\NodaTime.Serialization.JsonNet.2.0.0-alpha20160729\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="$(SolutionDir)\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
+    <Analyzer Include="$(SolutionDir)\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="$(SolutionDir)\packages\StyleCop.Analyzers.1.0.0\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets'))" />
+  </Target>
+  <Target Name="CleanNUnitList" BeforeTargets="PrepareForBuild">
+    <Delete Files="$(SolutionDir)\nunit-list.txt" />
+  </Target>
+  <Import Project="$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets" Condition="Exists('$(SolutionDir)\packages\NodaTime.2.0.0-alpha20160729\build\NodaTime.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
