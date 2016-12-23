@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Tests.Logic
 {
     using System;
@@ -30,7 +31,7 @@ namespace ClrCoder.Tests.Logic
         {
             var original =
                 new Interval<double>(Math.PI, 10);
-            string serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSettings);
+            var serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSettings);
             TestContext.WriteLine(serialized);
 
             var deserialized = JsonConvert.DeserializeObject<Interval<double>>(serialized);

@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder
 {
     using System;
@@ -9,9 +10,12 @@ namespace ClrCoder
     using System.Globalization;
     using System.Linq;
     using System.Runtime.CompilerServices;
-    using System.Threading;
 
     using JetBrains.Annotations;
+
+#if NET46
+    using System.Threading;    
+#endif
 
     /// <summary>
     /// Extensions for core BCL classes designed to boost development productivity.
@@ -114,8 +118,8 @@ namespace ClrCoder
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
 #if NET46
-        /// <see cref="StackOverflowException"/>,
-        /// <see cref="ThreadAbortException"/>.
+/// <see cref="StackOverflowException"/>,
+/// <see cref="ThreadAbortException"/>.
 #endif
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
@@ -142,15 +146,17 @@ namespace ClrCoder
         }
 
         /// <summary>
-        /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the 
+        /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the
         /// <paramref name="comparand"/>.
         /// </summary>
         /// <typeparam name="T">Type of source value.</typeparam>
         /// <param name="source">Source value.</param>
         /// <param name="comparand">Value to replace.</param>
         /// <param name="substitute">Replacement value.</param>
-        /// <returns><paramref name="substitute"/> when <paramref name="source"/> is equals to the 
-        /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.</returns>
+        /// <returns>
+        /// <paramref name="substitute"/> when <paramref name="source"/> is equals to the
+        /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.
+        /// </returns>
         public static T Replace<T>(this T source, T comparand, T substitute) where T : IEquatable<T>
         {
             return source.Equals(comparand) ? substitute : source;
@@ -164,9 +170,9 @@ namespace ClrCoder
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
 #if NET46
-        /// <see cref="StackOverflowException"/>,
-        /// <see cref="ThreadAbortException"/>.
-#endif        
+/// <see cref="StackOverflowException"/>,
+/// <see cref="ThreadAbortException"/>.
+#endif
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
         public static void RethrowUnprocessable([NotNull] this Exception ex)

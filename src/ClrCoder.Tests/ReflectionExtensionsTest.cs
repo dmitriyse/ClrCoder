@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Tests
 {
     using System.Diagnostics.CodeAnalysis;
@@ -70,7 +71,7 @@ namespace ClrCoder.Tests
 
 #pragma warning disable CS0649, CS0169
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented",
-             Justification = "Reviewed. Suppression is OK here.")]
+            Justification = "Reviewed. Suppression is OK here.")]
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Required for reflection tests.")]
         private class DummyClass
         {

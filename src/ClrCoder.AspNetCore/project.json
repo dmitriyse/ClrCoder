@@ -8,13 +8,13 @@
 
   "frameworks": {
     "netstandard1.3": {
-      "imports": [ "dnxcore50", "portable40-net40+sl5+win8+wp8+wpa81" ],
+      "imports": ["dnxcore50", "portable40-net40+sl5+win8+wp8+wpa81"],
       "dependencies": {
         "NETStandard.Library": "1.6.0"
       }
     },
     "netstandard1.6": {
-      "imports": [ "dotnet" ],
+      "imports": ["dotnet"],
       "dependencies": {
         "NETStandard.Library": "1.6.0"
       }

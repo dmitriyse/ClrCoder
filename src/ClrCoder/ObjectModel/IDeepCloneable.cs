@@ -2,12 +2,13 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ObjectModel
 {
     using JetBrains.Annotations;
 
     /// <summary>
-    /// Typed cloneable contract. 
+    /// Typed cloneable contract.
     /// </summary>
     /// <typeparam name="T">Type of clones.</typeparam>
     [PublicAPI]

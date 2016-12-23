@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder
 {
     using System;
@@ -319,7 +320,7 @@ namespace ClrCoder
                                 if (!cache.Fields.TryGetValue(typeAndName.Item2, out fieldInfo))
                                 {
                                     throw new KeyNotFoundException(
-                                              "Cannot find property or field with the specified name.");
+                                        "Cannot find property or field with the specified name.");
                                 }
 
                                 // TODO: Replace to expression compilation.

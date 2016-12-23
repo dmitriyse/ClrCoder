@@ -2,9 +2,9 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.AspNetCore.Hosting
 {
-
     using JetBrains.Annotations;
 
 #if NET46
@@ -17,19 +17,19 @@ namespace ClrCoder.AspNetCore.Hosting
     using Mono.Unix;
     using Mono.Unix.Native;
 #endif
+
     /// <summary>
     /// Extensions related to Asp.Net Core hosting.
     /// </summary>
     [PublicAPI]
     public static class HostingExtensions
     {
-
 #if NET46
-        /// <summary>
-        /// Allow self-host to be terminated by posix termination signals (SIGINT, SIGTERM).
-        /// </summary>
-        /// <param name="builder">Web host builder.</param>
-        /// <returns>The same builder for fluent syntax.</returns>
+/// <summary>
+/// Allow self-host to be terminated by posix termination signals (SIGINT, SIGTERM).
+/// </summary>
+/// <param name="builder">Web host builder.</param>
+/// <returns>The same builder for fluent syntax.</returns>
         [NotNull]
         public static IWebHostBuilder UsePosixSignalsListener([NotNull] this IWebHostBuilder builder)
         {

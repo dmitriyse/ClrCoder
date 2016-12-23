@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Tests
 {
     using System;
@@ -20,7 +21,8 @@ namespace ClrCoder.Tests
     public class BclBehaviorTests
     {
         /// <summary>
-        /// Long running TPL task should use background thread. This behavior required to implement supporting background services that is terminated on application exit.
+        /// Long running TPL task should use background thread. This behavior required to implement supporting background services
+        /// that is terminated on application exit.
         /// </summary>
         [Test]
         public void LongRunningTaskShouldUseBackgroundThreads()
@@ -74,7 +76,7 @@ namespace ClrCoder.Tests
 
                         // Right after the catch runtime will rise ThreadAbortException again.
                         TestContext.Out.WriteLine("Unreachable code!");
-                    }, 
+                    },
                 TaskCreationOptions.LongRunning);
             task.Wait(TimeSpan.FromSeconds(1)).Should().BeFalse();
 #endif

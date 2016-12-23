@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Tests
 {
     using System;
@@ -65,7 +66,7 @@ namespace ClrCoder.Tests
         }
 
         /// <summary>
-        /// Core i7-5920k@4.5Ghz speed = ~5.1K op/s. 
+        /// Core i7-5920k@4.5Ghz speed = ~5.1K op/s.
         /// </summary>
         [Test]
         public void LambdaCompileBenchmark()
