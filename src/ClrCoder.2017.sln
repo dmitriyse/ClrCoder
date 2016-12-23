@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26014.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5DE7A5A2-0190-4737-B205-9E82CF24B4A9}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\C# Style settings.html = ..\docs\C# Style settings.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreCLR Build", "CoreCLR Build", "{A8669C8A-3DB4-4DF9-A545-0A9125F78065}"
+	ProjectSection(SolutionItems) = preProject
+		..\global.json = ..\global.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder", "ClrCoder\ClrCoder.csproj", "{128376A9-B458-4CDC-97B8-394BF4C61226}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder.AspNetCore", "ClrCoder.AspNetCore\ClrCoder.AspNetCore.csproj", "{C41B9F67-571D-4852-B7C4-B54E84DCBCDC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder.Tests", "ClrCoder.Tests\ClrCoder.Tests.csproj", "{298FAA4E-BFD2-4F5B-90C2-7C8290FD658A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{128376A9-B458-4CDC-97B8-394BF4C61226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{128376A9-B458-4CDC-97B8-394BF4C61226}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{128376A9-B458-4CDC-97B8-394BF4C61226}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{128376A9-B458-4CDC-97B8-394BF4C61226}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C41B9F67-571D-4852-B7C4-B54E84DCBCDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C41B9F67-571D-4852-B7C4-B54E84DCBCDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C41B9F67-571D-4852-B7C4-B54E84DCBCDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C41B9F67-571D-4852-B7C4-B54E84DCBCDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{298FAA4E-BFD2-4F5B-90C2-7C8290FD658A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{298FAA4E-BFD2-4F5B-90C2-7C8290FD658A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{298FAA4E-BFD2-4F5B-90C2-7C8290FD658A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298FAA4E-BFD2-4F5B-90C2-7C8290FD658A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
