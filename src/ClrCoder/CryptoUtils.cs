@@ -64,7 +64,7 @@ namespace ClrCoder
         {
             public Md5HashTheadVariables()
             {
-                Md5 = new MD5CryptoServiceProvider();
+                Md5 = MD5.Create();
                 Md5.Initialize();
             }
 

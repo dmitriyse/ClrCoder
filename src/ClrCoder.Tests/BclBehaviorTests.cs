@@ -26,7 +26,7 @@ namespace ClrCoder.Tests
         public void LongRunningTaskShouldUseBackgroundThreads()
         {
             var cts = new CancellationTokenSource();
-#if !PCL
+#if NET46
             var task = Task.Factory.StartNew(
                 () =>
                     {

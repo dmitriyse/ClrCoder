@@ -4,25 +4,27 @@
 // </copyright>
 namespace ClrCoder.AspNetCore.Hosting
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
+#if NET46
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
-
     using Mono.Unix;
     using Mono.Unix.Native;
-
+#endif
     /// <summary>
     /// Extensions related to Asp.Net Core hosting.
     /// </summary>
     [PublicAPI]
     public static class HostingExtensions
     {
+
+#if NET46
         /// <summary>
         /// Allow self-host to be terminated by posix termination signals (SIGINT, SIGTERM).
         /// </summary>
@@ -107,5 +109,6 @@ namespace ClrCoder.AspNetCore.Hosting
                 return next;
             }
         }
+#endif
     }
 }

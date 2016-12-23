@@ -2,20 +2,22 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Threading
 {
     using System;
     using System.Collections.Concurrent;
     using System.Runtime.CompilerServices;
-    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
+#if NET46
+    using System.Threading;
+#endif
 
     /// <summary>
-    /// Standard implementation of deferred handler.
-    /// TODO: Optimize me. <br/>
-    /// Current implementation have additional memory copying and at least 2 object createion per call.
+    /// <para>Standard implementation of deferred handler. TODO: Optimize me. <br/></para>
+    /// <para>Current implementation have additional memory copying and at least 2 object createion per call.</para>
     /// </summary>
     [PublicAPI]
     public class DeferredHandler
@@ -24,7 +26,8 @@ namespace ClrCoder.Threading
 
         private readonly BlockingCollection<Action> _deferredQueue = new BlockingCollection<Action>();
 
-        private bool _deferThreadAborted;
+        //// ReSharper disable once RedundantDefaultMemberInitializer
+        private bool _deferThreadAborted = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeferredHandler"/> class.
@@ -35,7 +38,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action without arguments.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> without arguments.
         /// </summary>
         /// <param name="action">Action to execute in a background.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,7 +55,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with one argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with one argument.
         /// </summary>
         /// <typeparam name="T">Type of argument 1.</typeparam>
         /// <param name="action">Action to execute.</param>
@@ -71,7 +74,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with two argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with two argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -92,7 +95,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with three argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with three argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -115,7 +118,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with 4 argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with 4 argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -140,7 +143,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with 5 argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with 5 argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -173,7 +176,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with 6 argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with 6 argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -209,7 +212,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with 7 argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with 7 argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -248,7 +251,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Defer action with 8 argument.
+        /// <see cref="DeferredHandler.Defer(System.Action)"/> <paramref name="action"/> with 8 argument.
         /// </summary>
         /// <typeparam name="T1">Type of argument 1.</typeparam>
         /// <typeparam name="T2">Type of argument 2.</typeparam>
@@ -307,6 +310,7 @@ namespace ClrCoder.Threading
                     }
                 }
             }
+#if NET46
             catch (ThreadAbortException)
             {
                 _deferThreadAborted = true;
@@ -323,6 +327,7 @@ namespace ClrCoder.Threading
                     }
                 }
             }
+#endif
             catch (Exception)
             {
                 // Mute errors.

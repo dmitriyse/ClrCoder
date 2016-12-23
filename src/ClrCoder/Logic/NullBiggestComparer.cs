@@ -6,6 +6,7 @@ namespace ClrCoder.Logic
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
 
     using JetBrains.Annotations;
 
@@ -16,17 +17,23 @@ namespace ClrCoder.Logic
     [PublicAPI]
     public class NullBiggestComparer<T>
     {
+        /// <summary>
+        /// Initializes class.
+        /// </summary>
         static NullBiggestComparer()
         {
-            if (typeof(T).IsClass)
+            if (typeof(T).GetTypeInfo().IsClass)
             {
-                Default = (IComparer<T>)Activator.CreateInstance(
-                    typeof(NullBiggestClassComparer<>).MakeGenericType(typeof(T)));
+                Default =
+                    (IComparer<T>)
+                    Activator.CreateInstance(typeof(NullBiggestClassComparer<>).MakeGenericType(typeof(T)));
             }
             else if (typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                Default = (IComparer<T>)Activator.CreateInstance(
-                    typeof(NullBiggestNullableComparer<>).MakeGenericType(typeof(T).GenericTypeArguments[0]));
+                Default =
+                    (IComparer<T>)
+                    Activator.CreateInstance(
+                        typeof(NullBiggestNullableComparer<>).MakeGenericType(typeof(T).GenericTypeArguments[0]));
             }
             else
             {

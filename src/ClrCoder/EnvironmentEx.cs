@@ -50,7 +50,7 @@ namespace ClrCoder
         /// <summary>
         /// Directory with binary files.
         /// </summary>
-        public static string BinPath => AppDomain.CurrentDomain.BaseDirectory;
+        public static string BinPath => AppContext.BaseDirectory;
 
         /// <summary>
         /// Checks that mono runtime.

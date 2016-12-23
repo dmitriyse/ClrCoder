@@ -112,9 +112,11 @@ namespace ClrCoder
         /// <param name="ex">Exception to check.</param>
         /// <remarks>
         /// Next exceptions cannot be processed:
-        /// <see cref="StackOverflowException"/>,
         /// <see cref="OutOfMemoryException"/>,
+#if NET46
+        /// <see cref="StackOverflowException"/>,
         /// <see cref="ThreadAbortException"/>.
+#endif
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
         /// <returns><see langword="true"/>, if exception can be muted/handled.</returns>
@@ -122,11 +124,20 @@ namespace ClrCoder
         public static bool IsProcessable([NotNull] this Exception ex)
         {
 #if DEBUG
+#if NET46
             return
                 !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
                   || ex is NotImplementedException);
 #else
+            return
+                !(ex is OutOfMemoryException || ex is NotImplementedException);
+#endif
+#else
+#if NET46
             return !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException);
+#else
+            return !(ex is OutOfMemoryException);
+#endif
 #endif
         }
 
@@ -151,26 +162,40 @@ namespace ClrCoder
         /// <param name="ex">Exception to check.</param>
         /// <remarks>
         /// Next exceptions cannot be processed:
-        /// <see cref="StackOverflowException"/>,
         /// <see cref="OutOfMemoryException"/>,
+#if NET46
+        /// <see cref="StackOverflowException"/>,
         /// <see cref="ThreadAbortException"/>.
+#endif        
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
         public static void RethrowUnprocessable([NotNull] this Exception ex)
         {
 #if DEBUG
+#if NET46
             if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
                 || ex is NotImplementedException)
             {
                 throw ex;
             }
-
 #else
+            if (ex is OutOfMemoryException || ex is NotImplementedException)
+            {
+                throw ex;
+            }
+#endif
+#else
+#if NET46
             if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException)
             {
                 throw ex;
             }
-
+#else
+            if (ex is OutOfMemoryException)
+            {
+                throw ex;
+            }
+#endif
 #endif
         }
 
