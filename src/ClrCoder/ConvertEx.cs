@@ -8,6 +8,7 @@ namespace ClrCoder
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     using NodaTime;
     using NodaTime.Serialization.JsonNet;
@@ -27,6 +28,7 @@ namespace ClrCoder
                                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                                        };
             DefaultTraceSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+            DefaultTraceSettings.Converters.Add(new StringEnumConverter { CamelCaseText = false });
         }
 
         /// <summary>

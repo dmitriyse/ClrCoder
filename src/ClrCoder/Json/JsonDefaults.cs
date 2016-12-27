@@ -44,6 +44,8 @@ namespace ClrCoder
                 // Using IANA tokens for time zones for better compatibility with all world (non only ms-*).
                 settings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 
+                settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
+
                 return settings;
             }
         }
@@ -70,7 +72,8 @@ namespace ClrCoder
                 settings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 
                 // Forcing all statuses to be transfered as a string.
-                settings.Converters.Add(new StringEnumConverter());
+                settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
+
                 return settings;
             }
         }
