@@ -5,10 +5,11 @@
     "NodaTime": "2.0.0-alpha20160707",
     "NodaTime.Serialization.JsonNet": "2.0.0-alpha20160707",
     "Newtonsoft.Json": "9.0.1",
-    "morelinq": "2.0.0-beta06",
+    "morelinq": "2.0.0",
     "System.Net.Http": "4.1.0",
     "System.Security.Cryptography.Algorithms": "4.2.0",
-    "System.Threading.Thread": "4.0.0"
+    "System.Threading.Thread": "4.0.0",
+    "System.Threading.ThreadPool": "4.0.10"
   },
 
   "frameworks": {

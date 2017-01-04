@@ -10,6 +10,8 @@ namespace ClrCoder
 
     using JetBrains.Annotations;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Aggregates caller information provided by compiler. See <see cref="CallerFilePathAttribute"/>.
     /// </summary>
@@ -22,6 +24,7 @@ namespace ClrCoder
         /// <param name="filePath">Caller file path.</param>
         /// <param name="memberName">Caller member name.</param>
         /// <param name="lineNumber">Caller line number.</param>
+        [JsonConstructor]
         public CallerInfo([NotNull] string filePath, [NotNull] string memberName, int lineNumber)
         {
             if (filePath == null)

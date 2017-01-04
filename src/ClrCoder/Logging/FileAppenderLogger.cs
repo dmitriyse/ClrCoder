@@ -10,6 +10,8 @@ namespace ClrCoder.Logging
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     /// <summary>
     /// Appends log entries to a file.
     /// </summary>
@@ -22,22 +24,32 @@ namespace ClrCoder.Logging
         /// Initializes a new instance of the <see cref="FileAppenderLogger"/> class.
         /// </summary>
         /// <param name="fileName">File name to append log entries to.</param>
-        public FileAppenderLogger([NotNull] string fileName)
+        /// <param name="asyncHandler">Asynchronous handler for logs processing.</param>
+        public FileAppenderLogger([NotNull] string fileName, [NotNull] IAsyncHandler asyncHandler)
         {
             if (fileName == null)
             {
                 throw new ArgumentNullException(nameof(fileName));
             }
 
+            if (asyncHandler == null)
+            {
+                throw new ArgumentNullException(nameof(asyncHandler));
+            }
+
             _fileName = fileName;
+            AsyncHandler = asyncHandler;
         }
 
         /// <inheritdoc/>
-        public void Log(object obj)
+        public IAsyncHandler AsyncHandler { get; }
+
+        /// <inheritdoc/>
+        public void Log(object entry)
         {
-            if (obj is string)
+            var entryString = entry as string;
+            if (entryString != null)
             {
-                var entryString = obj as string;
                 if (entryString.Contains("\n"))
                 {
                     throw new NotSupportedException("Serialized json strings should be formatted in a one line.");

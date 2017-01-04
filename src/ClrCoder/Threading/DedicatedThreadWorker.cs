@@ -17,7 +17,7 @@ namespace ClrCoder.Threading
     /// Worker that uses same thread for all tasks.
     /// </summary>
     [PublicAPI]
-    public class DedicatedThreadWorker : IDisposable
+    public class DedicatedThreadWorker : IAsyncHandler, IDisposable
     {
         [NotNull]
         private readonly Task _workerTask;
@@ -51,35 +51,181 @@ namespace ClrCoder.Threading
         /// <inheritdoc/>
         public void Dispose()
         {
-            EnsureNotDisposing();
-            GC.SuppressFinalize(this);
             Dispose(true);
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync(Action action)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                _workItems.Add(action, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T>(Action<T> action, T arg)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                // This is non optimal implementation.
+                _workItems.Add(
+                    () =>
+                        {
+                            action(arg);
+                        }, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                // This is non optimal implementation.
+                _workItems.Add(
+                    () =>
+                    {
+                        action(arg1, arg2);
+                    }, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2, T3>(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3)
+        {
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                // This is non optimal implementation.
+                _workItems.Add(
+                    () =>
+                    {
+                        action(arg1, arg2, arg3);
+                    }, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                // This is non optimal implementation.
+                _workItems.Add(
+                    () =>
+                    {
+                        action(arg1, arg2, arg3, arg4);
+                    }, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                // This is non optimal implementation.
+                _workItems.Add(
+                    () =>
+                    {
+                        action(arg1, arg2, arg3, arg4, arg5);
+                    }, _ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
         }
 
         /// <summary>
         /// Schedules task to be executed in the worker thread.
         /// </summary>
         /// <param name="action">Action to execute.</param>
-        public void ExecuteSync(Action action)
+        public void RunSync(Action action)
         {
-            EnsureNotDisposing();
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
 
-            var taskCompletionSource = new TaskCompletionSource<bool>();
-            _workItems.Add(
-                () =>
-                    {
-                        try
+                var taskCompletionSource = new TaskCompletionSource<bool>();
+                _workItems.Add(
+                    () =>
                         {
-                            action();
-                            taskCompletionSource.SetResult(true);
-                        }
-                        catch (Exception ex)
-                        {
-                            taskCompletionSource.SetException(ex);
-                        }
-                    });
+                            try
+                            {
+                                action();
+                                taskCompletionSource.SetResult(true);
+                            }
+                            catch (Exception ex)
+                            {
+                                taskCompletionSource.SetException(ex);
+                            }
+                        },
+                    _ct);
 
-            taskCompletionSource.Task.Wait();
+                taskCompletionSource.Task.Wait(_ct);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
         }
 
         /// <summary>
@@ -88,23 +234,33 @@ namespace ClrCoder.Threading
         /// <typeparam name="T">Result type.</typeparam>
         /// <param name="func">Function to execute.</param>
         /// <returns>Function result.</returns>
-        public T ExecuteSync<T>(Func<T> func)
+        public T RunSync<T>(Func<T> func)
         {
-            EnsureNotDisposing();
-            var taskCompletionSource = new TaskCompletionSource<T>();
-            _workItems.Add(
-                () =>
-                    {
-                        try
+            try
+            {
+                _ct.ThrowIfCancellationRequested();
+                var taskCompletionSource = new TaskCompletionSource<T>();
+                _workItems.Add(
+                    () =>
                         {
-                            taskCompletionSource.SetResult(func());
-                        }
-                        catch (Exception ex)
-                        {
-                            taskCompletionSource.SetException(ex);
-                        }
-                    });
-            return taskCompletionSource.Task.Result;
+                            try
+                            {
+                                taskCompletionSource.SetResult(func());
+                            }
+                            catch (Exception ex)
+                            {
+                                taskCompletionSource.SetException(ex);
+                            }
+                        },
+                    _ct);
+
+                taskCompletionSource.Task.Wait(_ct);
+                return taskCompletionSource.Task.Result;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw ReThrowOperationCanceled(ex);
+            }
         }
 
         /// <summary>
@@ -113,8 +269,26 @@ namespace ClrCoder.Threading
         /// <param name="disposing">Indicates that dispose was directly called.</param>
         protected virtual void Dispose(bool disposing)
         {
-            _cts.Cancel();
-            _workerTask.Wait();
+            lock (_cts)
+            {
+                try
+                {
+                    _ct.ThrowIfCancellationRequested();
+
+                    if (disposing)
+                    {
+                        GC.SuppressFinalize(this);
+                    }
+                    _cts.Cancel();
+
+                    // ReSharper disable once MethodSupportsCancellation
+                    _workerTask.Wait();
+                }
+                catch (OperationCanceledException ex)
+                {
+                    throw ReThrowOperationCanceled(ex);
+                }
+            }
         }
 
         private void EnsureNotDisposing()
@@ -123,6 +297,11 @@ namespace ClrCoder.Threading
             {
                 throw new InvalidOperationException("Worker disposed or disposing.");
             }
+        }
+
+        private Exception ReThrowOperationCanceled(OperationCanceledException ex)
+        {
+            return new InvalidOperationException("Worker disposed or disposing.");
         }
 
         private void WorkerThreadProc()
@@ -142,7 +321,14 @@ namespace ClrCoder.Threading
                     }
                 }
 
-                action();
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    ThreadPool.QueueUserWorkItem(h => { throw ex; });
+                }
             }
         }
     }

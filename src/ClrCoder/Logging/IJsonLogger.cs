@@ -12,16 +12,19 @@ namespace ClrCoder.Logging
     /// <summary>
     /// Main logging abstraction.
     /// </summary>
-    /// <remarks>
-    /// This logger is designed to be used with <see cref="DeferredHandler"/> and not contains
-    /// </remarks>
     [PublicAPI]
     public interface IJsonLogger
     {
         /// <summary>
-        /// Object that represents log entry.
+        /// Asynchronous handler, that should be used to generate and process log messages.
         /// </summary>
-        /// <param name="obj">JObject, string with Json, or any other type that will be serialized to json string.</param>
-        void Log([NotNull] object obj);
+        [NotNull]
+        IAsyncHandler AsyncHandler { get; }
+
+        /// <summary>
+        /// Object that represents log <c>entry</c>.
+        /// </summary>
+        /// <param name="entry">JObject, string with Json, or any other type derived from <see cref="JLogEntry"/>.</param>
+        void Log([NotNull] object entry);
     }
 }
