@@ -9,7 +9,8 @@
     "System.Net.Http": "4.1.0",
     "System.Security.Cryptography.Algorithms": "4.2.0",
     "System.Threading.Thread": "4.0.0",
-    "System.Threading.ThreadPool": "4.0.10"
+    "System.Threading.ThreadPool": "4.0.10",
+    "System.ValueTuple": "4.0.0-rc3-24212-01"
   },
 
   "frameworks": {

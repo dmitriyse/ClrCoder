@@ -139,7 +139,7 @@ namespace ClrCoder
             }
 
             var setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
-                new ValuedTuple<Type, string>(type, memberName),
+                new ValueTuple<Type, string>(type, memberName),
                 typeAndName =>
                     {
                         var cache = GetDataMemberInfoesCache(type);
@@ -304,7 +304,7 @@ namespace ClrCoder
                 var typeLocal = this._type;
                 var getter =
                     GetterCache<TObject, TValue>.Getters.GetOrAdd(
-                        new ValuedTuple<Type, string>(typeLocal, this._name),
+                        new ValueTuple<Type, string>(typeLocal, this._name),
                         typeAndName =>
                             {
                                 var cache = GetDataMemberInfoesCache(typeLocal);
@@ -349,14 +349,14 @@ namespace ClrCoder
 
         private static class GetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>> Getters =
-                new ConcurrentDictionary<ValuedTuple<Type, string>, Func<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<ValueTuple<Type, string>, Func<TObject, TValue>> Getters =
+                new ConcurrentDictionary<ValueTuple<Type, string>, Func<TObject, TValue>>();
         }
 
         private static class SetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>> Setters =
-                new ConcurrentDictionary<ValuedTuple<Type, string>, Action<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<ValueTuple<Type, string>, Action<TObject, TValue>> Setters =
+                new ConcurrentDictionary<ValueTuple<Type, string>, Action<TObject, TValue>>();
         }
     }
 }
