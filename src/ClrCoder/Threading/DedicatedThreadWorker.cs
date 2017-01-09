@@ -88,10 +88,8 @@ namespace ClrCoder.Threading
 
                 // This is non optimal implementation.
                 _workItems.Add(
-                    () =>
-                        {
-                            action(arg);
-                        }, _ct);
+                    () => { action(arg); },
+                    _ct);
             }
             catch (OperationCanceledException ex)
             {
@@ -113,10 +111,8 @@ namespace ClrCoder.Threading
 
                 // This is non optimal implementation.
                 _workItems.Add(
-                    () =>
-                    {
-                        action(arg1, arg2);
-                    }, _ct);
+                    () => { action(arg1, arg2); },
+                    _ct);
             }
             catch (OperationCanceledException ex)
             {
@@ -133,10 +129,8 @@ namespace ClrCoder.Threading
 
                 // This is non optimal implementation.
                 _workItems.Add(
-                    () =>
-                    {
-                        action(arg1, arg2, arg3);
-                    }, _ct);
+                    () => { action(arg1, arg2, arg3); },
+                    _ct);
             }
             catch (OperationCanceledException ex)
             {
@@ -158,10 +152,8 @@ namespace ClrCoder.Threading
 
                 // This is non optimal implementation.
                 _workItems.Add(
-                    () =>
-                    {
-                        action(arg1, arg2, arg3, arg4);
-                    }, _ct);
+                    () => { action(arg1, arg2, arg3, arg4); },
+                    _ct);
             }
             catch (OperationCanceledException ex)
             {
@@ -170,7 +162,13 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void RunAsync<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+        public void RunAsync<T1, T2, T3, T4, T5>(
+            Action<T1, T2, T3, T4, T5> action,
+            T1 arg1,
+            T2 arg2,
+            T3 arg3,
+            T4 arg4,
+            T5 arg5)
         {
             if (action == null)
             {
@@ -183,10 +181,8 @@ namespace ClrCoder.Threading
 
                 // This is non optimal implementation.
                 _workItems.Add(
-                    () =>
-                    {
-                        action(arg1, arg2, arg3, arg4, arg5);
-                    }, _ct);
+                    () => { action(arg1, arg2, arg3, arg4, arg5); },
+                    _ct);
             }
             catch (OperationCanceledException ex)
             {

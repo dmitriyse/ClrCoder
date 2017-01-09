@@ -28,7 +28,7 @@ namespace ClrCoder.Logging.Std
         public ConsoleJsonLogger([NotNull] IAsyncHandler asyncHandler)
         {
             AsyncHandler = asyncHandler;
-             
+
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));

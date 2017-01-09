@@ -5,7 +5,6 @@
 
 namespace ClrCoder.Tests
 {
-    using System.Reflection;
     using System.Runtime.CompilerServices;
 
     using FluentAssertions;
