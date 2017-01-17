@@ -85,6 +85,80 @@ namespace ClrCoder
         }
 
         /// <summary>
+        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
+        /// </summary>
+        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
+        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
+        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
+        /// <param name="key">Key to search value.</param>
+        /// <param name="createFunc">Value factory.</param>
+        /// <returns>Value for the specified key or default value.</returns>
+        public static TValue GetOrCreate<TKey, TValue>(
+            [NotNull]
+            this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            [NotNull] Func<TKey, TValue> createFunc)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+            if (createFunc == null)
+            {
+                throw new ArgumentNullException(nameof(createFunc));
+            }
+
+            TValue result;
+
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+
+            var newValue = createFunc(key);
+            dictionary.Add(key, newValue);
+
+            return newValue;
+        }
+
+        /// <summary>
+        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
+        /// </summary>
+        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
+        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
+        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
+        /// <param name="key">Key to search value.</param>
+        /// <param name="createFunc">Value factory.</param>
+        /// <returns>Value for the specified key or default value.</returns>
+        public static TValue GetOrCreate<TKey, TValue>(
+            [NotNull]
+            this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            [NotNull] Func<TValue> createFunc)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+            if (createFunc == null)
+            {
+                throw new ArgumentNullException(nameof(createFunc));
+            }
+
+            TValue result;
+
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+
+            var newValue = createFunc();
+            dictionary.Add(key, newValue);
+
+            return newValue;
+        }
+
+        /// <summary>
         /// Gets exception short description in form ExceptionType: Message.
         /// </summary>
         /// <param name="ex"><c>Exception</c> to get short description for.</param>
