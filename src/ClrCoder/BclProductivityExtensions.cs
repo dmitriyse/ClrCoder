@@ -60,6 +60,78 @@ namespace ClrCoder
         }
 
         /// <summary>
+        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
+        /// </summary>
+        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
+        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
+        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
+        /// <param name="key">Key to search value.</param>
+        /// <param name="createFunc">Value factory.</param>
+        /// <returns>Value for the specified key or default value.</returns>
+        public static TValue GetOrCreate<TKey, TValue>(
+            [NotNull] this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            [NotNull] Func<TKey, TValue> createFunc)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+            if (createFunc == null)
+            {
+                throw new ArgumentNullException(nameof(createFunc));
+            }
+
+            TValue result;
+
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+
+            TValue newValue = createFunc(key);
+            dictionary.Add(key, newValue);
+
+            return newValue;
+        }
+
+        /// <summary>
+        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
+        /// </summary>
+        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
+        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
+        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
+        /// <param name="key">Key to search value.</param>
+        /// <param name="createFunc">Value factory.</param>
+        /// <returns>Value for the specified key or default value.</returns>
+        public static TValue GetOrCreate<TKey, TValue>(
+            [NotNull] this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            [NotNull] Func<TValue> createFunc)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+            if (createFunc == null)
+            {
+                throw new ArgumentNullException(nameof(createFunc));
+            }
+
+            TValue result;
+
+            if (dictionary.TryGetValue(key, out result))
+            {
+                return result;
+            }
+
+            TValue newValue = createFunc();
+            dictionary.Add(key, newValue);
+
+            return newValue;
+        }
+
+        /// <summary>
         /// Gets value from <c>dictionary</c> and returns default value if the specified <c>key</c> is not found.
         /// </summary>
         /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
@@ -82,80 +154,6 @@ namespace ClrCoder
             }
 
             return default(TValue);
-        }
-
-        /// <summary>
-        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
-        /// </summary>
-        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
-        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
-        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
-        /// <param name="key">Key to search value.</param>
-        /// <param name="createFunc">Value factory.</param>
-        /// <returns>Value for the specified key or default value.</returns>
-        public static TValue GetOrCreate<TKey, TValue>(
-            [NotNull]
-            this IDictionary<TKey, TValue> dictionary,
-            TKey key,
-            [NotNull] Func<TKey, TValue> createFunc)
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-            if (createFunc == null)
-            {
-                throw new ArgumentNullException(nameof(createFunc));
-            }
-
-            TValue result;
-
-            if (dictionary.TryGetValue(key, out result))
-            {
-                return result;
-            }
-
-            var newValue = createFunc(key);
-            dictionary.Add(key, newValue);
-
-            return newValue;
-        }
-
-        /// <summary>
-        /// Gets value from <c>dictionary</c> and creates value if the specified <c>key</c> is not found.
-        /// </summary>
-        /// <typeparam name="TKey"><c>Type</c> of the <c>dictionary</c> <c>key</c>.</typeparam>
-        /// <typeparam name="TValue"><c>Type</c> of the <c>dictionary</c> value</typeparam>
-        /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
-        /// <param name="key">Key to search value.</param>
-        /// <param name="createFunc">Value factory.</param>
-        /// <returns>Value for the specified key or default value.</returns>
-        public static TValue GetOrCreate<TKey, TValue>(
-            [NotNull]
-            this IDictionary<TKey, TValue> dictionary,
-            TKey key,
-            [NotNull] Func<TValue> createFunc)
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-            if (createFunc == null)
-            {
-                throw new ArgumentNullException(nameof(createFunc));
-            }
-
-            TValue result;
-
-            if (dictionary.TryGetValue(key, out result))
-            {
-                return result;
-            }
-
-            var newValue = createFunc();
-            dictionary.Add(key, newValue);
-
-            return newValue;
         }
 
         /// <summary>
@@ -217,6 +215,96 @@ namespace ClrCoder
             return !(ex is OutOfMemoryException);
 #endif
 #endif
+        }
+
+        /// <summary>
+        /// Generates random <see langword="double"/> value from the specified range.
+        /// </summary>
+        /// <param name="rnd"><see cref="Random"/> <c>object</c>.</param>
+        /// <param name="maxValueExclusive">Range max boundary (exclusive).</param>
+        /// <returns>Random double value grater than zero and less than <see cref="maxValueExclusive"/>.</returns>
+        public static double NextDouble(this Random rnd, double maxValueExclusive)
+        {
+            return NextDouble(rnd, 0.0, maxValueExclusive);
+        }
+
+        /// <summary>
+        /// Generates random <see langword="double"/> value from the specified range.
+        /// </summary>
+        /// <param name="rnd"><see cref="Random"/> <c>object</c>.</param>
+        /// <param name="minValue">Range min bounday.</param>
+        /// <param name="maxValueExclusive">Range max boundary (exclusive).</param>
+        /// <returns>Random double value grater <see cref="minValue"/> and less than <see cref="maxValueExclusive"/>.</returns>
+        public static double NextDouble(this Random rnd, double minValue, double maxValueExclusive)
+        {
+            if (minValue > maxValueExclusive)
+            {
+                throw new ArgumentException("MinValue should be less or equal to maxValueExclusive", nameof(minValue));
+            }
+
+            return minValue + (rnd.NextDouble() * (maxValueExclusive - minValue));
+        }
+
+        /// <summary>
+        /// Generates list with random unique integer values.
+        /// </summary>
+        /// <param name="rnd">Random values generator.</param>
+        /// <param name="minValue">Minimal value.</param>
+        /// <param name="maxValueExclusive">Maximal value exclusive.</param>
+        /// <param name="size">Result <c>size</c>.</param>
+        /// <returns>List with specified <c>size</c> that contains unique random values from the specified range.</returns>
+        public static List<int> RandomUniqueSet(this Random rnd, int minValue, int maxValueExclusive, int size)
+        {
+            if (rnd == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (minValue > maxValueExclusive)
+            {
+                throw new ArgumentException("Minimal value should be less or equal to maximal value.");
+            }
+
+            if (size < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size), "Size should be grater or equal to zero");
+            }
+
+            if (size > maxValueExclusive - minValue)
+            {
+                throw new AggregateException("Size should be less or equal to range size between min and max values.");
+            }
+
+            int maxValueFromZero = maxValueExclusive - minValue;
+
+            // Fast scenario.
+            if (size < maxValueFromZero / 3)
+            {
+                var uniqueSubset = new HashSet<int>();
+                while (uniqueSubset.Count < size)
+                {
+                    int a = rnd.Next(minValue, maxValueExclusive);
+                    uniqueSubset.Add(a);
+                }
+
+                return uniqueSubset.ToList();
+            }
+
+            var resultSubset = new List<int>(maxValueFromZero);
+
+            for (int i = minValue; i < maxValueExclusive; i++)
+            {
+                resultSubset.Add(i);
+            }
+
+            for (int validElementsCount = maxValueFromZero; validElementsCount > size; validElementsCount--)
+            {
+                int indexToRemove = rnd.Next(0, validElementsCount);
+                resultSubset[indexToRemove] = resultSubset[validElementsCount - 1];
+            }
+
+            resultSubset.RemoveRange(size, maxValueFromZero - size);
+            return resultSubset;
         }
 
         /// <summary>
