@@ -7,15 +7,31 @@ namespace ClrCoder.AspNetCore.Hosting
 {
     using JetBrains.Annotations;
 
-#if NET46
+#if NET46 || NETSTANDARD1_6
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.AspNetCore.Mvc.Formatters;
+
+    using System.Buffers;
+
+    using Newtonsoft.Json;
+
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.ObjectPool;
+    using Microsoft.Extensions.Options;
+
+#endif
+#if NET46
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    using Microsoft.AspNetCore.Builder;
+
     using Mono.Unix;
     using Mono.Unix.Native;
+
 #endif
 
     /// <summary>
@@ -24,6 +40,80 @@ namespace ClrCoder.AspNetCore.Hosting
     [PublicAPI]
     public static class HostingExtensions
     {
+#if NET46 || NETSTANDARD1_6
+
+        [UsedImplicitly]
+        private class CustomSerializerSettingsSetup : IConfigureOptions<MvcOptions>
+        {
+            private readonly ILoggerFactory _loggerFactory;
+
+            private readonly ArrayPool<char> _charPool;
+
+            private readonly ObjectPoolProvider _objectPoolProvider;
+
+            public CustomSerializerSettingsSetup(
+                ILoggerFactory loggerFactory,
+                ArrayPool<char> charPool,
+                ObjectPoolProvider objectPoolProvider)
+            {
+                _loggerFactory = loggerFactory;
+                _charPool = charPool;
+                _objectPoolProvider = objectPoolProvider;
+            }
+
+            public JsonSerializerSettings SerializerSettings { get; set; }
+
+            public void Configure([NotNull] MvcOptions options)
+            {
+                options.OutputFormatters.RemoveType<JsonOutputFormatter>();
+                options.InputFormatters.RemoveType<JsonInputFormatter>();
+                options.InputFormatters.RemoveType<JsonPatchInputFormatter>();
+
+                JsonSerializerSettings outputSettings = SerializerSettings;
+                options.OutputFormatters.Add(new JsonOutputFormatter(outputSettings, _charPool));
+
+                JsonSerializerSettings inputSettings = SerializerSettings;
+                ILogger<JsonInputFormatter> jsonInputLogger = _loggerFactory.CreateLogger<JsonInputFormatter>();
+                options.InputFormatters.Add(
+                    new JsonInputFormatter(jsonInputLogger, inputSettings, _charPool, _objectPoolProvider));
+
+                ILogger<JsonPatchInputFormatter> jsonInputPatchLogger =
+                    _loggerFactory.CreateLogger<JsonPatchInputFormatter>();
+                options.InputFormatters.Add(
+                    new JsonPatchInputFormatter(jsonInputPatchLogger, inputSettings, _charPool, _objectPoolProvider));
+            }
+        }
+
+        /// <summary>
+        /// Applies serializer <c>settings</c> for input/output json communication.
+        /// </summary>
+        /// <param name="hostBuilder">Host builder.</param>
+        /// <param name="settings">Json serializer <c>settings</c>.</param>
+        /// <returns>Fluent syntax continuation.</returns>
+        public static IWebHostBuilder ConfigureJsonFormatters(
+            this IWebHostBuilder hostBuilder,
+            JsonSerializerSettings settings)
+        {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            hostBuilder.ConfigureServices(
+                services =>
+                    {
+                        services.AddTransient<IConfigureOptions<MvcOptions>>(
+                            provider =>
+                                {
+                                    var s = provider.GetService<CustomSerializerSettingsSetup>();
+                                    s.SerializerSettings = settings;
+                                    return s;
+                                });
+                    });
+
+            return hostBuilder;
+        }
+#endif
 #if NET46
 /// <summary>
 /// Allow self-host to be terminated by posix termination signals (SIGINT, SIGTERM).
@@ -62,7 +152,7 @@ namespace ClrCoder.AspNetCore.Hosting
                             var signals = new[] { sigInt, sigTerm };
                             for (;;)
                             {
-                                var id = UnixSignal.WaitAny(signals);
+                                int id = UnixSignal.WaitAny(signals);
 
                                 if (id >= 0 && id < signals.Length)
                                 {
