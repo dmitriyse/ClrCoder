@@ -5,7 +5,9 @@
 
 namespace ClrCoder.Cluster
 {
+    using System;
     using System.IO;
+    using System.Threading.Tasks;
 
     using AspNetCore.Hosting;
 
@@ -22,14 +24,15 @@ namespace ClrCoder.Cluster
                 .AddScope(
                     "ClusterNodeWebApp",
                     nodes: x =>
-                        x.Add(
-                                factory:
-                                async r =>
-                                    new WebHostBuilder()
-                                        .UseKestrel()
-                                        .UseContentRoot(Directory.GetCurrentDirectory())
-                                        .ConfigureJsonFormatters(JsonDefaults.JsonRestRpcSerializerSettings))
-                            .Add<IClusterNode>(factoryType: typeof(ClusterNode)));
+                        x.Add<IWebHostBuilder>(
+                                factory: new IxDelegateFactoryConfig(
+                                    new Func<Task<IWebHostBuilder>>(
+                                        async () =>
+                                            new WebHostBuilder()
+                                                .UseKestrel()
+                                                .UseContentRoot(Directory.GetCurrentDirectory())
+                                                .ConfigureJsonFormatters(JsonDefaults.JsonRestRpcSerializerSettings))))
+                            .Add<IClusterNode>(factory: new IxClassFactoryConfig<ClusterNode>()));
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
             return hostBuilder;

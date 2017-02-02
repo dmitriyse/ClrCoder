@@ -7,12 +7,21 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System.Collections.Generic;
 
+    using JetBrains.Annotations;
+
     public class IxScopeBaseConfig
     {
         public IxIdentifier Identifier { get; set; }
 
         public List<IxScopeBaseConfig> Nodes { get; } = new List<IxScopeBaseConfig>();
 
-        public bool ImportFromParent { get; set; }
+        [CanBeNull]
+        public IIxVisibilityFilterConfig ImportFilter { get; set; }
+
+        [CanBeNull]
+        public IIxVisibilityFilterConfig ExportToParentFilter { get; set; }
+
+        [CanBeNull]
+        public IIxVisibilityFilterConfig ExportFilter { get; set; }
     }
 }

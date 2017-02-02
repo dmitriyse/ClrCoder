@@ -1,4 +1,4 @@
-﻿// <copyright file="IxEstensions.cs" company="ClrCoder project">
+﻿// <copyright file="IxExtensions.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -9,23 +9,29 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public static class IxEstensions
+    public static class IxExtensions
     {
         public static IIxBuilder<List<IxScopeBaseConfig>> Add<TContract>(
             this IIxBuilder<List<IxScopeBaseConfig>> nodesBuilder,
-            ScopeBinding scopeBinding = null,
             string name = null,
-            Type factoryType = null,
-            Func<IIxResolver, Task<TContract>> factory = null,
+            IxScopeBinding scopeBinding = null,
+            IIxVisibilityFilterConfig importFilter = null,
+            IIxVisibilityFilterConfig exportToParentFilter = null,
+            IIxVisibilityFilterConfig exportFilter = null,
+            IIxFactoryConfig factory = null,
+            IIxMultiplicityConfig multiplicity = null,
             Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)
         {
+            // TODO: Apply defaults.
             nodesBuilder.Config.Add(
-                new IxComponentConfig
+                new IxStdProviderConfig
                     {
-                        Identifier = new IxIdentifier(typeof(TContract), name),
                         Factory = factory,
-                        FactoryType = factoryType,
-                        ScopeBinding = scopeBinding
+                        Identifier = new IxIdentifier(typeof(TContract), name),
+                        ScopeBinding = scopeBinding,
+                        Multiplicity = multiplicity ?? new IxSingletonMultiplicityConfig(),
+                        ExportFilter = exportFilter,
+                        ExportToParentFilter = exportToParentFilter
                     });
 
             nodes?.Invoke(new IxBuilder<List<IxScopeBaseConfig>>());
@@ -44,9 +50,10 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <returns>Fluent syntax continuation.</returns>
         public static IIxBuilder<List<IxScopeBaseConfig>> AddScope(
             this IIxBuilder<List<IxScopeBaseConfig>> nodesBuilder,
-            string name,
-            IxExportVisibilities exportVisibility = IxExportVisibilities.DescendantScopes,
-            bool importFromParent = true,
+            string name = null,
+            IIxVisibilityFilterConfig importFilter = null,
+            IIxVisibilityFilterConfig exportToParentFilter = null,
+            IIxVisibilityFilterConfig exportFilter = null,
             Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)
         {
             if (nodesBuilder == null)
@@ -64,11 +71,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentException("Name for scope should not be empty", nameof(name));
             }
 
+            // TODO:Apply defaults.
             var scopeConfig = new IxScopeConfig
                                   {
                                       Identifier = new IxIdentifier(typeof(IxScope), name),
-                                      ExportVisibility = exportVisibility,
-                                      ImportFromParent = importFromParent
+                                      ExportToParentFilter = exportToParentFilter,
+                                      ExportFilter = exportFilter,
+                                      ImportFilter = importFilter
                                   };
 
             nodesBuilder.Config.Add(scopeConfig);
@@ -84,7 +93,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public static Task<T> Get<T>(this IIxResolver resolver)
         {
-            throw new NotImplementedException();
+            return resolver.Resolve<T>();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <summary>
     /// Resolver API, the only point where hosted <c>object</c> can be instantiated.
     /// </summary>
-    public interface IIxResolver
+    public interface IIxResolver : IIxInstance
     {
         /// <summary>
         /// Resolves <c>object</c> with the specified type and <c>name</c>.
