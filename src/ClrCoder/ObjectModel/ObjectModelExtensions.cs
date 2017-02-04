@@ -21,20 +21,20 @@ namespace ClrCoder.ObjectModel
         /// Builds interceptors chain from sequence of interceptor builders.
         /// </summary>
         /// <typeparam name="TDelegate">Type of method that goes through interceptors list.</typeparam>
-        /// <param name="interceptorBuilders">
+        /// <param name="interceptors">
         /// Interceptor builder takes some <c>delegate</c> and returns intercepted
         /// <c>delegate</c>.
         /// </param>
         /// <param name="interceptTarget">Original non intercepted <c>delegate</c>.</param>
         /// <returns>Intercepted <c>delegate</c>.</returns>
         public static TDelegate BuildInterceptorsChain<TDelegate>(
-            this IEnumerable<Func<TDelegate, TDelegate>> interceptorBuilders,
+            this IEnumerable<Func<TDelegate, TDelegate>> interceptors,
             TDelegate interceptTarget)
             where TDelegate : class
         {
-            if (interceptorBuilders == null)
+            if (interceptors == null)
             {
-                throw new ArgumentNullException(nameof(interceptorBuilders));
+                throw new ArgumentNullException(nameof(interceptors));
             }
 
             if (interceptTarget == null)
@@ -42,7 +42,7 @@ namespace ClrCoder.ObjectModel
                 throw new ArgumentNullException(nameof(interceptTarget));
             }
 
-            return interceptorBuilders.Reverse().Aggregate(interceptTarget, (current, builder) => builder(current));
+            return interceptors.Reverse().Aggregate(interceptTarget, (current, interceptor) => interceptor(current));
         }
     }
 }

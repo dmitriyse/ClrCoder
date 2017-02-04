@@ -2,7 +2,6 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -14,7 +13,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public static IIxBuilder<List<IxScopeBaseConfig>> Add<TContract>(
             this IIxBuilder<List<IxScopeBaseConfig>> nodesBuilder,
             string name = null,
-            IxScopeBinding scopeBinding = null,
+            IIxScopeBindingConfig scopeBinding = null,
             IIxVisibilityFilterConfig importFilter = null,
             IIxVisibilityFilterConfig exportToParentFilter = null,
             IIxVisibilityFilterConfig exportFilter = null,
@@ -30,6 +29,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         Identifier = new IxIdentifier(typeof(TContract), name),
                         ScopeBinding = scopeBinding,
                         Multiplicity = multiplicity ?? new IxSingletonMultiplicityConfig(),
+                        ImportFilter = importFilter,
                         ExportFilter = exportFilter,
                         ExportToParentFilter = exportToParentFilter
                     });
@@ -44,8 +44,6 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="nodesBuilder">Nodes builder of a parent node.</param>
         /// <param name="name">Scope should be named.</param>
-        /// <param name="exportVisibility">Scope registration export visibility rule.</param>
-        /// <param name="importFromParent">Allows to import or not dependencies from parent node.</param>
         /// <param name="nodes">Action that builds children <c>nodes</c>.</param>
         /// <returns>Fluent syntax continuation.</returns>
         public static IIxBuilder<List<IxScopeBaseConfig>> AddScope(

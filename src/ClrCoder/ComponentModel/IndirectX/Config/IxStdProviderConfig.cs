@@ -10,7 +10,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     public class IxStdProviderConfig : IxScopeBaseConfig
     {
         [CanBeNull]
-        public IxScopeBinding ScopeBinding { get; set; }
+        public IIxScopeBindingConfig ScopeBinding { get; set; }
 
         [CanBeNull]
         public IIxMultiplicityConfig Multiplicity { get; set; }

@@ -2,7 +2,6 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -20,13 +19,26 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxHost host,
             [CanBeNull] IxProviderNode parentNode,
             IxStdProviderConfig config,
-            [CanBeNull] IxHost.RawInstanceFactory rawInstanceFactory)
-            : base(host, parentNode, config, rawInstanceFactory)
+            [CanBeNull] IxHost.RawInstanceFactory rawInstanceFactory,
+            IxHost.VisibilityFilter exportFilter,
+            IxHost.VisibilityFilter exportToParentFilter,
+            IxHost.VisibilityFilter importFilter,
+            IxHost.ScopeBinderDelegate scopeBinder)
+            : base(
+                host,
+                parentNode,
+                config,
+                rawInstanceFactory,
+                exportFilter,
+                exportToParentFilter,
+                importFilter,
+                scopeBinder)
         {
             if (parentNode == null)
             {
                 throw new ArgumentNullException(nameof(parentNode));
             }
+
             if (rawInstanceFactory == null)
             {
                 throw new ArgumentNullException(nameof(rawInstanceFactory));
@@ -36,29 +48,31 @@ namespace ClrCoder.ComponentModel.IndirectX
         public override async Task<IIxInstance> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
         {
             Task<IIxInstance> creationTask;
-
-            lock (parentInstance.DataSyncRoot)
+            lock (Host.InstanceTreeSyncRoot)
             {
-                object data = parentInstance.GetData(this);
-                if (data == null)
+                lock (parentInstance.DataSyncRoot)
                 {
-                    creationTask = CreateInstance(parentInstance, context);
-                    if (creationTask.IsCompleted)
+                    object data = parentInstance.GetData(this);
+                    if (data == null)
                     {
-                        // Returns good result or exception.
-                        return creationTask.GetAwaiter().GetResult();
-                    }
+                        creationTask = CreateInstance(parentInstance, context);
+                        if (creationTask.IsCompleted)
+                        {
+                            // Returns good result or exception.
+                            return creationTask.GetAwaiter().GetResult();
+                        }
 
-                    parentInstance.SetData(this, creationTask);
-                }
-                else if (data is Task)
-                {
-                    creationTask = (Task<IIxInstance>)data;
-                }
-                else
-                {
-                    // Object created.
-                    return (IIxInstance)data;
+                        parentInstance.SetData(this, creationTask);
+                    }
+                    else if (data is Task)
+                    {
+                        creationTask = (Task<IIxInstance>)data;
+                    }
+                    else
+                    {
+                        // Object created.
+                        return (IIxInstance)data;
+                    }
                 }
             }
 

@@ -2,10 +2,10 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -45,7 +45,19 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             object IIxInstance.Object => this;
 
-            IIxInstance IIxInstance.ParentInstance => Instance;
+            IIxInstance IIxInstance.ParentInstance
+            {
+                get
+                {
+                    if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+                    {
+                        throw new InvalidOperationException(
+                            "Inspecting instance parent should be performed under InstanceTreeLock.");
+                    }
+
+                    return Instance;
+                }
+            }
 
             IIxResolver IIxInstance.Resolver
             {
@@ -53,6 +65,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 {
                     throw new InvalidOperationException("This is too virtual instance and cannot have nested resolver.");
                 }
+
                 set
                 {
                     throw new InvalidOperationException("This is too virtual instance and cannot have nested resolver.");

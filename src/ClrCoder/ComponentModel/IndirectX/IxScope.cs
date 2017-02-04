@@ -2,7 +2,6 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -15,8 +14,22 @@ namespace ClrCoder.ComponentModel.IndirectX
         [CanBeNull]
         private IxScopeInstance _rootInstance;
 
-        public IxScope(IxHost host, [CanBeNull] IxProviderNode parentNode, IxScopeConfig config)
-            : base(host, parentNode, config, null)
+        public IxScope(
+            IxHost host,
+            [CanBeNull] IxProviderNode parentNode,
+            IxScopeConfig config,
+            IxHost.VisibilityFilter exportFilter,
+            IxHost.VisibilityFilter exportToParentFilter,
+            IxHost.VisibilityFilter importFilter)
+            : base(
+                host,
+                parentNode,
+                config,
+                null,
+                exportFilter,
+                exportToParentFilter,
+                importFilter,
+                (a, b, c, d) => { throw new NotImplementedException(); })
         {
         }
 
@@ -34,7 +47,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             // TODO: Implement smart singleton.
             throw new NotImplementedException();
-            //return new IxScopeInstance(Host, this, parentInstance);
+
+            // return new IxScopeInstance(Host, this, parentInstance);
         }
 
         public IxScopeInstance GetRootInstance()

@@ -2,7 +2,6 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -14,6 +13,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     public abstract class IxInstance : IIxInstance
     {
+        private readonly IIxInstance _parentInstance;
+
         [CanBeNull]
         private Dictionary<IxProviderNode, object> _childrenData;
 
@@ -25,7 +26,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             Host = host;
             ProviderNode = providerNode;
-            ParentInstance = parentInstance;
+            _parentInstance = parentInstance;
             Object = @object;
         }
 
@@ -36,7 +37,19 @@ namespace ClrCoder.ComponentModel.IndirectX
         public object Object { get; }
 
         [CanBeNull]
-        public IIxInstance ParentInstance { get; }
+        public IIxInstance ParentInstance
+        {
+            get
+            {
+                if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+                {
+                    throw new InvalidOperationException(
+                        "Inspecting instance parent should be performed under InstanceTreeLock.");
+                }
+
+                return _parentInstance;
+            }
+        }
 
         public IIxResolver Resolver { get; set; }
 
@@ -65,6 +78,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
+            if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+            {
+                throw new InvalidOperationException(
+                    "Inspecting instance parent should be performed under InstanceTreeLock.");
+            }
+
             if (!Monitor.IsEntered(DataSyncRoot))
             {
                 throw new InvalidOperationException("Data manipulations should be performed under lock.");
@@ -82,6 +101,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             if (providerNode == null)
             {
                 throw new ArgumentNullException(nameof(providerNode));
+            }
+
+            if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+            {
+                throw new InvalidOperationException(
+                    "Inspecting instance parent should be performed under InstanceTreeLock.");
             }
 
             if (!Monitor.IsEntered(DataSyncRoot))
