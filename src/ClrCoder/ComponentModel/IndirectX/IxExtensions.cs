@@ -20,9 +20,9 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig exportFilter = null,
             IIxFactoryConfig factory = null,
             IIxMultiplicityConfig multiplicity = null,
+            IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)
         {
-            // TODO: Apply defaults.
             nodesBuilder.Config.Add(
                 new IxStdProviderConfig
                     {
@@ -32,7 +32,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         Multiplicity = multiplicity ?? new IxSingletonMultiplicityConfig(),
                         ImportFilter = importFilter,
                         ExportFilter = exportFilter,
-                        ExportToParentFilter = exportToParentFilter
+                        ExportToParentFilter = exportToParentFilter,
+                        DisposeHandler = disposeHandler
                     });
 
             nodes?.Invoke(new IxBuilder<List<IxScopeBaseConfig>>());
@@ -60,17 +61,6 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(nodesBuilder));
             }
 
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("Name for scope should not be empty", nameof(name));
-            }
-
-            // TODO:Apply defaults.
             var scopeConfig = new IxScopeConfig
                                   {
                                       Identifier = new IxIdentifier(typeof(IxScope), name),

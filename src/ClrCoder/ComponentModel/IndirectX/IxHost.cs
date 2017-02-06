@@ -31,45 +31,30 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             VisibilityFilterBuilder.Add(StdVisibilityFilterBuilder, 100);
 
-            ProviderNodeBuilder.Add(ScopeBuilder, 100);
-            ProviderNodeBuilder.Add(SingletonProviderBuilder, 200);
+            ProviderNodeBuilder.Add(StdProviderConfigDefaultsSetter, 100);
+            ProviderNodeBuilder.Add(ScopeBuilder, 200);
+            ProviderNodeBuilder.Add(SingletonProviderBuilder, 300);
 
             ScopeBinderBuilder.Add(RegistrationScopeBinderBuilder, 100);
 
+            DisposeHandlerBuilder.Add(DisposableDisposeHandlerBuilder, 100);
+
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
             ResolveHandler.Add(StdResolveInterceptor, 200);
-        }
 
-        /// <summary>
-        /// Raw instance factory <c>delegate</c>. No any registrations just obtain instance according to config.
-        /// </summary>
-        /// <param name="parentInstance">Parent instance.</param>
-        /// <param name="context"><c>Resolve</c> <c>context</c>.</param>
-        /// <returns>Create instance.</returns>
-        public delegate Task<object> RawInstanceFactory(IIxInstance parentInstance, IxResolveContext context);
+        }
 
         /// <summary>
         /// Creates dependency node from <paramref name="config"/>.
         /// </summary>
         /// <param name="config">Configuration node.</param>
         /// <returns>Created node.</returns>
-        public delegate RawInstanceFactory RawInstanceFactoryBuilderDelegate(
+        public delegate IxRawInstanceFactory RawInstanceFactoryBuilderDelegate(
             IIxFactoryConfig config);
 
-        public delegate Task<IIxInstanceLock> ResolveBoundDelegate(
-            IIxInstance parentInstance,
-            IxProviderNode provider,
-            IxResolveContext context);
+        public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull]Type type);
 
-        public delegate Task<IIxInstanceLock> ScopeBinderDelegate(
-            IIxInstance originInstance,
-            IxResolvePath resolvePath,
-            IxResolveContext context,
-            ResolveBoundDelegate resolveBound);
-
-        public delegate bool VisibilityFilter(IxIdentifier identifier);
-
-        public delegate VisibilityFilter VisibilityFilterBuilderDelegate(IIxVisibilityFilterConfig config);
+        public delegate IxVisibilityFilter VisibilityFilterBuilderDelegate(IIxVisibilityFilterConfig config);
 
         [CanBeNull]
         public IIxResolver Resolver { get; private set; }
@@ -201,5 +186,24 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             return ResolveHandler.Delegate(originInstance, identifier, context);
         }
+
+        /// <inheritdoc/>
+        public Task DisposeTask => _rootScopeInstance.DisposeTask;
     }
+
+    public delegate Task IxDisposeHandlerDelegate(object @object);
+
+    public delegate bool IxVisibilityFilter(IxIdentifier identifier);
+
+    public delegate Task<IIxInstanceLock> IxScopeBinderDelegate(
+        IIxInstance originInstance,
+        IxResolvePath resolvePath,
+        IxHost.IxResolveContext context,
+        IxResolveBoundDelegate resolveBound);
+
+    public delegate Task<IIxInstanceLock> IxResolveBoundDelegate(
+        IIxInstance parentInstance,
+        IxProviderNode provider,
+        IxHost.IxResolveContext context);
+
 }

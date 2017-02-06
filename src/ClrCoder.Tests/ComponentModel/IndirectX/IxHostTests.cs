@@ -1,4 +1,4 @@
-﻿// <copyright file="IxManagerTests.cs" company="ClrCoder project">
+﻿// <copyright file="IxHostTests.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -16,7 +16,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     /// Tests for <see cref="IxHost"/> class.
     /// </summary>
     [TestFixture]
-    public class IxManagerTests
+    public class IxHostTests
     {
         /// <summary>
         /// Init/dispose cycle with zero configuration and resolves.

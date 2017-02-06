@@ -19,7 +19,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
 
             _instanceLock = instanceLock;
-            Target = (T)_instanceLock.Target;
+            Target = (T)_instanceLock.Target.Object;
         }
 
         public T Target { get; }

@@ -19,11 +19,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxHost host,
             [CanBeNull] IxProviderNode parentNode,
             IxStdProviderConfig config,
-            [CanBeNull] IxHost.RawInstanceFactory rawInstanceFactory,
-            IxHost.VisibilityFilter exportFilter,
-            IxHost.VisibilityFilter exportToParentFilter,
-            IxHost.VisibilityFilter importFilter,
-            IxHost.ScopeBinderDelegate scopeBinder)
+            [CanBeNull] IxRawInstanceFactory rawInstanceFactory,
+            IxVisibilityFilter exportFilter,
+            IxVisibilityFilter exportToParentFilter,
+            IxVisibilityFilter importFilter,
+            IxScopeBinderDelegate scopeBinder,
+            IxDisposeHandlerDelegate disposeHandler)
             : base(
                 host,
                 parentNode,
@@ -32,7 +33,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportFilter,
                 exportToParentFilter,
                 importFilter,
-                scopeBinder)
+                scopeBinder,
+                disposeHandler)
         {
             if (parentNode == null)
             {
@@ -85,7 +87,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             try
             {
                 Debug.Assert(RawInstanceFactory != null, "RawInstanceFactory != null");
-                object @object = await RawInstanceFactory(parentInstance, context);
+                object @object = await RawInstanceFactory.Factory(parentInstance, context);
                 return new IxSingletonInstance(Host, this, parentInstance, @object);
             }
             finally

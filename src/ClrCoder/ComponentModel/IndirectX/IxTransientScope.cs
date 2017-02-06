@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -17,10 +18,10 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxHost host,
             IxProviderNode parentNode,
             IxScopeBaseConfig config,
-            IxHost.RawInstanceFactory rawInstanceFactory,
-            IxHost.VisibilityFilter exportFilter,
-            IxHost.VisibilityFilter exportToParentFilter,
-            IxHost.VisibilityFilter importFilter)
+            IxRawInstanceFactory rawInstanceFactory,
+            IxVisibilityFilter exportFilter,
+            IxVisibilityFilter exportToParentFilter,
+            IxVisibilityFilter importFilter)
             : base(
                 host,
                 parentNode,
@@ -29,7 +30,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportFilter,
                 exportToParentFilter,
                 importFilter,
-                (a, b, c, d) => { throw new NotImplementedException(); })
+                (a, b, c, d) => { throw new NotImplementedException(); },
+                obj => Task.CompletedTask)
         {
         }
 

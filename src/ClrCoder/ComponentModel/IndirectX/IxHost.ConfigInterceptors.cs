@@ -7,6 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Reflection;
     using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using ObjectModel;
 
+    [NoReorder]
     public partial class IxHost
     {
         /// <summary>
@@ -37,10 +39,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxScopeBaseConfig config,
             [CanBeNull] IxProviderNode parentNode);
 
-        public delegate ScopeBinderDelegate ScopeBinderBuilderDelegate(IIxScopeBindingConfig bindingConfig);
-
-        /// <inheritdoc/>
-        public Task DisposeTask => _rootScopeInstance.DisposeTask;
+        public delegate IxScopeBinderDelegate ScopeBinderBuilderDelegate(IIxScopeBindingConfig bindingConfig);
 
         /// <summary>
         /// Visibility filter builder.
@@ -68,39 +67,74 @@ namespace ClrCoder.ComponentModel.IndirectX
                     })
             ;
 
-        private static VisibilityFilterBuilderDelegate StdVisibilityFilterBuilder(
-            VisibilityFilterBuilderDelegate next)
-        {
-            return visibilityConfig =>
-                {
-                    if (!(visibilityConfig is IxStdVisibilityFilterConfig))
+        public InterceptableDelegate<DisposeHandlerBuilderDelegate> DisposeHandlerBuilder { get; } =
+            new InterceptableDelegate<DisposeHandlerBuilderDelegate>(
+                type =>
                     {
-                        return next(visibilityConfig);
+                        if (type == null)
+                        {
+                            return obj =>
+                                {
+                                    Contract.Assert(obj != null, "Dispose handler called on not null object.");
+                                    return Task.CompletedTask;
+                                };
+                        }
+
+                        throw new NotSupportedException($"Cannot build dispose handler for type {type}");
                     }
 
-                    var stdConfig = visibilityConfig as IxStdVisibilityFilterConfig;
-                    return id =>
-                        {
-                            if (stdConfig.WhiteList != null)
-                            {
-                                if (!stdConfig.WhiteList.Contains(id))
-                                {
-                                    return false;
-                                }
-                            }
+            );
 
-                            if (stdConfig.BlackList != null)
-                            {
-                                if (stdConfig.BlackList.Contains(id))
-                                {
-                                    return false;
-                                }
-                            }
+        #region Provider Node Builders
 
-                            return true;
-                        };
+        private ProviderNodeBuilderDelegate StdProviderConfigDefaultsSetter(ProviderNodeBuilderDelegate next)
+        {
+            return (nodeConfig, parentNode) =>
+                {
+                    if (nodeConfig.GetType() != typeof(IxStdProviderConfig))
+                    {
+                        return next(nodeConfig, parentNode);
+                    }
+
+                    var cfg = (IxStdProviderConfig)nodeConfig;
+
+                    if (cfg.Multiplicity == null)
+                    {
+                        cfg.Multiplicity = new IxSingletonMultiplicityConfig();
+                    }
+
+                    // By default allow exporting to children.
+                    if (cfg.ExportFilter == null)
+                    {
+                        cfg.ExportFilter = new IxStdVisibilityFilterConfig();
+                    }
+
+                    // By default allow importing all from parent.
+                    if (cfg.ImportFilter == null)
+                    {
+                        cfg.ImportFilter = new IxStdVisibilityFilterConfig();
+                    }
+
+                    // By default exporting nothing to parent.
+                    if (cfg.ExportToParentFilter == null)
+                    {
+                        cfg.ExportToParentFilter = new IxStdVisibilityFilterConfig
+                                                       {
+                                                           WhiteList = new HashSet<IxIdentifier>()
+                                                       };
+                    }
+
+                    // Binding to registration by default.
+                    if (cfg.ScopeBinding == null)
+                    {
+                        cfg.ScopeBinding = new IxRegistrationScopeBindingConfig();
+                    }
+
+                    return next(nodeConfig, parentNode);
                 };
         }
+
+        #endregion
 
         private RawInstanceFactoryBuilderDelegate ClassRawFactoryBuilder(
             RawInstanceFactoryBuilderDelegate next)
@@ -119,9 +153,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                                 "Existing instance factory config should have not null instance.");
                         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                        return async (parentValue, resolveContext) => instance;
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                        return new IxRawInstanceFactory(
+                            (parentValue, resolveContext) => Task.FromResult(instance),
+                            configTypeInfo.GenericTypeArguments[0]);
                     }
 
                     return next(factoryConfig);
@@ -145,9 +179,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                                 "Existing instance factory config should have not null instance.");
                         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                        return async (parentValue, resolveContext) => instance;
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                        return new IxRawInstanceFactory(
+                            (parentValue, resolveContext) => Task.FromResult(instance),
+                            configTypeInfo.GenericTypeArguments[0]);
                     }
 
                     return next(factoryConfig);
@@ -204,9 +238,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                         cfg.ImportFilter = new IxStdVisibilityFilterConfig();
                     }
 
-                    VisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
-                    VisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
-                    VisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
+                    IxVisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
+                    IxVisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
+                    IxVisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
 
                     return new IxScope(
                         this,
@@ -250,7 +284,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("Instance factory should be configured.");
                     }
 
-                    RawInstanceFactory rawInstanceFactory = RawInstanceFactoryBuilder.Delegate(cfg.Factory);
+                    IxRawInstanceFactory rawInstanceFactory = RawInstanceFactoryBuilder.Delegate(cfg.Factory);
+
+                    if (cfg.DisposeHandler == null)
+                    {
+                        cfg.DisposeHandler = DisposeHandlerBuilder.Delegate(rawInstanceFactory.InstanceBaseType);
+                    }
 
                     if (cfg.ExportFilter == null)
                     {
@@ -268,16 +307,21 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("Import filter should be defined for provider node.");
                     }
 
-                    VisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
-                    VisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
-                    VisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
+                    IxVisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
+                    IxVisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
+                    IxVisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
 
                     if (cfg.ScopeBinding == null)
                     {
                         throw new InvalidOperationException("Scope binding should be specified.");
                     }
 
-                    ScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
+                    if (cfg.DisposeHandler == null)
+                    {
+                        throw new InvalidOperationException("Dispose handler should be specified.");
+                    }
+
+                    IxScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
 
                     return new IxSingletonProvider(
                         this,
@@ -287,8 +331,103 @@ namespace ClrCoder.ComponentModel.IndirectX
                         exportFilter,
                         exportToParent,
                         importFilter,
-                        scopeBinder);
+                        scopeBinder,
+                        cfg.DisposeHandler);
                 };
         }
+
+        private VisibilityFilterBuilderDelegate StdVisibilityFilterBuilder(
+            VisibilityFilterBuilderDelegate next)
+        {
+            return visibilityConfig =>
+                {
+                    if (!(visibilityConfig is IxStdVisibilityFilterConfig))
+                    {
+                        return next(visibilityConfig);
+                    }
+
+                    var stdConfig = visibilityConfig as IxStdVisibilityFilterConfig;
+                    return id =>
+                        {
+                            if (stdConfig.WhiteList != null)
+                            {
+                                if (!stdConfig.WhiteList.Contains(id))
+                                {
+                                    return false;
+                                }
+                            }
+
+                            if (stdConfig.BlackList != null)
+                            {
+                                if (stdConfig.BlackList.Contains(id))
+                                {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        };
+                };
+        }
+
+        #region Dispose handler builders
+
+        private DisposeHandlerBuilderDelegate DisposableDisposeHandlerBuilder(DisposeHandlerBuilderDelegate next)
+        {
+            return type =>
+                {
+                    if (type == null)
+                    {
+                        IxDisposeHandlerDelegate nextHandler = next(null);
+                        return obj =>
+                            {
+                                var disposable = obj as IDisposable;
+                                if (disposable != null)
+                                {
+                                    try
+                                    {
+                                        disposable.Dispose();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        if (!ex.IsProcessable())
+                                        {
+                                            throw;
+                                        }
+                                    }
+
+                                    return Task.CompletedTask;
+                                }
+
+                                return nextHandler(obj);
+                            };
+                    }
+
+                    if (!typeof(IDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    {
+                        return next(type);
+                    }
+
+                    return obj =>
+                        {
+                            try
+                            {
+                                Contract.Assert(obj != null, "Dispose handler called for null object");
+                                ((IDisposable)obj)?.Dispose();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (!ex.IsProcessable())
+                                {
+                                    throw;
+                                }
+                            }
+
+                            return Task.CompletedTask;
+                        };
+                };
+        }
+
+        #endregion
     }
 }

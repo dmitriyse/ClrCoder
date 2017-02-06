@@ -19,10 +19,10 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
+        /// <inheritdoc/>
         protected override Task SelfDispose()
         {
-            // TODO: Smart dispose depending on object type.
-            throw new NotImplementedException();
+            return ProviderNode.DisposeHandler(Object);
         }
     }
 }

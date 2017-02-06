@@ -82,7 +82,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxInstance originInstance,
             IxResolvePath resolvePath,
             IxResolveContext context,
-            ResolveBoundDelegate resolveBound)
+            IxResolveBoundDelegate resolveBound)
         {
             IIxInstance curInstance = originInstance;
 
@@ -169,7 +169,17 @@ namespace ClrCoder.ComponentModel.IndirectX
                                originInstance,
                                resolvePath,
                                context,
-                               (parentInstance, provider, c) => provider.GetInstance(parentInstance, c));
+                               async (parentInstance, provider, c) =>
+                                   {
+                                       // While we have temporary lock, we needs to put permanent lock.
+                                       var resolvedInstanceTempLock = await provider.GetInstance(parentInstance, c);
+                                       
+                                       // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
+                                       // ReSharper disable once ObjectCreationAsStatement
+                                       new IxInstanceMasterLock(resolvedInstanceTempLock.Target, parentInstance);
+
+                                       return resolvedInstanceTempLock;
+                                   });
                 };
         }
     }

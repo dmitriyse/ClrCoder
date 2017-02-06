@@ -175,8 +175,10 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
 
             LocksVersion++;
-
-            TryStartSelfDispose();
+            if (IsDisposing)
+            {
+                TryStartSelfDispose();
+            }
         }
 
         /// <inheritdoc/>
@@ -261,7 +263,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         private void EnsureTreeLocked()
         {
             Contract.Assert(
-                false,
+                Monitor.IsEntered(Host.InstanceTreeSyncRoot),
                 "Lock related operation should be performed under global tree lock.");
         }
 

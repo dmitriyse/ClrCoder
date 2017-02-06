@@ -23,11 +23,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxHost host,
             [CanBeNull] IxProviderNode parentNode,
             IxScopeBaseConfig config,
-            [CanBeNull] IxHost.RawInstanceFactory rawInstanceFactory,
-            IxHost.VisibilityFilter exportFilter,
-            IxHost.VisibilityFilter exportToParentFilter,
-            IxHost.VisibilityFilter importFilter,
-            IxHost.ScopeBinderDelegate scopeBinder)
+            [CanBeNull] IxRawInstanceFactory rawInstanceFactory,
+            IxVisibilityFilter exportFilter,
+            IxVisibilityFilter exportToParentFilter,
+            IxVisibilityFilter importFilter,
+            IxScopeBinderDelegate scopeBinder,
+            IxDisposeHandlerDelegate disposeHandler)
         {
             if (host == null)
             {
@@ -54,6 +55,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(scopeBinder));
             }
 
+            if (disposeHandler == null)
+            {
+                throw new ArgumentNullException(nameof(disposeHandler));
+            }
+
             _nodes = new List<IxProviderNode>();
             _nodesById = new Dictionary<IxIdentifier, IxProviderNode>();
 
@@ -65,20 +71,23 @@ namespace ClrCoder.ComponentModel.IndirectX
             ExportToParentFilter = exportToParentFilter;
             ImportFilter = importFilter;
             ScopeBinder = scopeBinder;
+            DisposeHandler = disposeHandler;
 
             ParentNode?.RegisterChild(this);
         }
 
         [CanBeNull]
-        public IxHost.RawInstanceFactory RawInstanceFactory { get; }
+        public IxRawInstanceFactory RawInstanceFactory { get; }
 
-        public IxHost.VisibilityFilter ExportFilter { get; }
+        public IxVisibilityFilter ExportFilter { get; }
 
-        public IxHost.VisibilityFilter ExportToParentFilter { get; }
+        public IxVisibilityFilter ExportToParentFilter { get; }
 
-        public IxHost.VisibilityFilter ImportFilter { get; }
+        public IxVisibilityFilter ImportFilter { get; }
 
-        public IxHost.ScopeBinderDelegate ScopeBinder { get; }
+        public IxScopeBinderDelegate ScopeBinder { get; }
+
+        public IxDisposeHandlerDelegate DisposeHandler { get; }
 
         public IxIdentifier Identifier { get; }
 

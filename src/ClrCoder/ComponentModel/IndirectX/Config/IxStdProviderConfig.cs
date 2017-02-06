@@ -5,6 +5,9 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    using System;
+    using System.Threading.Tasks;
+
     using JetBrains.Annotations;
 
     public class IxStdProviderConfig : IxScopeBaseConfig
@@ -17,5 +20,11 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         [CanBeNull]
         public IIxFactoryConfig Factory { get; set; }
+
+        /// <summary>
+        /// Overrides dispose operation.
+        /// </summary>
+        [CanBeNull]
+        public IxDisposeHandlerDelegate DisposeHandler { get; set; }
     }
 }
