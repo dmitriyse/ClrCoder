@@ -33,7 +33,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
         }
 
-        public override Task<IIxInstance> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        public override Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
         {
             throw new NotImplementedException();
         }

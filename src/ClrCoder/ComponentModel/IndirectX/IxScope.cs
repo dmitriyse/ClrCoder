@@ -33,7 +33,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
         }
 
-        public override async Task<IIxInstance> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        public override async Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
         {
             if (parentInstance == null)
             {
@@ -42,7 +42,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             if (_rootInstance != null)
             {
-                return _rootInstance;
+                return new IxInstanceTempLock(_rootInstance);
             }
 
             // TODO: Implement smart singleton.

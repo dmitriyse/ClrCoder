@@ -16,10 +16,10 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
         }
 
-        public override async Task AsyncDispose()
+        /// <inheritdoc/>
+        protected override Task SelfDispose()
         {
-            // Do nothing. 
-            // Scope is light-weight component designet to control visibility.
+            return Task.CompletedTask;
         }
     }
 }

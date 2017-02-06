@@ -2,10 +2,13 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -36,18 +39,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public delegate ScopeBinderDelegate ScopeBinderBuilderDelegate(IIxScopeBindingConfig bindingConfig);
 
-        private ScopeBinderBuilderDelegate RegistrationScopeBinderBuilder(ScopeBinderBuilderDelegate next)
-        {
-            return config =>
-                {
-                    if (!(config is IxRegistrationScopeBindingConfig))
-                    {
-                        return next(config);
-                    }
-
-                    return RegistrationScopeBinder;
-                };
-        }
+        /// <inheritdoc/>
+        public Task DisposeTask => _rootScopeInstance.DisposeTask;
 
         /// <summary>
         /// Visibility filter builder.
@@ -72,7 +65,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 config =>
                     {
                         throw new NotSupportedException($"Scope binder with type {config.GetType()} is not supported.");
-                    });
+                    })
+            ;
 
         private static VisibilityFilterBuilderDelegate StdVisibilityFilterBuilder(
             VisibilityFilterBuilderDelegate next)
@@ -108,6 +102,32 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        private RawInstanceFactoryBuilderDelegate ClassRawFactoryBuilder(
+            RawInstanceFactoryBuilderDelegate next)
+        {
+            return factoryConfig =>
+                {
+                    TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
+
+                    if (configTypeInfo.IsGenericType
+                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>))
+                    {
+                        object instance = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
+                        if (instance == null)
+                        {
+                            throw new InvalidOperationException(
+                                "Existing instance factory config should have not null instance.");
+                        }
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+                        return async (parentValue, resolveContext) => instance;
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                    }
+
+                    return next(factoryConfig);
+                };
+        }
+
         private RawInstanceFactoryBuilderDelegate ExistingInstanceRawFactoryBuilder(
             RawInstanceFactoryBuilderDelegate next)
         {
@@ -134,6 +154,19 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        private ScopeBinderBuilderDelegate RegistrationScopeBinderBuilder(ScopeBinderBuilderDelegate next)
+        {
+            return config =>
+                {
+                    if (!(config is IxRegistrationScopeBindingConfig))
+                    {
+                        return next(config);
+                    }
+
+                    return RegistrationScopeBinder;
+                };
+        }
+
         private ProviderNodeBuilderDelegate ScopeBuilder(ProviderNodeBuilderDelegate next)
         {
             return (cfg, parentNode) =>
@@ -155,23 +188,25 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.ExportFilter == null)
                     {
-                        throw new InvalidOperationException("Export filter should be defined for provider node.");
+                        cfg.ExportFilter = new IxStdVisibilityFilterConfig();
                     }
 
                     if (cfg.ExportToParentFilter == null)
                     {
-                        throw new InvalidOperationException(
-                            "Export to parent filter should be defined for provider node.");
+                        cfg.ExportToParentFilter = new IxStdVisibilityFilterConfig
+                                                       {
+                                                           WhiteList = new HashSet<IxIdentifier>()
+                                                       };
                     }
 
                     if (cfg.ImportFilter == null)
                     {
-                        throw new InvalidOperationException("Import filter should be defined for provider node.");
+                        cfg.ImportFilter = new IxStdVisibilityFilterConfig();
                     }
 
                     VisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
-                    VisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
                     VisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
+                    VisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
 
                     return new IxScope(
                         this,
@@ -242,7 +277,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("Scope binding should be specified.");
                     }
 
-                    var scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
+                    ScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
 
                     return new IxSingletonProvider(
                         this,

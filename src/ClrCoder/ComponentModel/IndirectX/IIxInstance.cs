@@ -5,9 +5,9 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using JetBrains.Annotations;
+    using System.Collections.Generic;
 
-    using Threading;
+    using JetBrains.Annotations;
 
     public interface IIxInstance : IAsyncDisposable
     {
@@ -21,10 +21,27 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         IIxResolver Resolver { get; set; }
 
+        object DataSyncRoot { get; }
+
+        IReadOnlyCollection<IIxInstanceLock> OwnedLocks { get; }
+
+        IReadOnlyCollection<IIxInstanceLock> Locks { get; }
+
+        /// <summary>
+        /// Identifies that instance will be dispose in progress.
+        /// </summary>
+        bool IsDisposing { get; }
+
+        void AddLock(IIxInstanceLock instanceLock);
+
+        void AddOwnedLock(IIxInstanceLock instanceLock);
+
         [CanBeNull]
         object GetData(IxProviderNode providerNode);
 
-        object DataSyncRoot { get; }
+        void RemoveLock(IIxInstanceLock instanceLock);
+
+        void RemoveOwnedLock(IIxInstanceLock instanceLock);
 
         void SetData(IxProviderNode providerNode, [CanBeNull] object data);
     }

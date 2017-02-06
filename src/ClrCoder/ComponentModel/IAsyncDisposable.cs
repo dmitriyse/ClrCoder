@@ -7,8 +7,19 @@ namespace ClrCoder.ComponentModel
 {
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Asynchronously disposable.
+    /// </summary>
     public interface IAsyncDisposable
     {
-        Task AsyncDispose();
+        /// <summary>
+        /// Dispose task. Returns valid dispose task even <see cref="StartDispose"/> was not called yet.
+        /// </summary>
+        Task DisposeTask { get; }
+
+        /// <summary>
+        /// Initiates async disposing, allowed to be called multiple times.
+        /// </summary>
+        void StartDispose();
     }
 }

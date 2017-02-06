@@ -15,9 +15,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <summary>
         /// Resolves <c>object</c> with the specified type and <c>name</c>.
         /// </summary>
-        /// <typeparam name="TContract">Required <c>object</c> contract.</typeparam>
-        /// <param name="name">Additional distinguish <c>name</c>.</param>
+        /// <param name="identifier">Dependency <c>identifier</c>.</param>
         /// <returns>Required <c>object</c>.</returns>
-        Task<TContract> Resolve<TContract>(string name = null);
+        Task<IIxInstanceLock> Resolve(IxIdentifier identifier);
     }
 }

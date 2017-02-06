@@ -2,9 +2,11 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -13,18 +15,70 @@ namespace ClrCoder.ComponentModel.IndirectX
     public partial class IxHost
     {
         public InterceptableDelegate<ResolveDelegate> ResolveHandler = new InterceptableDelegate<ResolveDelegate>(
-            (originInstance, identifier, context) =>
+            (originInstanceLock, identifier, context) =>
                 {
                     throw new NotSupportedException(
                         $"No any rule found to resolve {identifier.Type}|{identifier.Name} dependency.");
                 });
 
-        public delegate Task<IIxInstance> ResolveDelegate(
+        public delegate Task<IIxInstanceLock> ResolveDelegate(
             IIxInstance originInstance,
             IxIdentifier identifier,
             IxResolveContext context);
 
-        private async Task<IIxInstance> RegistrationScopeBinder(
+        public async Task<IIxInstanceLock> ResolveList(
+            IIxInstance originInstance,
+            HashSet<IxIdentifier> dependencies,
+            IxResolveContext context,
+            Func<Dictionary<IxIdentifier, IIxInstance>, Task<IIxInstanceLock>> targetOperation)
+        {
+            if (originInstance == null)
+            {
+                throw new ArgumentNullException(nameof(originInstance));
+            }
+
+            if (dependencies == null)
+            {
+                throw new ArgumentNullException(nameof(dependencies));
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (targetOperation == null)
+            {
+                throw new ArgumentNullException(nameof(targetOperation));
+            }
+
+            using (HashSet<IxIdentifier>.Enumerator enumerator = dependencies.GetEnumerator())
+            {
+                var result = new Dictionary<IxIdentifier, IIxInstance>();
+                Func<Task<IIxInstanceLock>> resolveItem = null;
+                resolveItem = async () =>
+                    {
+                        // ReSharper disable once AccessToDisposedClosure
+                        if (!enumerator.MoveNext())
+                        {
+                            return await targetOperation(result);
+                        }
+
+                        // ReSharper disable once AccessToDisposedClosure
+                        using (IIxInstanceLock instanceLock = await Resolve(originInstance, enumerator.Current, context)
+                        )
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            result.Add(enumerator.Current, instanceLock.Target);
+                            return await resolveItem();
+                        }
+                    };
+
+                return await resolveItem();
+            }
+        }
+
+        private async Task<IIxInstanceLock> RegistrationScopeBinder(
             IIxInstance originInstance,
             IxResolvePath resolvePath,
             IxResolveContext context,
@@ -50,50 +104,35 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("Resolve algorithms problems");
             }
 
-            Func<IIxInstance, int, Task<IIxInstance>> resolvePathElements = null;
+            Func<IIxInstance, int, Task<IIxInstanceLock>> resolvePathElements = null;
 
             resolvePathElements = async (parentInstance, index) =>
                 {
                     if (index < resolvePath.Path.Count - 1)
                     {
-                        IIxInstance instance = await Resolve(
-                                                   parentInstance,
-                                                   resolvePath.Path[index].Identifier,
-                                                   context);
-
-                        try
+                        using (IIxInstanceLock instanceLock = await Resolve(
+                                                                  parentInstance,
+                                                                  resolvePath.Path[index].Identifier,
+                                                                  context))
                         {
-                            return await resolvePathElements(instance, index + 1);
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                await instance.AsyncDispose();
-                            }
-                            catch
-                            {
-                                // Silently disposing intermediate element.
-                            }
-
-                            throw;
+                            return await resolvePathElements(instanceLock.Target, index + 1);
                         }
                     }
 
                     return await resolveBound(parentInstance, resolvePath.Path.Last(), context);
                 };
 
-            IIxInstance resultInstance = await resolvePathElements(curInstance, 0);
-            return resultInstance;
+            IIxInstanceLock resultInstanceLock = await resolvePathElements(curInstance, 0);
+            return resultInstanceLock;
         }
 
         private ResolveDelegate ResolverResolveInterceptor(ResolveDelegate next)
         {
-            return async (originInstance, identifier, context) =>
+            return async (originInstanceLock, identifier, context) =>
                 {
                     if (identifier.Type != typeof(IIxResolver))
                     {
-                        return await next(originInstance, identifier, context);
+                        return await next(originInstanceLock, identifier, context);
                     }
 
                     if (identifier.Name != null)
@@ -101,18 +140,18 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("IIxResolver cannot be queried with name.");
                     }
 
-                    if (originInstance.Resolver == null)
+                    if (originInstanceLock.Resolver == null)
                     {
-                        lock (originInstance)
+                        lock (originInstanceLock)
                         {
-                            if (originInstance.Resolver == null)
+                            if (originInstanceLock.Resolver == null)
                             {
-                                originInstance.Resolver = new IxResolver(this, originInstance, context);
+                                originInstanceLock.Resolver = new IxResolver(this, originInstanceLock, context);
                             }
                         }
                     }
 
-                    return originInstance.Resolver;
+                    return new IxInstanceNoLock(originInstanceLock.Resolver);
                 };
         }
 

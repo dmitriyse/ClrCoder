@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -89,9 +90,9 @@ namespace ClrCoder.ComponentModel.IndirectX
             return nodesBuilder;
         }
 
-        public static Task<T> Get<T>(this IIxResolver resolver)
+        public static async Task<IxLock<T>> Get<T>(this IIxResolver resolver, string name = null)
         {
-            return resolver.Resolve<T>();
+            return new IxLock<T>(await resolver.Resolve(new IxIdentifier(typeof(T), name)));
         }
     }
 }

@@ -45,7 +45,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
-        public override async Task<IIxInstance> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        public override async Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
         {
             Task<IIxInstance> creationTask;
             lock (Host.InstanceTreeSyncRoot)
@@ -59,7 +59,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         if (creationTask.IsCompleted)
                         {
                             // Returns good result or exception.
-                            return creationTask.GetAwaiter().GetResult();
+                            return new IxInstanceTempLock(creationTask.GetAwaiter().GetResult());
                         }
 
                         parentInstance.SetData(this, creationTask);
@@ -71,12 +71,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                     else
                     {
                         // Object created.
-                        return (IIxInstance)data;
+                        return new IxInstanceTempLock((IIxInstance)data);
                     }
                 }
             }
 
-            return await creationTask;
+            return new IxInstanceTempLock(await creationTask);
         }
 
         private async Task<IIxInstance> CreateInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)

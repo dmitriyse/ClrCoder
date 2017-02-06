@@ -19,10 +19,10 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
-        public override async Task AsyncDispose()
+        protected override Task SelfDispose()
         {
-            // TODO: Instance should be disposed with parent scope disposing.
-            // Do nothing.
+            // TODO: Smart dispose depending on object type.
+            throw new NotImplementedException();
         }
     }
 }

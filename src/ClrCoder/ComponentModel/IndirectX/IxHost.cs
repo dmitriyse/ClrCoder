@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -55,12 +56,12 @@ namespace ClrCoder.ComponentModel.IndirectX
         public delegate RawInstanceFactory RawInstanceFactoryBuilderDelegate(
             IIxFactoryConfig config);
 
-        public delegate Task<IIxInstance> ResolveBoundDelegate(
+        public delegate Task<IIxInstanceLock> ResolveBoundDelegate(
             IIxInstance parentInstance,
             IxProviderNode provider,
             IxResolveContext context);
 
-        public delegate Task<IIxInstance> ScopeBinderDelegate(
+        public delegate Task<IIxInstanceLock> ScopeBinderDelegate(
             IIxInstance originInstance,
             IxResolvePath resolvePath,
             IxResolveContext context,
@@ -76,9 +77,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         public object InstanceTreeSyncRoot { get; } = new object();
 
         /// <inheritdoc/>
-        public async Task AsyncDispose()
+        public void StartDispose()
         {
-            // Do Nothing.
+            _rootScopeInstance.StartDispose();
         }
 
         public async Task Initialize(IxHostConfig config)
@@ -164,13 +165,16 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             _rootScopeInstance = _rootScope.GetRootInstance();
             var resolveContext = new IxResolveContext(null);
-            Resolver =
-                (IIxResolver)
-                (await Resolve(_rootScopeInstance, new IxIdentifier(typeof(IIxResolver), null), resolveContext))
-                .Object;
+            using (IIxInstanceLock rootResolverLock = await Resolve(
+                                                          _rootScopeInstance,
+                                                          new IxIdentifier(typeof(IIxResolver), null),
+                                                          resolveContext))
+            {
+                Resolver = (IIxResolver)rootResolverLock.Target.Object;
+            }
         }
 
-        private Task<IIxInstance> Resolve(
+        private Task<IIxInstanceLock> Resolve(
             IIxInstance originInstance,
             IxIdentifier identifier,
             IxResolveContext context)

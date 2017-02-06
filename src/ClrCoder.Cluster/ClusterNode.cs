@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Cluster
 {
+    using System;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -46,6 +47,19 @@ namespace ClrCoder.Cluster
                 .UseUrls("http://*:5000")
                 .UseStartup<Startup>()
                 .Build();
+        }
+
+        public Task DisposeTask
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void StartDispose()
+        {
+            throw new NotImplementedException();
         }
 
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

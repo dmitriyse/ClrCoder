@@ -10,6 +10,12 @@ namespace ClrCoder.ComponentModel
 
     public static class ComponentModelAsyncExtensions
     {
+        public static Task AsyncDispose(this IAsyncDisposable disposable)
+        {
+            disposable.StartDispose();
+            return disposable.DisposeTask;
+        }
+
         public static async Task AsyncUsing<T>(this Task<T> objTask, Func<T, Task> action)
             where T : IAsyncDisposable
         {
@@ -23,6 +29,7 @@ namespace ClrCoder.ComponentModel
                 await obj.AsyncDispose();
             }
         }
+
         public static async Task<TResult> AsyncUsing<T, TResult>(this Task<T> objTask, Func<T, Task<TResult>> action)
             where T : IAsyncDisposable
         {

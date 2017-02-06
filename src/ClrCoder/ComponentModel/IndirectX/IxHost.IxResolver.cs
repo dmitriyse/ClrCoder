@@ -2,9 +2,11 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -80,12 +82,56 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
+            IReadOnlyCollection<IIxInstanceLock> IIxInstance.OwnedLocks
+            {
+                get
+                {
+                    throw new NotSupportedException("This is too virtual.");
+                }
+            }
+
+            IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks
+            {
+                get
+                {
+                    throw new NotSupportedException("This is too virtual.");
+                }
+            }
+
+            Task IAsyncDisposable.DisposeTask
+            {
+                get
+                {
+                    throw new NotSupportedException("Too virtual for dispose.");
+                }
+            }
+
+            public bool IsDisposing
+            {
+                get
+                {
+                    throw new NotSupportedException("Lifetime methods cannot be used for this virtual object.");
+                }
+            }
+
             public IIxInstance Instance { get; }
 
             [CanBeNull]
             public IxResolveContext Context { get; }
 
-            public Task AsyncDispose()
+            void IIxInstance.AddLock(IIxInstanceLock instanceLock)
+            {
+                throw new NotSupportedException(
+                    "This is completely virtual object and should cannot be locked/unlocked.");
+            }
+
+            void IIxInstance.AddOwnedLock(IIxInstanceLock instanceLock)
+            {
+                throw new NotSupportedException(
+                    "This is completely virtual object and cannot own locks.");
+            }
+
+            public void StartDispose()
             {
                 throw new NotSupportedException("This method is too virtual to dispose it.");
             }
@@ -95,12 +141,25 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new NotSupportedException("This object not intendet to have children and children data.");
             }
 
-            public async Task<TContract> Resolve<TContract>(string name = null)
+            void IIxInstance.RemoveLock(IIxInstanceLock instanceLock)
+            {
+                throw new NotSupportedException(
+                    "This is completely virtual object and cannot be locked/unlocked.");
+            }
+
+            void IIxInstance.RemoveOwnedLock(IIxInstanceLock instanceLock)
+            {
+                throw new NotSupportedException(
+                    "This is completely virtual object and cannot own locks.");
+            }
+
+            public async Task<IIxInstanceLock> Resolve(IxIdentifier identifier)
             {
                 var context = new IxResolveContext(Context);
-
-                object obj = await Host.Resolve(Instance, new IxIdentifier(typeof(TContract), name), context);
-                return (TContract)obj;
+                using (new IxInstanceTempLock(Instance))
+                {
+                    return await Host.Resolve(Instance, identifier, context);
+                }
             }
 
             void IIxInstance.SetData(IxProviderNode providerNode, object data)

@@ -189,9 +189,10 @@ namespace ClrCoder
         /// <remarks>
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
+        /// <see cref="CriticalException"/>,
 #if NET46
-/// <see cref="StackOverflowException"/>,
-/// <see cref="ThreadAbortException"/>.
+        /// <see cref="StackOverflowException"/>,
+        /// <see cref="ThreadAbortException"/>.
 #endif
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
@@ -200,21 +201,25 @@ namespace ClrCoder
         public static bool IsProcessable([NotNull] this Exception ex)
         {
 #if DEBUG
+            if (ex is NotImplementedException)
+            {
+                return false;
+            }
+#endif
 #if NET46
-            return
-                !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
-                  || ex is NotImplementedException);
-#else
-            return
-                !(ex is OutOfMemoryException || ex is NotImplementedException);
+            if (ex is StackOverflowException 
+                || ex is ThreadAbortException
+                || ex is AppDomainUnloadedException
+                || ex is CannotUnloadAppDomainException)
+            {
+                return false;
+            }
+
 #endif
-#else
-#if NET46
-            return !(ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException);
-#else
-            return !(ex is OutOfMemoryException);
-#endif
-#endif
+            return !(ex is OutOfMemoryException
+                     || ex is CriticalException
+                     || ex is BadImageFormatException
+                     || ex is InvalidProgramException);
         }
 
         /// <summary>

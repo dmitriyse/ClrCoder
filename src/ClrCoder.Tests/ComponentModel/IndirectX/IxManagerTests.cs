@@ -7,6 +7,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
     using System.Threading.Tasks;
 
+    using ClrCoder.ComponentModel;
     using ClrCoder.ComponentModel.IndirectX;
 
     using NUnit.Framework;
@@ -18,23 +19,18 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     public class IxManagerTests
     {
         /// <summary>
+        /// Init/dispose cycle with zero configuration and resolves.
         /// </summary>
+        /// <return>Async execution TPL task.</return>
         [Test]
-        public async Task SimpleTest()
+        public async Task EmptyHostCycle()
         {
-            ////await new IxHostBuilder()
-            ////    .Configure(
-            ////        nodes: x => x
-            ////            .Add<IxManagerTests>(
-            ////                3,
-            ////                nodes: y => y.AddTransient<IxManagerTests>(3))
-            ////            .AddTransient<IxManagerTests>(3))
-            ////    .Build()
-            ////    .AsyncUsing(
-            ////        async host =>
-            ////            {
-            ////                var obj = await host.Get<T>();
-            ////            });
+            await new IxHostBuilder()
+                .Configure(rootNodes => { })
+                .Build()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+                .AsyncUsing(async host => { });
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         }
 
         private class DummyType
