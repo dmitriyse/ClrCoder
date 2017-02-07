@@ -70,11 +70,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                                   };
 
             nodesBuilder.Config.Add(scopeConfig);
-
             nodes?.Invoke(
                 new IxBuilder<List<IxScopeBaseConfig>>
                     {
-                        Config = new List<IxScopeBaseConfig>()
+                        Config = scopeConfig.Nodes
                     });
 
             return nodesBuilder;

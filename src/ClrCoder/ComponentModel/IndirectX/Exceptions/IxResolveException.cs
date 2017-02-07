@@ -1,47 +1,47 @@
-﻿// <copyright file="CriticalException.cs" company="ClrCoder project">
+﻿// <copyright file="IxResolveException.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace ClrCoder
+namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
 
     using JetBrains.Annotations;
+
 #if NET46
     using System.Runtime.Serialization;
 #endif
 
     /// <summary>
-    /// Library generated non processable exception.
+    /// Base class for all IndirectX processable exceptions.
     /// </summary>
     [PublicAPI]
-    public class CriticalException : Exception
+    public class IxResolveException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CriticalException"/> class.
+        /// Initializes a new instance of the <see cref="IxResolveException"/> class.
         /// </summary>
-        public CriticalException()
-            : base("Application critical exception occurs. Termination required.")
+        public IxResolveException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CriticalException"/> class with a specified error message.
+        /// Initializes a new instance of the <see cref="IxResolveException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The message that describes the error. </param>
-        public CriticalException(string message)
+        public IxResolveException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CriticalException"/> class with a specified error message and inner
+        /// Initializes a new instance of the <see cref="IxResolveException"/> class with a specified error message and inner
         /// exception.
         /// </summary>
         /// <param name="message">The message that describes the error. </param>
         /// <param name="innerException">Inner error.</param>
-        public CriticalException(string message, Exception innerException)
+        public IxResolveException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
@@ -49,7 +49,7 @@ namespace ClrCoder
 #if NET46
 
 /// <summary>
-/// Initializes a new instance of the <see cref="CriticalException"/> class with serialization data.
+/// Initializes a new instance of the <see cref="IxResolveException"/> class with serialization data.
 /// </summary>
 /// <param name="info">
 /// The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being
@@ -59,7 +59,7 @@ namespace ClrCoder
 /// The <see cref="StreamingContext"/> that contains contextual information about the source or
 /// destination.
 /// </param>
-        public CriticalException(SerializationInfo info, StreamingContext context)
+        public IxResolveException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

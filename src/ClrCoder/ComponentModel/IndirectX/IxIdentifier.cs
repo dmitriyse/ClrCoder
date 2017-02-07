@@ -22,7 +22,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="type">Type part of identifier.</param>
         /// <param name="name">Additional name.</param>
-        public IxIdentifier(Type type, [CanBeNull] string name)
+        public IxIdentifier(Type type, [CanBeNull] string name = null)
         {
             if (type == null)
             {

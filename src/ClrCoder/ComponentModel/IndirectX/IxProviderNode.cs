@@ -111,7 +111,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             _nodes.Add(child);
             _nodesById.Add(child.Identifier, child);
-            VisibleNodes.Add(child.Identifier, new IxResolvePath(this, new[] { child }));
+            VisibleNodes[child.Identifier] = new IxResolvePath(this, new[] { child });
         }
     }
 }

@@ -205,6 +205,11 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return (cfg, parentNode) =>
                 {
+                    if (cfg.Identifier == default(IxIdentifier))
+                    {
+                        cfg.Identifier = new IxIdentifier(typeof(IxScope));
+                    }
+
                     if (parentNode == null)
                     {
                         if (cfg.GetType() != typeof(IxHostConfig))

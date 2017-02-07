@@ -40,8 +40,8 @@ namespace ClrCoder.ComponentModel.IndirectX
             DisposeHandlerBuilder.Add(DisposableDisposeHandlerBuilder, 100);
 
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
-            ResolveHandler.Add(StdResolveInterceptor, 200);
-
+            ResolveHandler.Add(SelfToDirectChildrenResolver, 200);
+            ResolveHandler.Add(StdResolveInterceptor, 300);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public delegate IxRawInstanceFactory RawInstanceFactoryBuilderDelegate(
             IIxFactoryConfig config);
 
-        public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull]Type type);
+        public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull] Type type);
 
         public delegate IxVisibilityFilter VisibilityFilterBuilderDelegate(IIxVisibilityFilterConfig config);
 
@@ -105,8 +105,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                     {
                         importRegistrationsFromChildren(child);
 
+                        // Applying export to parent filter 
+                        // while Blocking from exporting resolve pathes with zero-length.
                         foreach (KeyValuePair<IxIdentifier, IxResolvePath> kvp in
-                            child.VisibleNodes.Where(x => child.ExportToParentFilter(x.Key)))
+                            child.VisibleNodes.Where(
+                                x => child.ExportToParentFilter(x.Key)
+                                     && x.Value.Path.Any()))
                         {
                             if (node.VisibleNodes.ContainsKey(kvp.Key))
                             {
@@ -125,6 +129,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 {
                     KeyValuePair<IxIdentifier, IxResolvePath>[] registrationsToExport =
                         node.VisibleNodes.Where(x => node.ExportFilter(x.Key)).ToArray();
+
                     if (!registrationsToExport.Any())
                     {
                         return;
@@ -205,5 +210,4 @@ namespace ClrCoder.ComponentModel.IndirectX
         IIxInstance parentInstance,
         IxProviderNode provider,
         IxHost.IxResolveContext context);
-
 }

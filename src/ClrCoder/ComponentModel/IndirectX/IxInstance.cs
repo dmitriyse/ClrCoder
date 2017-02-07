@@ -7,6 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading;
@@ -51,6 +52,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public object Object { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [CanBeNull]
         public IIxInstance ParentInstance
         {

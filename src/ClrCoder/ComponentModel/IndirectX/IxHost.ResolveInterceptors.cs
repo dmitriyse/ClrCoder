@@ -7,6 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -17,8 +18,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         public InterceptableDelegate<ResolveDelegate> ResolveHandler = new InterceptableDelegate<ResolveDelegate>(
             (originInstanceLock, identifier, context) =>
                 {
-                    throw new NotSupportedException(
-                        $"No any rule found to resolve {identifier.Type}|{identifier.Name} dependency.");
+                    throw new IxResolveTargetNotFound(
+                        $"No any rule found to resolve {identifier.Type}|{identifier.Name} dependency.",
+                        identifier);
                 });
 
         public delegate Task<IIxInstanceLock> ResolveDelegate(
@@ -85,6 +87,8 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxResolveBoundDelegate resolveBound)
         {
             IIxInstance curInstance = originInstance;
+
+            Contract.Assert(resolvePath.Path.Any(), "Registration scope binder does not support empty path.");
 
             lock (InstanceTreeSyncRoot)
             {
@@ -155,6 +159,26 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        private ResolveDelegate SelfToDirectChildrenResolver(ResolveDelegate next)
+        {
+            return async (originInstance, identifier, context) =>
+                {
+                    if (identifier.Name == null)
+                    {
+                        IxResolvePath resolvePath;
+                        if (originInstance.ProviderNode.VisibleNodes.TryGetValue(identifier, out resolvePath))
+                        {
+                            if (!resolvePath.Path.Any())
+                            {
+                                return new IxInstanceTempLock(originInstance);
+                            }
+                        }
+                    }
+
+                    return await next(originInstance, identifier, context);
+                };
+        }
+
         private ResolveDelegate StdResolveInterceptor(ResolveDelegate next)
         {
             return async (originInstance, identifier, context) =>
@@ -172,8 +196,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                                async (parentInstance, provider, c) =>
                                    {
                                        // While we have temporary lock, we needs to put permanent lock.
-                                       var resolvedInstanceTempLock = await provider.GetInstance(parentInstance, c);
-                                       
+                                       IIxInstanceLock resolvedInstanceTempLock =
+                                           await provider.GetInstance(parentInstance, c);
+
                                        // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
                                        // ReSharper disable once ObjectCreationAsStatement
                                        new IxInstanceMasterLock(resolvedInstanceTempLock.Target, parentInstance);

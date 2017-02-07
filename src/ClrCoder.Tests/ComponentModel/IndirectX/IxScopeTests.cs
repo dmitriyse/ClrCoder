@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
+    using System;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel;
@@ -20,6 +21,54 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     [TestFixture]
     public class IxScopeTests
     {
+        /// <summary>
+        /// Registered scope should be resolved.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Registered_scope_should_be_resolved_with_the_same_instance()
+        {
+            await new IxHostBuilder()
+                .Configure(nodes: n => { n.AddScope("test"); })
+                .Build()
+                .AsyncUsing(
+                    async host =>
+                        {
+                            object firstResolvedInstance;
+                            using (IxLock<IxScope> scope = await host.Resolver.Get<IxScope>("test"))
+                            {
+                                scope.Target.Should().NotBeNull();
+                                firstResolvedInstance = scope.Target;
+                            }
+
+                            using (IxLock<IxScope> scope = await host.Resolver.Get<IxScope>("test"))
+                            {
+                                scope.Target.Should().NotBeNull();
+                                scope.Target.Should().Be(firstResolvedInstance);
+                            }
+                        });
+        }
+
+        /// <summary>
+        /// Registered scope should be resolved.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task RegisteredScopeShouldBeResolved()
+        {
+            await new IxHostBuilder()
+                .Configure(nodes: n => { n.AddScope("test"); })
+                .Build()
+                .AsyncUsing(
+                    async host =>
+                        {
+                            using (IxLock<IxScope> rootScope = await host.Resolver.Get<IxScope>("test"))
+                            {
+                                rootScope.Target.Should().NotBeNull();
+                            }
+                        });
+        }
+
         /// <summary>
         /// Root scope resolve test.
         /// </summary>
@@ -37,6 +86,51 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                             {
                                 rootScope.Target.Should().NotBeNull();
                             }
+                        });
+        }
+
+        /// <summary>
+        /// Simplest use case. Single instantiation, no dispose on parent scope dispose.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Scope_registration_should_follow_visibility_rule()
+        {
+            var instance = new DummyObject();
+
+            await new IxHostBuilder()
+                .Configure(
+                    rootNodes =>
+                        {
+                            rootNodes.AddScope(
+                                name: "private",
+                                nodes: nodes =>
+                                    {
+                                        nodes.Add<DummyObject>(
+                                            factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                            disposeHandler: obj => Task.CompletedTask);
+                                    });
+                        })
+                .Build()
+                .AsyncUsing(
+                    host =>
+                        {
+                            Func<Task> action = async () =>
+                                {
+                                    using (
+                                        IxLock<DummyObject> resolvedInstanceLock =
+                                            await host.Resolver.Get<DummyObject>())
+                                    {
+                                        resolvedInstanceLock.Target.Should().Be(instance);
+                                    }
+                                };
+
+                            var expectedIdentifier = new IxIdentifier(typeof(DummyObject));
+
+                            action.ShouldThrow<IxResolveTargetNotFound>()
+                                .Where(x => x.Identifier == expectedIdentifier);
+
+                            return Task.CompletedTask;
                         });
         }
 

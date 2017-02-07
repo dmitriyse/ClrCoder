@@ -30,12 +30,15 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportFilter,
                 exportToParentFilter,
                 importFilter,
-                (a, b, c, d) => { throw new NotImplementedException(); },
+                host.ScopeBinderBuilder.Delegate(new IxRegistrationScopeBindingConfig()),
                 obj => Task.CompletedTask)
         {
+
+            // Adding self provided as default for children.
+            VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] {}));
         }
 
-        public override async Task<IIxInstanceLock> GetInstance(
+        public override Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
             IxHost.IxResolveContext context)
         {
@@ -44,15 +47,26 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(parentInstance));
             }
 
-            if (_rootInstance != null)
+            lock (Host.InstanceTreeSyncRoot)
             {
-                return new IxInstanceTempLock(_rootInstance);
+                lock (parentInstance.DataSyncRoot)
+                {
+                    IxScopeInstance singleton;
+                    object data = parentInstance.GetData(this);
+                    if (data == null)
+                    {
+                        singleton = new IxScopeInstance(Host, this, parentInstance);
+
+                        parentInstance.SetData(this, singleton);
+                    }
+                    else
+                    {
+                        singleton = (IxScopeInstance)data;
+                    }
+
+                    return Task.FromResult<IIxInstanceLock>(new IxInstanceTempLock(singleton));
+                }
             }
-
-            // TODO: Implement smart singleton.
-            throw new NotImplementedException();
-
-            // return new IxScopeInstance(Host, this, parentInstance);
         }
 
         public IxScopeInstance GetRootInstance()

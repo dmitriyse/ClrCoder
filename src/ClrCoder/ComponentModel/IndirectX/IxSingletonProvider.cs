@@ -2,13 +2,12 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-
-    using JetBrains.Annotations;
 
     public class IxSingletonProvider : IxProviderNode
     {
@@ -17,9 +16,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public IxSingletonProvider(
             IxHost host,
-            [CanBeNull] IxProviderNode parentNode,
+            IxProviderNode parentNode,
             IxStdProviderConfig config,
-            [CanBeNull] IxRawInstanceFactory rawInstanceFactory,
+            IxRawInstanceFactory rawInstanceFactory,
             IxVisibilityFilter exportFilter,
             IxVisibilityFilter exportToParentFilter,
             IxVisibilityFilter importFilter,
@@ -45,10 +44,25 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 throw new ArgumentNullException(nameof(rawInstanceFactory));
             }
+
+            // Adding self provided as default for children.
+            VisibleNodes.Add(new IxIdentifier(Identifier.Type, null), new IxResolvePath(this, new IxProviderNode[] { }));
         }
 
-        public override async Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        public override async Task<IIxInstanceLock> GetInstance(
+            IIxInstance parentInstance,
+            IxHost.IxResolveContext context)
         {
+            if (parentInstance == null)
+            {
+                throw new ArgumentNullException(nameof(parentInstance));
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             Task<IIxInstance> creationTask;
             lock (Host.InstanceTreeSyncRoot)
             {
