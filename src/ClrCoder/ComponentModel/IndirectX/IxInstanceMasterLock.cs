@@ -26,7 +26,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             Target = target;
             Master = master;
 
-            lock (Target.Host.InstanceTreeSyncRoot)
+            lock (Target.ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 Target.AddLock(this);
                 Master.AddOwnedLock(this);
@@ -44,7 +44,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("Lock already disposed.");
             }
 
-            lock (Target.Host.InstanceTreeSyncRoot)
+            lock (Target.ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 if (_disposed)
                 {

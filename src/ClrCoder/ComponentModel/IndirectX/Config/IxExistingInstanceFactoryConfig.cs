@@ -5,7 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    public class IxExistingInstanceFactoryConfig<T> : IIxFactoryConfig
+    public class IxExistingInstanceFactoryConfig<T> : IIxRawFactoryConfig
     {
         public IxExistingInstanceFactoryConfig(T instance)
         {

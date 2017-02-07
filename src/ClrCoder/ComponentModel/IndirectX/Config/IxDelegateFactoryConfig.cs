@@ -7,7 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
 
-    public class IxDelegateFactoryConfig : IIxFactoryConfig
+    public class IxDelegateFactoryConfig : IIxRawFactoryConfig
     {
         public IxDelegateFactoryConfig(Delegate factory)
         {

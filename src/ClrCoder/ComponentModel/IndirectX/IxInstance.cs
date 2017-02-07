@@ -33,20 +33,16 @@ namespace ClrCoder.ComponentModel.IndirectX
         private Dictionary<IxProviderNode, object> _childrenData;
 
         public IxInstance(
-            IxHost host,
             IxProviderNode providerNode,
             [CanBeNull] IIxInstance parentInstance,
             object @object)
         {
-            Host = host;
             ProviderNode = providerNode;
             _parentInstance = parentInstance;
             Object = @object;
             _ownedLocks = new HashSet<IIxInstanceLock>();
             _locks = new HashSet<IIxInstanceLock>();
         }
-
-        public IxHost Host { get; }
 
         public IxProviderNode ProviderNode { get; }
 
@@ -58,7 +54,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             get
             {
-                if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+                if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
                 {
                     Contract.Assert(
                         false,
@@ -79,7 +75,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 if (_disposeTask == null && _disposeCompletionSource == null)
                 {
-                    lock (Host.InstanceTreeSyncRoot)
+                    lock (ProviderNode.Host.InstanceTreeSyncRoot)
                     {
                         if (_disposeTask == null && _disposeCompletionSource == null)
                         {
@@ -148,7 +144,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
             {
                 Contract.Assert(
                     false,
@@ -200,7 +196,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
+            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
             {
                 Contract.Assert(
                     false,
@@ -224,7 +220,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public virtual void StartDispose()
         {
-            lock (Host.InstanceTreeSyncRoot)
+            lock (ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 IsDisposing = true;
 
@@ -265,7 +261,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         private void EnsureTreeLocked()
         {
             Contract.Assert(
-                Monitor.IsEntered(Host.InstanceTreeSyncRoot),
+                Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot),
                 "Lock related operation should be performed under global tree lock.");
         }
 
@@ -318,7 +314,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                     "Dependencies schema problem, after instance object disposed no any lock are allowed.");
                             }
 
-                            lock (Host.InstanceTreeSyncRoot)
+                            lock (ProviderNode.Host.InstanceTreeSyncRoot)
                             {
                                 // Freeing all owned locks.
                                 while (OwnedLocks.Any())

@@ -10,8 +10,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     public class IxSingletonInstance : IxInstance
     {
-        public IxSingletonInstance(IxHost host, IxProviderNode providerNode, IIxInstance parentInstance, object @object)
-            : base(host, providerNode, parentInstance, @object)
+        public IxSingletonInstance(IxProviderNode providerNode, IIxInstance parentInstance, object @object)
+            : base(providerNode, parentInstance, @object)
         {
             if (parentInstance == null)
             {

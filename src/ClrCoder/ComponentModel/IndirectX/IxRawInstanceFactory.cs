@@ -1,4 +1,4 @@
-﻿// <copyright file="Class.cs" company="ClrCoder project">
+﻿// <copyright file="IxRawInstanceFactory.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -35,7 +35,15 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="parentInstance">Parent instance.</param>
     /// <param name="context"><c>Resolve</c> <c>context</c>.</param>
     /// <returns>Create instance.</returns>
-    public delegate Task<object> IxRawInstanceFactoryDelegate(
+    public delegate Task<IIxInstanceLock> IxRawInstanceFactoryDelegate(
+        IxProviderNode providerNode,
         IIxInstance parentInstance,
-        IxHost.IxResolveContext context);
+        IxHost.IxResolveContext context,
+        IxInstanceFactoryDelegate ixInstanceFactoryDelegate);
+
+    public delegate IIxInstanceLock IxInstanceFactoryDelegate(
+        IxProviderNode providerNode,
+        IIxInstance parentInstance,
+        IxHost.IxResolveContext context,
+        object @object);
 }

@@ -125,10 +125,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                     }
                                 };
 
-                            var expectedIdentifier = new IxIdentifier(typeof(DummyObject));
-
                             action.ShouldThrow<IxResolveTargetNotFound>()
-                                .Where(x => x.Identifier == expectedIdentifier);
+                                .Which.Identifier.Should().Be(new IxIdentifier(typeof(DummyObject)));
 
                             return Task.CompletedTask;
                         });

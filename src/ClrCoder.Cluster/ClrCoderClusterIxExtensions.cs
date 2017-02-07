@@ -32,7 +32,7 @@ namespace ClrCoder.Cluster
                                                 .UseKestrel()
                                                 .UseContentRoot(Directory.GetCurrentDirectory())
                                                 .ConfigureJsonFormatters(JsonDefaults.JsonRestRpcSerializerSettings))))
-                            .Add<IClusterNode>(factory: new IxClassFactoryConfig<ClusterNode>()));
+                            .Add<IClusterNode>(factory: new IxClassRawFactoryConfig<ClusterNode>()));
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
             return hostBuilder;

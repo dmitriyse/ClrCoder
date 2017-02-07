@@ -18,7 +18,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig importFilter = null,
             IIxVisibilityFilterConfig exportToParentFilter = null,
             IIxVisibilityFilterConfig exportFilter = null,
-            IIxFactoryConfig factory = null,
+            IIxRawFactoryConfig factory = null,
             IIxMultiplicityConfig multiplicity = null,
             IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)

@@ -28,6 +28,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             // TODO: Load priorities from configs.
             RawInstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
+            RawInstanceFactoryBuilder.Add(ClassRawFactoryBuilder, 100);
 
             VisibilityFilterBuilder.Add(StdVisibilityFilterBuilder, 100);
 
@@ -50,7 +51,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="config">Configuration node.</param>
         /// <returns>Created node.</returns>
         public delegate IxRawInstanceFactory RawInstanceFactoryBuilderDelegate(
-            IIxFactoryConfig config);
+            IIxRawFactoryConfig config);
 
         public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull] Type type);
 
@@ -179,7 +180,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (originInstance.Host != this)
+            if (originInstance.ProviderNode.Host != this)
             {
                 throw new InvalidOperationException("You cannot use resolver from different host.");
             }

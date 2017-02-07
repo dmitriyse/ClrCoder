@@ -1,4 +1,4 @@
-﻿// <copyright file="IxInstanceTempLock.cs" company="ClrCoder project">
+﻿// <copyright file="IxReferenceLock.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -7,26 +7,38 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
 
-    public class IxInstanceTempLock : IIxInstanceLock
+    /// <summary>
+    /// Lock when one object references another.
+    /// </summary>
+    public class IxReferenceLock : IIxInstanceLock
     {
         private bool _disposed;
 
-        public IxInstanceTempLock(IIxInstance target)
+        public IxReferenceLock(IIxInstance target, IIxInstance user)
         {
             if (target == null)
             {
                 throw new ArgumentNullException(nameof(target));
             }
 
-            Target = target;
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
 
-            lock (target.ProviderNode.Host.InstanceTreeSyncRoot)
+            Target = target;
+            User = user;
+
+            lock (Target.ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 Target.AddLock(this);
+                User.AddOwnedLock(this);
             }
         }
 
         public IIxInstance Target { get; }
+
+        public IIxInstance User { get; }
 
         public void Dispose()
         {
@@ -45,6 +57,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 _disposed = true;
 
                 Target.RemoveLock(this);
+                User.RemoveOwnedLock(this);
             }
         }
 

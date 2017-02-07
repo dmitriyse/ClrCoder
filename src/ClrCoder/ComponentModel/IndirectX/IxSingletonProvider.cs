@@ -63,7 +63,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(context));
             }
 
-            Task<IIxInstance> creationTask;
+            Task<IIxInstanceLock> creationTask;
             lock (Host.InstanceTreeSyncRoot)
             {
                 lock (parentInstance.DataSyncRoot)
@@ -75,14 +75,14 @@ namespace ClrCoder.ComponentModel.IndirectX
                         if (creationTask.IsCompleted)
                         {
                             // Returns good result or exception.
-                            return new IxInstanceTempLock(creationTask.GetAwaiter().GetResult());
+                            return creationTask.GetAwaiter().GetResult();
                         }
 
                         parentInstance.SetData(this, creationTask);
                     }
                     else if (data is Task)
                     {
-                        creationTask = (Task<IIxInstance>)data;
+                        creationTask = (Task<IIxInstanceLock>)data;
                     }
                     else
                     {
@@ -92,23 +92,26 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
-            return new IxInstanceTempLock(await creationTask);
+            return await creationTask;
         }
 
-        private async Task<IIxInstance> CreateInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        private async Task<IIxInstanceLock> CreateInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
         {
-            IIxInstance result = null;
+            IIxInstanceLock result = null;
             try
             {
                 Debug.Assert(RawInstanceFactory != null, "RawInstanceFactory != null");
-                object @object = await RawInstanceFactory.Factory(parentInstance, context);
-                return new IxSingletonInstance(Host, this, parentInstance, @object);
+                result = await RawInstanceFactory.Factory(
+                             this,
+                             parentInstance,
+                             context,
+                             (provider, parent, ctx, @obj) => new IxInstanceTempLock(new IxSingletonInstance(provider, parent, @obj)));
             }
             finally
             {
                 lock (parentInstance.DataSyncRoot)
                 {
-                    parentInstance.SetData(this, result);
+                    parentInstance.SetData(this, result?.Target);
                 }
             }
 

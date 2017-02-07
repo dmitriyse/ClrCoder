@@ -19,7 +19,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IIxMultiplicityConfig Multiplicity { get; set; }
 
         [CanBeNull]
-        public IIxFactoryConfig Factory { get; set; }
+        public IIxRawFactoryConfig Factory { get; set; }
 
         /// <summary>
         /// Overrides dispose operation.

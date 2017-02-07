@@ -11,8 +11,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     public interface IIxInstance : IAsyncDisposable
     {
-        IxHost Host { get; }
-
         IxProviderNode ProviderNode { get; }
 
         object Object { get; }

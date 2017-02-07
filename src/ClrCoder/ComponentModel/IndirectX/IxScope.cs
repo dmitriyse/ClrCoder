@@ -55,7 +55,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     object data = parentInstance.GetData(this);
                     if (data == null)
                     {
-                        singleton = new IxScopeInstance(Host, this, parentInstance);
+                        singleton = new IxScopeInstance(this, parentInstance);
 
                         parentInstance.SetData(this, singleton);
                     }
@@ -76,7 +76,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("Only root scope can produce root instance.");
             }
 
-            return _rootInstance ?? (_rootInstance = new IxScopeInstance(Host, this, null));
+            return _rootInstance ?? (_rootInstance = new IxScopeInstance(this, null));
         }
     }
 }

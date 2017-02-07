@@ -11,8 +11,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     public class IxScopeInstance : IxInstance
     {
-        public IxScopeInstance(IxHost host, IxProviderNode providerNode, [CanBeNull] IIxInstance parentInstance)
-            : base(host, providerNode, parentInstance, providerNode)
+        public IxScopeInstance(IxProviderNode providerNode, [CanBeNull] IIxInstance parentInstance)
+            : base(providerNode, parentInstance, providerNode)
         {
         }
 

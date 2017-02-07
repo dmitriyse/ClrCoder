@@ -8,10 +8,13 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
+    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
+
+    using MoreLinq;
 
     using ObjectModel;
 
@@ -21,7 +24,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <summary>
         /// Raw instance factory from config builder.
         /// </summary>
-        public InterceptableDelegate<RawInstanceFactoryBuilderDelegate> RawInstanceFactoryBuilder =
+        public InterceptableDelegate<RawInstanceFactoryBuilderDelegate> RawInstanceFactoryBuilder { get; } =
             new InterceptableDelegate<RawInstanceFactoryBuilderDelegate>(
                 config =>
                     {
@@ -80,7 +83,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                                 };
                         }
 
-                        throw new NotSupportedException($"Cannot build dispose handler for type {type}");
+                        // By default no any dispose action required on object.
+                        return obj => Task.CompletedTask;
                     }
 
             );
@@ -144,17 +148,71 @@ namespace ClrCoder.ComponentModel.IndirectX
                     TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
 
                     if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>))
+                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassRawFactoryConfig<>))
                     {
-                        object instance = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
-                        if (instance == null)
+                        TypeInfo instanceClass = configTypeInfo.GenericTypeArguments[0].GetTypeInfo();
+                        ConstructorInfo[] constructors =
+                            instanceClass.DeclaredConstructors.Where(x => !x.IsStatic).ToArray();
+                        if (constructors.Length == 0)
                         {
-                            throw new InvalidOperationException(
-                                "Existing instance factory config should have not null instance.");
+                            // Currently impossible case.
+                            throw new IxConfigurationException(
+                                $"Cannot use IxClassRawFactory because no any constructors found in the class {instanceClass.FullName}.");
+                        }
+
+                        if (constructors.Length > 1)
+                        {
+                            throw new IxConfigurationException(
+                                $"Cannot use IxClassRawFactory because more than one constructors defined in the class {instanceClass.FullName}.");
+                        }
+
+                        ConstructorInfo constructorInfo = constructors.Single();
+
+                        HashSet<IxIdentifier> dependencies =
+                            constructorInfo.GetParameters().Select(x => new IxIdentifier(x.ParameterType)).ToHashSet();
+                        if (dependencies.Count != constructorInfo.GetParameters().Length)
+                        {
+                            throw new IxConfigurationException(
+                                "Multiple parameters with the same type not supported by IxClassRawFactory.");
                         }
 
                         return new IxRawInstanceFactory(
-                            (parentValue, resolveContext) => Task.FromResult(instance),
+                            (providerNode, parentInstance, resolveContext, ixInstanceFactory) => ResolveList(
+                                parentInstance,
+                                dependencies,
+                                resolveContext,
+                                resolvedDependencies =>
+                                    {
+                                        object[] arguments = constructorInfo.GetParameters()
+                                            .Select(
+                                                x =>
+                                                    resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
+                                            .ToArray();
+
+                                        object instance = constructorInfo.Invoke(arguments);
+
+                                        Contract.Assert(
+                                            instance != null,
+                                            "Constructor call through reflection should not return null.");
+
+                                        IIxInstanceLock ixInstanceLock = ixInstanceFactory(
+                                            providerNode,
+                                            parentInstance,
+                                            resolveContext,
+                                            instance);
+
+                                        lock (providerNode.Host.InstanceTreeSyncRoot)
+                                        {
+                                            foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp 
+                                                in resolvedDependencies)
+                                            {
+                                                // ReSharper disable once ObjectCreationAsStatement
+                                                new IxReferenceLock(kvp.Value, ixInstanceLock.Target);
+                                            }
+                                        }
+
+                                        return Task.FromResult(ixInstanceLock);
+                                    }),
                             configTypeInfo.GenericTypeArguments[0]);
                     }
 
@@ -180,7 +238,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         }
 
                         return new IxRawInstanceFactory(
-                            (parentValue, resolveContext) => Task.FromResult(instance),
+                            (provider, parentInstance, resolveContext, ixInstanceFactory) =>
+                                Task.FromResult(ixInstanceFactory(provider, parentInstance, resolveContext, instance)),
                             configTypeInfo.GenericTypeArguments[0]);
                     }
 
