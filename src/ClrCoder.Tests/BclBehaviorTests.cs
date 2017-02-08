@@ -6,6 +6,7 @@
 namespace ClrCoder.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -20,6 +21,53 @@ namespace ClrCoder.Tests
     [TestFixture]
     public class BclBehaviorTests
     {
+        /// <summary>
+        /// Async functions wraps exception into Task when exception raised in synchronous execution part.
+        /// </summary>
+        [Test]
+        public void Async_function_exception_should_be_wrapped_in_a_sync_execution_path()
+        {
+            Action a = () =>
+                {
+                    Func<Task> someAsync = async () =>
+                        {
+                            await Task.CompletedTask;
+                            throw new Exception("DummyError");
+                        };
+
+                    Task task = someAsync();
+                    task.Should().NotBeNull();
+                    task.Wait();
+                };
+            a.ShouldThrow<AggregateException>().WithInnerException<Exception>().WithInnerMessage("DummyError");
+        }
+
+        /// <summary>
+        /// Await behavior test for completed task.
+        /// </summary>
+        /// <returns>Async execution task.</returns>
+        [Test]
+        public async Task Completed_task_should_be_awaited_synchronously()
+        {
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            await Task.CompletedTask;
+
+            Thread.CurrentThread.ManagedThreadId.Should().Be(originalThreadId);
+        }
+
+        /// <summary>
+        /// Await behavior test for completed task with ConfigureAwait(false).
+        /// </summary>
+        /// <returns>Async execution task.</returns>
+        [Test]
+        public async Task Completed_task_should_be_awaited_synchronously_even_with_configure_await_false()
+        {
+            int originalThreadId = Thread.CurrentThread.ManagedThreadId;
+            await Task.CompletedTask.ConfigureAwait(false);
+
+            Thread.CurrentThread.ManagedThreadId.Should().Be(originalThreadId);
+        }
+
         /// <summary>
         /// Long running TPL task should use background thread. This behavior required to implement supporting background services
         /// that is terminated on application exit.
@@ -53,7 +101,7 @@ namespace ClrCoder.Tests
                 TaskCreationOptions.LongRunning);
             task.Wait(TimeSpan.FromSeconds(1)).Should().BeFalse();
 #else
-            var task = Task.Factory.StartNew(
+            Task task = Task.Factory.StartNew(
                 () =>
                     {
                         Thread.CurrentThread.IsBackground.Should()
@@ -93,6 +141,16 @@ namespace ClrCoder.Tests
         public void PathCombineTest(string a, string b, string expected)
         {
             Path.Combine(a, b).Replace("/", "\\").Should().Be(expected);
+        }
+
+        /// <summary>
+        /// Trace.Assert behavior test.
+        /// </summary>
+        [Test]
+        [Ignore("For manual testing")]
+        public void TraceAssert_should_produce_breakpoint()
+        {
+            Trace.Assert(false, "break on me");
         }
     }
 }

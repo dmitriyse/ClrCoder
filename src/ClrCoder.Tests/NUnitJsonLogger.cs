@@ -7,14 +7,13 @@ namespace ClrCoder.Tests
 {
     using ClrCoder.Logging;
     using ClrCoder.Logging.Std;
+    using ClrCoder.Threading;
 
     using JetBrains.Annotations;
 
     using NodaTime;
 
     using NUnit.Framework;
-
-    using Threading;
 
     /// <summary>
     /// Logger that outputs to <see cref="TestContext"/>.
@@ -39,8 +38,8 @@ namespace ClrCoder.Tests
         /// <inheritdoc/>
         public void Log(object entry)
         {
-            var logEntry = LoggerUtils.NormalizeToLogEntry(entry);
-            var dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
+            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
             TestContext.WriteLine(
                 $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}:{logEntry.Severity}: {dotNetTypePrefix}{logEntry.Message}");

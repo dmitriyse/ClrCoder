@@ -23,7 +23,7 @@ namespace ClrCoder.Tests
         /// </summary>
         /// <param name="minValue">Test set size.</param>
         /// <param name="maxValue">Test subset size.</param>
-        /// <param name="size"></param> 
+        /// <param name="size">Size of result collection.</param> 
         [Test]
         [TestCase(0, 0, 0)]
         [TestCase(0, 1, 1)]

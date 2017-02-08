@@ -46,7 +46,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
 
             // Adding self provided as default for children.
-            VisibleNodes.Add(new IxIdentifier(Identifier.Type, null), new IxResolvePath(this, new IxProviderNode[] { }));
+            VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] { }));
         }
 
         public override async Task<IIxInstanceLock> GetInstance(
@@ -71,12 +71,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                     object data = parentInstance.GetData(this);
                     if (data == null)
                     {
-                        creationTask = CreateInstance(parentInstance, context);
-                        if (creationTask.IsCompleted)
-                        {
-                            // Returns good result or exception.
-                            return creationTask.GetAwaiter().GetResult();
-                        }
+                        Debug.Assert(RawInstanceFactory != null, "RawInstanceFactory != null");
+                        creationTask = RawInstanceFactory.Factory(
+                                     this,
+                                     parentInstance,
+                                     context,
+                                     (provider, parent, ctx, @obj) => new IxInstanceTempLock(new IxSingletonInstance(provider, parent, @obj)));
 
                         parentInstance.SetData(this, creationTask);
                     }
@@ -92,20 +92,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
-            return await creationTask;
-        }
-
-        private async Task<IIxInstanceLock> CreateInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
-        {
             IIxInstanceLock result = null;
             try
             {
-                Debug.Assert(RawInstanceFactory != null, "RawInstanceFactory != null");
-                result = await RawInstanceFactory.Factory(
-                             this,
-                             parentInstance,
-                             context,
-                             (provider, parent, ctx, @obj) => new IxInstanceTempLock(new IxSingletonInstance(provider, parent, @obj)));
+                result = await creationTask;
             }
             finally
             {
@@ -115,6 +105,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
+            // ReSharper disable once AssignNullToNotNullAttribute
+            // This is resharper wrong nullability detection.
             return result;
         }
     }

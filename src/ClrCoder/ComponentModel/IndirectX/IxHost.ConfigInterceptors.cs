@@ -7,7 +7,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -78,7 +77,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             return obj =>
                                 {
-                                    Contract.Assert(obj != null, "Dispose handler called on not null object.");
+                                    Critical.Assert(obj != null, "Dispose handler called on not null object.");
                                     return Task.CompletedTask;
                                 };
                         }
@@ -191,7 +190,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                         object instance = constructorInfo.Invoke(arguments);
 
-                                        Contract.Assert(
+                                        Critical.Assert(
                                             instance != null,
                                             "Constructor call through reflection should not return null.");
 
@@ -476,7 +475,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             try
                             {
-                                Contract.Assert(obj != null, "Dispose handler called for null object");
+                                Critical.Assert(obj != null, "Dispose handler called for null object");
                                 ((IDisposable)obj)?.Dispose();
                             }
                             catch (Exception ex)

@@ -8,8 +8,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     using System;
     using System.Threading.Tasks;
 
-    using ClrCoder.ComponentModel;
     using ClrCoder.ComponentModel.IndirectX;
+    using ClrCoder.Threading;
 
     using FluentAssertions;
 

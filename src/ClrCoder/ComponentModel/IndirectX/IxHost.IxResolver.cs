@@ -12,6 +12,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     /// <content><see cref="IxResolver"/> implementation.</content>
     public partial class IxHost
     {

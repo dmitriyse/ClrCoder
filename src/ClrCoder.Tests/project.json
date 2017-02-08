@@ -13,6 +13,7 @@
     "NodaTime": "2.0.0-alpha20160707",
     "NodaTime.Serialization.JsonNet": "2.0.0-alpha20160707",
     "NUnit": "3.5",
+    "System.Diagnostics.TraceSource": "4.0.0",
     "System.Threading.Thread": "4.0.0"
   },
 

@@ -7,7 +7,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -88,7 +87,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             IIxInstance curInstance = originInstance;
 
-            Contract.Assert(resolvePath.Path.Any(), "Registration scope binder does not support empty path.");
+            Critical.Assert(resolvePath.Path.Any(), "Registration scope binder does not support empty path.");
 
             lock (InstanceTreeSyncRoot)
             {

@@ -7,7 +7,7 @@ namespace ClrCoder.Cluster
 {
     using System.Threading.Tasks;
 
-    using ComponentModel;
+    using Threading;
 
     public interface IClusterNode : IAsyncDisposable
     {

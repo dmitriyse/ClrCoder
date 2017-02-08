@@ -8,46 +8,58 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
+    using Collections;
+
     using JetBrains.Annotations;
 
-    public abstract class IxInstance : IIxInstance
+    using Threading;
+
+    /// <summary>
+    /// IndirectX controlled instance placeholder <c>base</c> implementation.
+    /// </summary>
+    /// <remarks>Should be implemented as proxy in the future.</remarks>
+    public abstract class IxInstance : AsyncDisposableBase, IIxInstance
     {
         private readonly IIxInstance _parentInstance;
 
-        private readonly HashSet<IIxInstanceLock> _locks;
+        private readonly ProcessableSet<IIxInstanceLock> _locks;
 
-        private readonly HashSet<IIxInstanceLock> _ownedLocks;
-
-        private Task _disposeTask;
-
-        private TaskCompletionSource<bool> _disposeCompletionSource;
-
-        private bool _selfDisposingStarted;
+        private readonly ProcessableSet<IIxInstanceLock> _ownedLocks;
 
         [CanBeNull]
         private Dictionary<IxProviderNode, object> _childrenData;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IxInstance"/> class.
+        /// </summary>
+        /// <param name="providerNode">Node that produces instance.</param>
+        /// <param name="parentInstance">Direct parent instance.</param>
+        /// <param name="object">Controlled by this placeholder object.</param>
         public IxInstance(
             IxProviderNode providerNode,
             [CanBeNull] IIxInstance parentInstance,
             object @object)
+            : base(providerNode.Host.InstanceTreeSyncRoot)
         {
             ProviderNode = providerNode;
             _parentInstance = parentInstance;
             Object = @object;
-            _ownedLocks = new HashSet<IIxInstanceLock>();
-            _locks = new HashSet<IIxInstanceLock>();
+            _ownedLocks = new ProcessableSet<IIxInstanceLock>();
+            _locks = new ProcessableSet<IIxInstanceLock>();
         }
 
+        /// <inheritdoc/>
         public IxProviderNode ProviderNode { get; }
 
+        /// <inheritdoc/>
         public object Object { get; }
 
+        /// <inheritdoc/>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [CanBeNull]
         public IIxInstance ParentInstance
@@ -56,7 +68,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
                 {
-                    Contract.Assert(
+                    Critical.Assert(
                         false,
                         "Inspecting instance parent should be performed under InstanceTreeLock.");
                 }
@@ -65,37 +77,17 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
+        /// <inheritdoc/>
         public IIxResolver Resolver { get; set; }
 
+        /// <inheritdoc/>
         public object DataSyncRoot => ChildrenData;
 
-        public Task DisposeTask
-        {
-            get
-            {
-                if (_disposeTask == null && _disposeCompletionSource == null)
-                {
-                    lock (ProviderNode.Host.InstanceTreeSyncRoot)
-                    {
-                        if (_disposeTask == null && _disposeCompletionSource == null)
-                        {
-                            _disposeCompletionSource = new TaskCompletionSource<bool>();
-                            _disposeTask = _disposeCompletionSource.Task;
-                        }
-                    }
-                }
-
-                return _disposeTask;
-            }
-        }
-
+        /// <inheritdoc/>
         public IReadOnlyCollection<IIxInstanceLock> OwnedLocks => _ownedLocks;
 
+        /// <inheritdoc/>
         public IReadOnlyCollection<IIxInstanceLock> Locks => _locks;
-
-        public bool IsDisposing { get; protected set; }
-
-        public int LocksVersion { get; set; }
 
         private Dictionary<IxProviderNode, object> ChildrenData
         {
@@ -110,32 +102,35 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
+        /// <inheritdoc/>
         public void AddLock(IIxInstanceLock instanceLock)
         {
             EnsureTreeLocked();
 
-            if (!_locks.Add(instanceLock))
+            try
             {
-                Contract.Assert(false, "Lock already registered in the target instance.");
+                SetDisposeSuspended(true);
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set lock, self dispose was started.");
             }
 
-            if (_selfDisposingStarted)
-            {
-                Contract.Assert(false, "You cannot use instance while in object self-disposing state");
-            }
-
-            LocksVersion++;
+            bool inserted = _locks.Add(instanceLock);
+            Critical.Assert(inserted, "Lock already registered in the target instance.");
         }
 
+        /// <inheritdoc/>
         public void AddOwnedLock(IIxInstanceLock instanceLock)
         {
             EnsureTreeLocked();
             if (!_ownedLocks.Add(instanceLock))
             {
-                Contract.Assert(false, "Owned Lock already registered in the owner.");
+                Critical.Assert(false, "Owned Lock already registered in the owner.");
             }
         }
 
+        /// <inheritdoc/>
         [CanBeNull]
         public object GetData(IxProviderNode providerNode)
         {
@@ -144,16 +139,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
-            {
-                Contract.Assert(
-                    false,
-                    "Inspecting instance parent should be performed under InstanceTreeLock.");
-            }
-
             if (!Monitor.IsEntered(DataSyncRoot))
             {
-                Contract.Assert(false, "Data manipulations should be performed under lock.");
+                Critical.Assert(false, "Data manipulations should be performed under lock.");
             }
 
             object result;
@@ -167,13 +155,15 @@ namespace ClrCoder.ComponentModel.IndirectX
         public void RemoveLock(IIxInstanceLock instanceLock)
         {
             EnsureTreeLocked();
+
+            // --------- We are under tree lock --------------
             if (!_locks.Remove(instanceLock))
             {
-                Contract.Assert(false, "Lock was not registered in the target or already removed.");
+                Critical.Assert(false, "Lock was not registered in the target or already removed.");
             }
 
-            LocksVersion++;
-            if (IsDisposing)
+            // It's safe to use IsDisposeStarted while StartDispose was called also under tree lock.
+            if (IsDisposeStarted)
             {
                 TryStartSelfDispose();
             }
@@ -183,12 +173,15 @@ namespace ClrCoder.ComponentModel.IndirectX
         public void RemoveOwnedLock(IIxInstanceLock instanceLock)
         {
             EnsureTreeLocked();
+
+            // --------- We are under tree lock --------------
             if (!_ownedLocks.Remove(instanceLock))
             {
-                Contract.Assert(false, "Owned lock was not registered in the owner or already removed.");
+                Critical.Assert(false, "Owned lock was not registered in the owner or already removed.");
             }
         }
 
+        /// <inheritdoc/>
         public void SetData(IxProviderNode providerNode, [CanBeNull] object data)
         {
             if (providerNode == null)
@@ -196,16 +189,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
-            {
-                Contract.Assert(
-                    false,
-                    "Inspecting instance parent should be performed under InstanceTreeLock.");
-            }
-
             if (!Monitor.IsEntered(DataSyncRoot))
             {
-                Contract.Assert(false, "Data manipulations should be performed under lock.");
+                Critical.Assert(false, "Data manipulations should be performed under lock.");
             }
 
             if (data == null)
@@ -218,120 +204,79 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
-        public virtual void StartDispose()
+        /// <inheritdoc/>
+        protected override async Task AsyncDispose()
         {
-            lock (ProviderNode.Host.InstanceTreeSyncRoot)
+            // Under tree lock here, until first await.
+            EnsureTreeLocked();
+
+            try
             {
-                IsDisposing = true;
-
-                var pulsedInstances = new HashSet<IIxInstanceLock>();
-
-                // Collection enumeration retries loop.
-                while (true)
+                if (Locks.Any())
                 {
-                    int currentLocksVersion = LocksVersion;
-                    foreach (IIxInstanceLock lockOfMe in Locks)
-                    {
-                        if (pulsedInstances.Add(lockOfMe))
-                        {
-                            // Collection can be changed in nested calls of this method.
-                            lockOfMe.PulseDispose();
-                        }
-
-                        // In a case of collection change we need to perform re-enumerate collection.
-                        if (LocksVersion != currentLocksVersion)
-                        {
-                            break;
-                        }
-                    }
-
-                    // Once we enumerated lock collection to the end we can exit retries loop.
-                    if (LocksVersion == currentLocksVersion)
-                    {
-                        break;
-                    }
+                    Critical.Assert(
+                        false,
+                        "Dependencies schema problem, after instance object disposed no any lock are allowed.");
                 }
 
-                TryStartSelfDispose();
+                await SelfDispose();
+
+                // Sync or async execution here.
+            }
+            finally
+            {
+                // Sync or async execution here.
+                // ------------------------------------
+                lock (ProviderNode.Host.InstanceTreeSyncRoot)
+                {
+                    // Freeing all owned locks.
+                    while (OwnedLocks.Any())
+                    {
+                        // Here other objects can dispose synchronously.
+                        OwnedLocks.First().Dispose();
+                    }
+                }
             }
         }
 
-        protected abstract Task SelfDispose();
-
-        private void EnsureTreeLocked()
+        /// <summary>
+        /// Ensures that tree <c>lock</c> obtained by current thread.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void EnsureTreeLocked()
         {
-            Contract.Assert(
+            Critical.Assert(
                 Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot),
                 "Lock related operation should be performed under global tree lock.");
         }
+
+        /// <inheritdoc/>
+        protected override void OnDisposeStarted()
+        {
+            // We are under tree lock here
+            // ---------------------------------------------------------
+
+            // This method is not reenterant.
+            // ---------------------------------------------------------
+            _locks.ForEach(x => x.PulseDispose());
+
+            TryStartSelfDispose();
+
+            base.OnDisposeStarted();
+        }
+
+        /// <summary>
+        /// Performs dispose related to this instance itself. This method is called after all locks on <c>this</c> objects are
+        /// removed.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        protected abstract Task SelfDispose();
 
         private void TryStartSelfDispose()
         {
             if (!Locks.Any())
             {
-                _selfDisposingStarted = true;
-                Task selfDisposeTask = SelfDispose();
-
-                // Synchronous version.
-                if (selfDisposeTask.IsCompleted)
-                {
-                    if (Locks.Any())
-                    {
-                        Contract.Assert(
-                            false,
-                            "Dependencies schema problem, after instance object disposed no any lock are allowed.");
-                    }
-
-                    // Freeing all owned locks.
-                    while (OwnedLocks.Any())
-                    {
-                        // Here other objcts can dispose synchronously.
-                        OwnedLocks.First().Dispose();
-                    }
-
-                    if (_disposeTask == null)
-                    {
-                        _disposeTask = Task.CompletedTask;
-                    }
-                    else if (_disposeCompletionSource != null)
-                    {
-                        _disposeCompletionSource.SetResult(true);
-                    }
-                    else
-                    {
-                        Contract.Assert(false, "Dispose logic error. State should be unreachable.");
-                    }
-                }
-                else
-                {
-                    Func<Task> disposeAsyncFinish = async () =>
-                        {
-                            await selfDisposeTask;
-                            if (Locks.Any())
-                            {
-                                Contract.Assert(
-                                    false,
-                                    "Dependencies schema problem, after instance object disposed no any lock are allowed.");
-                            }
-
-                            lock (ProviderNode.Host.InstanceTreeSyncRoot)
-                            {
-                                // Freeing all owned locks.
-                                while (OwnedLocks.Any())
-                                {
-                                    // Here other objcts can dispose synchronously.
-                                    OwnedLocks.First().Dispose();
-                                }
-
-                                _disposeCompletionSource?.SetResult(true);
-                            }
-                        };
-
-                    if (_disposeTask == null)
-                    {
-                        _disposeTask = disposeAsyncFinish();
-                    }
-                }
+                SetDisposeSuspended(false);
             }
         }
     }

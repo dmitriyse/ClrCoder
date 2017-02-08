@@ -9,6 +9,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     public interface IIxInstance : IAsyncDisposable
     {
         IxProviderNode ProviderNode { get; }
@@ -24,11 +26,6 @@ namespace ClrCoder.ComponentModel.IndirectX
         IReadOnlyCollection<IIxInstanceLock> OwnedLocks { get; }
 
         IReadOnlyCollection<IIxInstanceLock> Locks { get; }
-
-        /// <summary>
-        /// Identifies that instance will be dispose in progress.
-        /// </summary>
-        bool IsDisposing { get; }
 
         void AddLock(IIxInstanceLock instanceLock);
 
