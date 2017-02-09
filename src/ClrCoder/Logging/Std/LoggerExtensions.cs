@@ -6,263 +6,71 @@
 namespace ClrCoder.Logging.Std
 {
     using System;
-    using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
 
+    using Newtonsoft.Json.Linq;
+
     using NodaTime;
+
+    using Runtime.Serialization;
 
     /// <summary>
     /// Extension methods that represents logging api.
     /// </summary>
     [PublicAPI]
-    public static class LoggerExtensions
+    public static partial class LoggerExtensions
     {
         /// <summary>
-        /// Writes critical log entry.
+        /// Adds <c>data</c> to the json entry.
         /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Critical(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
+        /// <param name="builder">Entry <c>builder</c>.</param>
+        /// <param name="data">Object with <c>data</c>.</param>
+        /// <returns>The same <c>builder</c> for fluent syntax.</returns>
+        public static ILogEntryBuilder Data(this ILogEntryBuilder builder, object data)
         {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Critical,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            return new DelegateLogEntryBuilderForLogEntry(
+                builder,
+                e =>
+                    {
+                        try
+                        {
+                            JObject jsonData = JObject.FromObject(data, LoggerUtils.LogEntriesSerializer);
+                            foreach (JProperty jProperty in jsonData.Properties())
+                            {
+                                e.SetExtensionData(jProperty.Name, jProperty.Value);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (!ex.IsProcessable())
+                            {
+                                throw;
+                            }
+
+                            e.SetExtensionData("DataSerializationError", ex.Message);
+                        }
+
+                        return e;
+                    });
         }
 
         /// <summary>
-        /// Writes critical log entry.
+        /// Adds <c>details</c> text to a log entry.
         /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Critical<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Critical,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes critical log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Critical<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Critical,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes critical log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Critical<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Critical,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes debug log entry.
-        /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Debug(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes debug log entry.
-        /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Debug<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes debug log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Debug<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes debug log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Debug<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="details"></param>
-        /// <returns></returns>
+        /// <param name="builder">Log entry <c>builder</c>.</param>
+        /// <param name="details">Details text.</param>
+        /// <returns>Updated <c>builder</c>.</returns>
         public static ILogEntryBuilder Details(this ILogEntryBuilder builder, [NotNull] string details)
         {
             if (details == null)
@@ -288,483 +96,32 @@ namespace ClrCoder.Logging.Std
         }
 
         /// <summary>
-        /// Writes error log entry.
+        /// Adds <c>exception</c> dump to the json entry.
         /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Error(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
+        /// <param name="builder">Entry <c>builder</c>.</param>
+        /// <param name="exception">Exception to log.</param>
+        /// <returns>The same <c>builder</c> for fluent syntax.</returns>
+        public static ILogEntryBuilder Exception(this ILogEntryBuilder builder, Exception exception)
         {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Error,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
 
-        /// <summary>
-        /// Writes error log entry.
-        /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Error<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Error,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
 
-        /// <summary>
-        /// Writes error log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Error<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Error,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
+            var exceptionDump = new JsonExceptionDumper().Dump<ExceptionDto>(exception);
 
-        /// <summary>
-        /// Writes error log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Error<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Error,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes info log entry.
-        /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Info(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Info,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes info log entry.
-        /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Info<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Info,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes info log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Info<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Info,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes info log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Info<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Info,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes trace log entry.
-        /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Trace(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Trace,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes trace log entry.
-        /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Trace<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Trace,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes trace log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Trace<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes trace log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Trace<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Debug,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes warning log entry.
-        /// </summary>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Warning(
-            this IJsonLogger logger,
-            Func<Func<string, ILogEntryBuilder>, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Warning,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes warning log entry.
-        /// </summary>
-        /// <typeparam name="T">Log entry builder argument 1 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg">Log entry builder argument 1.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Warning<T>(
-            this IJsonLogger logger,
-            T arg,
-            Func<Func<string, ILogEntryBuilder>, T, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Warning,
-                arg,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes warning log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Warning<T1, T2>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Warning,
-                arg1,
-                arg2,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
-        }
-
-        /// <summary>
-        /// Writes warning log entry.
-        /// </summary>
-        /// <typeparam name="T1">Log entry builder argument 1 type.</typeparam>
-        /// <typeparam name="T2">Log entry builder argument 2 type.</typeparam>
-        /// <typeparam name="T3">Log entry builder argument 3 type.</typeparam>
-        /// <param name="logger">Logger to write to.</param>
-        /// <param name="arg1">Log entry builder argument 1.</param>
-        /// <param name="arg2">Log entry builder argument 2.</param>
-        /// <param name="arg3">Log entry builder argument 3.</param>
-        /// <param name="logEntryBuilder">Log entry builder <c>delegate</c>.</param>
-        /// <param name="callerFilePath">Log entry origin file path.</param>
-        /// <param name="callerMemberName">Log entry origin member name.</param>
-        /// <param name="callerLineNumber">Log entry origin line number.</param>
-        public static void Warning<T1, T2, T3>(
-            this IJsonLogger logger,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            Func<Func<string, ILogEntryBuilder>, T1, T2, T3, ILogEntryBuilder> logEntryBuilder,
-            [CallerFilePath] string callerFilePath = null,
-            [CallerMemberName] string callerMemberName = null,
-            [CallerLineNumber] int callerLineNumber = 0)
-        {
-            WriteLogEntry(
-                logger,
-                LogSeverity.Warning,
-                arg1,
-                arg2,
-                arg3,
-                logEntryBuilder,
-                callerFilePath,
-                callerMemberName,
-                callerLineNumber);
+            return new DelegateLogEntryBuilderForLogEntry(
+                builder,
+                e =>
+                    {
+                        e.Exception = exceptionDump;
+                        return e;
+                    });
         }
 
         private static void WriteLogEntry(
@@ -785,12 +142,13 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(callerMemberName));
             }
 
-            var instant = SystemClock.Instance.GetCurrentInstant();
+            Instant instant = SystemClock.Instance.GetCurrentInstant();
 
+            // TODO: Optimize performance here.
             logger.AsyncHandler.RunAsync(
                 (instantArg, callInfo) =>
                     {
-                        var entryBuilder = logEntryBuilder(
+                        ILogEntryBuilder entryBuilder = logEntryBuilder(
                             msg => new DelegateLogEntryBuilderForLogEntry(
                                 e =>
                                     {
@@ -804,7 +162,7 @@ namespace ClrCoder.Logging.Std
                                             Instant = instant,
                                             CallerInfo = callInfo
                                         };
-                        var buildedEntry = entryBuilder.Build(entry);
+                        object buildedEntry = entryBuilder.Build(entry);
                         logger.Log(buildedEntry);
                     },
                 instant,
@@ -830,12 +188,12 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(callerMemberName));
             }
 
-            var instant = SystemClock.Instance.GetCurrentInstant();
+            Instant instant = SystemClock.Instance.GetCurrentInstant();
 
             logger.AsyncHandler.RunAsync(
                 (instantArg, callInfo, arg1) =>
                     {
-                        var entryBuilder = logEntryBuilder(
+                        ILogEntryBuilder entryBuilder = logEntryBuilder(
                             msg => new DelegateLogEntryBuilderForLogEntry(
                                 e =>
                                     {
@@ -850,7 +208,7 @@ namespace ClrCoder.Logging.Std
                                             Instant = instant,
                                             CallerInfo = callInfo
                                         };
-                        var buildedEntry = entryBuilder.Build(entry);
+                        object buildedEntry = entryBuilder.Build(entry);
                         logger.Log(buildedEntry);
                     },
                 instant,
@@ -878,12 +236,12 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(callerMemberName));
             }
 
-            var instant = SystemClock.Instance.GetCurrentInstant();
+            Instant instant = SystemClock.Instance.GetCurrentInstant();
 
             logger.AsyncHandler.RunAsync(
                 (instantArg, callInfo, a1, a2) =>
                     {
-                        var entryBuilder = logEntryBuilder(
+                        ILogEntryBuilder entryBuilder = logEntryBuilder(
                             msg => new DelegateLogEntryBuilderForLogEntry(
                                 e =>
                                     {
@@ -900,7 +258,7 @@ namespace ClrCoder.Logging.Std
                                             CallerInfo = callInfo
                                         };
 
-                        var buildedEntry = entryBuilder.Build(entry);
+                        object buildedEntry = entryBuilder.Build(entry);
                         logger.Log(buildedEntry);
                     },
                 instant,
@@ -930,12 +288,12 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(callerMemberName));
             }
 
-            var instant = SystemClock.Instance.GetCurrentInstant();
+            Instant instant = SystemClock.Instance.GetCurrentInstant();
 
             logger.AsyncHandler.RunAsync(
                 (instantArg, callInfo, a1, a2, a3) =>
                     {
-                        var entryBuilder = logEntryBuilder(
+                        ILogEntryBuilder entryBuilder = logEntryBuilder(
                             msg => new DelegateLogEntryBuilderForLogEntry(
                                 e =>
                                     {
@@ -953,7 +311,7 @@ namespace ClrCoder.Logging.Std
                                             CallerInfo = callInfo
                                         };
 
-                        var buildedEntry = entryBuilder.Build(entry);
+                        object buildedEntry = entryBuilder.Build(entry);
                         logger.Log(buildedEntry);
                     },
                 instant,

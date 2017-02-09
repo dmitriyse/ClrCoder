@@ -115,18 +115,25 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                 .AsyncUsing(
                     host =>
                         {
-                            Func<Task> action = async () =>
-                                {
-                                    using (
-                                        IxLock<DummyObject> resolvedInstanceLock =
-                                            await host.Resolver.Get<DummyObject>())
+                            try
+                            {
+                                Func<Task> action = async () =>
                                     {
-                                        resolvedInstanceLock.Target.Should().Be(instance);
-                                    }
-                                };
+                                        using (
+                                            IxLock<DummyObject> resolvedInstanceLock =
+                                                await host.Resolver.Get<DummyObject>())
+                                        {
+                                            resolvedInstanceLock.Target.Should().Be(instance);
+                                        }
+                                    };
 
-                            action.ShouldThrow<IxResolveTargetNotFound>()
-                                .Which.Identifier.Should().Be(new IxIdentifier(typeof(DummyObject)));
+                                action.ShouldThrow<IxResolveTargetNotFound>()
+                                    .Which.Identifier.Should().Be(new IxIdentifier(typeof(DummyObject)));
+                            }
+                            catch (Exception ex)
+                            {
+                                Task.FromException(ex);
+                            }
 
                             return Task.CompletedTask;
                         });

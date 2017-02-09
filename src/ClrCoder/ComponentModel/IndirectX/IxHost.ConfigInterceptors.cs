@@ -77,7 +77,15 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             return obj =>
                                 {
-                                    Critical.Assert(obj != null, "Dispose handler called on not null object.");
+                                    try
+                                    {
+                                        Critical.Assert(obj != null, "Dispose handler called on not null object.");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        return Task.FromException(ex);
+                                    }
+
                                     return Task.CompletedTask;
                                 };
                         }
@@ -182,35 +190,41 @@ namespace ClrCoder.ComponentModel.IndirectX
                                 resolveContext,
                                 resolvedDependencies =>
                                     {
-                                        object[] arguments = constructorInfo.GetParameters()
-                                            .Select(
-                                                x =>
-                                                    resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
-                                            .ToArray();
-
-                                        object instance = constructorInfo.Invoke(arguments);
-
-                                        Critical.Assert(
-                                            instance != null,
-                                            "Constructor call through reflection should not return null.");
-
-                                        IIxInstanceLock ixInstanceLock = ixInstanceFactory(
-                                            providerNode,
-                                            parentInstance,
-                                            resolveContext,
-                                            instance);
-
-                                        lock (providerNode.Host.InstanceTreeSyncRoot)
+                                        try
                                         {
-                                            foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp 
-                                                in resolvedDependencies)
-                                            {
-                                                // ReSharper disable once ObjectCreationAsStatement
-                                                new IxReferenceLock(kvp.Value, ixInstanceLock.Target);
-                                            }
-                                        }
+                                            object[] arguments = constructorInfo.GetParameters()
+                                                .Select(
+                                                    x =>
+                                                        resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
+                                                .ToArray();
 
-                                        return Task.FromResult(ixInstanceLock);
+                                            object instance = constructorInfo.Invoke(arguments);
+
+                                            Critical.Assert(
+                                                instance != null,
+                                                "Constructor call through reflection should not return null.");
+
+                                            IIxInstanceLock ixInstanceLock = ixInstanceFactory(
+                                                providerNode,
+                                                parentInstance,
+                                                resolveContext,
+                                                instance);
+
+                                            lock (providerNode.Host.InstanceTreeSyncRoot)
+                                            {
+                                                foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
+                                                    in resolvedDependencies)
+                                                {
+                                                    // ReSharper disable once ObjectCreationAsStatement
+                                                    new IxReferenceLock(kvp.Value, ixInstanceLock.Target);
+                                                }
+                                            }
+                                            return Task.FromResult(ixInstanceLock);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            return Task.FromException<IIxInstanceLock>(ex);
+                                        }
                                     }),
                             configTypeInfo.GenericTypeArguments[0]);
                     }
@@ -238,7 +252,17 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                         return new IxRawInstanceFactory(
                             (provider, parentInstance, resolveContext, ixInstanceFactory) =>
-                                Task.FromResult(ixInstanceFactory(provider, parentInstance, resolveContext, instance)),
+                                {
+                                    try
+                                    {
+                                        return Task.FromResult(
+                                                ixInstanceFactory(provider, parentInstance, resolveContext, instance));
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        return Task.FromException<IIxInstanceLock>(ex);
+                                    }
+                                },
                             configTypeInfo.GenericTypeArguments[0]);
                     }
 
@@ -455,7 +479,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                     {
                                         if (!ex.IsProcessable())
                                         {
-                                            throw;
+                                            return Task.FromException(ex);
                                         }
                                     }
 
@@ -482,7 +506,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                             {
                                 if (!ex.IsProcessable())
                                 {
-                                    throw;
+                                    return Task.FromException(ex);
                                 }
                             }
 

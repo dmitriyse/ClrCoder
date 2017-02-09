@@ -47,7 +47,7 @@ namespace ClrCoder.Logging.Std
         /// <summary>
         /// Initializes a new instance of the <see cref="DelegateLogEntryBuilderForLogEntry"/> class.
         /// </summary>
-        /// <param name="buildDelegate"></param>
+        /// <param name="buildDelegate">Delegates that builds entry.</param>
         public DelegateLogEntryBuilderForLogEntry(
             [NotNull] Func<LogEntry, LogEntry> buildDelegate)
         {
@@ -67,8 +67,8 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            var currentEntry = _innerBuilder?.Build(entry) ?? entry;
-            var logEntry = LoggerUtils.NormalizeToLogEntry(currentEntry);
+            object currentEntry = _innerBuilder?.Build(entry) ?? entry;
+            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(currentEntry);
             return _buildDelegate(logEntry);
         }
     }

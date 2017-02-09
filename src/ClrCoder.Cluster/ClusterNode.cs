@@ -8,29 +8,33 @@ namespace ClrCoder.Cluster
     using System;
     using System.Threading.Tasks;
 
+    using ComponentModel.IndirectX;
+
     using JetBrains.Annotations;
+
+    using Logging;
 
     using Microsoft.AspNetCore.Hosting;
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    using Threading;
 
     /// <summary>
     /// ClrCoder cluster node.
     /// </summary>
-    public class ClusterNode : IClusterNode
+    public class ClusterNode : AsyncDisposableBase, IClusterNode
     {
+        private readonly IIxHost _indirectXHost;
+
         private IWebHost _webHost;
 
-        /// <inheritdoc/>
-        public async Task AsyncDispose()
+        private ClusterNode(IIxHost indirectXHost, IWebHostBuilder webHostBuilder, IJsonLogger logger)
         {
-            _webHost?.Dispose();
+            _indirectXHost = indirectXHost;
         }
 
         /// <inheritdoc/>
         public async Task<int> Run()
         {
-            // TODO: Rewrite to true async.
             _webHost.Run();
             return 0;
         }
@@ -49,19 +53,10 @@ namespace ClrCoder.Cluster
                 .Build();
         }
 
-        public Task DisposeTask
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void StartDispose()
+        /// <inheritdoc/>
+        protected override Task AsyncDispose()
         {
             throw new NotImplementedException();
         }
-
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

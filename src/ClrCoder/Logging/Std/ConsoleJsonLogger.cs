@@ -6,10 +6,13 @@
 namespace ClrCoder.Logging.Std
 {
     using System;
+    using System.Linq;
 
     using JetBrains.Annotations;
 
     using NodaTime;
+
+    using Runtime.Serialization;
 
     using Threading;
 
@@ -76,6 +79,31 @@ namespace ClrCoder.Logging.Std
 
                 Console.WriteLine(
                     $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
+                if (logEntry.Exception != null)
+                {
+                    string baseIntent = "  |";
+                    Console.Write(baseIntent);
+                    Console.WriteLine("------------------------------------- Exception ---------------------------------------");
+                    string intent = string.Empty;
+                    var curException = logEntry.Exception;
+                    do
+                    {
+                        Console.Write(baseIntent);
+                        Console.Write(intent);
+                        if (intent != string.Empty)
+                        {
+                            Console.Write("<--");
+                        }
+
+                        var name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
+                        Console.WriteLine($"{name}: {curException.Message}");
+                        curException = curException.InnerException;
+                        intent += "    ";
+                    }
+                    while(curException != null);
+                    Console.Write(baseIntent);
+                    Console.WriteLine("---------------------------------------------------------------------------------------");
+                }
             }
             finally
             {

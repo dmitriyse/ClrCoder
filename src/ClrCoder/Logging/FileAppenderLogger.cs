@@ -10,6 +10,8 @@ namespace ClrCoder.Logging
 
     using JetBrains.Annotations;
 
+    using Text;
+
     using Threading;
 
     /// <summary>

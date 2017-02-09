@@ -33,12 +33,14 @@ namespace ClrCoder.ComponentModel.IndirectX
                 host.ScopeBinderBuilder.Delegate(new IxRegistrationScopeBindingConfig()),
                 obj => Task.CompletedTask)
         {
-
             // Adding self provided as default for children.
-            VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] {}));
+            VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] { }));
         }
 
-        public override Task<IIxInstanceLock> GetInstance(
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+        /// <inheritdoc/>
+        public override async Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
             IxHost.IxResolveContext context)
         {
@@ -64,10 +66,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                         singleton = (IxScopeInstance)data;
                     }
 
-                    return Task.FromResult<IIxInstanceLock>(new IxInstanceTempLock(singleton));
+                    return new IxInstanceTempLock(singleton);
                 }
             }
         }
+
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
         public IxScopeInstance GetRootInstance()
         {

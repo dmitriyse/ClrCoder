@@ -1,9 +1,9 @@
-﻿// <copyright file="JsonConfigTest.cs" company="ClrCoder project">
+﻿// <copyright file="JsonConfigTests.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace ClrCoder.Tests
+namespace ClrCoder.Tests.Json
 {
     using System.IO;
 
@@ -15,7 +15,7 @@ namespace ClrCoder.Tests
     /// JsonConfig class tests.
     /// </summary>
     [TestFixture]
-    public class JsonConfigTest
+    public class JsonConfigTests
     {
 #if !PCL
 

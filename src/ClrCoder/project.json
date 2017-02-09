@@ -10,8 +10,9 @@
     "System.Security.Cryptography.Algorithms": "4.2.0",
     "System.Threading.Thread": "4.0.0",
     "System.Threading.ThreadPool": "4.0.10",
-    "System.ValueTuple": "4.0.0-rc3-24212-01"
-    },
+    "System.ValueTuple": "4.0.0-rc3-24212-01",
+    "System.Diagnostics.StackTrace": "4.0.1"
+  },
 
   "frameworks": {
     "netstandard1.3": {

@@ -9,6 +9,8 @@ namespace ClrCoder.Tests
 
     using NUnit.Framework;
 
+    using Reflection;
+
     /// <summary>
     /// Tests for <see cref="TypeEx"/> and <see cref="TypeEx{T}"/> classes.
     /// </summary>

@@ -11,6 +11,8 @@ namespace ClrCoder.Collections
 
     using JetBrains.Annotations;
 
+    using Reflection;
+
     /// <summary>
     /// <c>Dictionary</c>, which automatically creates values for the requested keys.
     /// </summary>

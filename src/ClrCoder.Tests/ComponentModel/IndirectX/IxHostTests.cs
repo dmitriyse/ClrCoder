@@ -21,20 +21,14 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         /// <summary>
         /// Init/dispose cycle with zero configuration and resolves.
         /// </summary>
-        /// <return>Async execution TPL task.</return>
+        /// <returns>Async execution TPL task.</returns>
         [Test]
         public async Task EmptyHostCycle()
         {
             await new IxHostBuilder()
                 .Configure(rootNodes => { })
                 .Build()
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                .AsyncUsing(async host => { });
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-        }
-
-        private class DummyType
-        {
+                .AsyncUsing(host => Task.CompletedTask);
         }
     }
 }

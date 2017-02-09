@@ -19,7 +19,6 @@ namespace ClrCoder.Cluster
     {
         public static IIxHostBuilder BecomeClusterNode(this IIxHostBuilder hostBuilder)
         {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             hostBuilder.Nodes
                 .AddScope(
                     "ClusterNodeWebApp",
@@ -33,7 +32,6 @@ namespace ClrCoder.Cluster
                                                 .UseContentRoot(Directory.GetCurrentDirectory())
                                                 .ConfigureJsonFormatters(JsonDefaults.JsonRestRpcSerializerSettings))))
                             .Add<IClusterNode>(factory: new IxClassRawFactoryConfig<ClusterNode>()));
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
             return hostBuilder;
         }

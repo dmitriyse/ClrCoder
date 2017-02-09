@@ -19,7 +19,10 @@ namespace ClrCoder.Logging.Std
     [PublicAPI]
     public static class LoggerUtils
     {
-        private static readonly JsonSerializer LogEntriesSerializer = JsonSerializer.Create(
+        /// <summary>
+        /// Default json serializer for std logging utils.
+        /// </summary>
+        internal static readonly JsonSerializer LogEntriesSerializer = JsonSerializer.Create(
             JsonDefaults.JsonRestRpcSerializerSettings);
 
         /// <summary>

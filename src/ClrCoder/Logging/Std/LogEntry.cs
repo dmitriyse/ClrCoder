@@ -5,10 +5,14 @@
 
 namespace ClrCoder.Logging.Std
 {
+    using JetBrains.Annotations;
+
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
     using NodaTime;
+
+    using Runtime.Serialization;
 
     /// <summary>
     /// Typed log entry.
@@ -18,16 +22,19 @@ namespace ClrCoder.Logging.Std
         /// <summary>
         /// Call place information.
         /// </summary>
+        [CanBeNull]
         public CallerInfo? CallerInfo { get; set; }
 
         /// <summary>
         /// Event details.
         /// </summary>
+        [CanBeNull]
         public string Details { get; set; }
 
         /// <summary>
         /// DotNet class that produced this log.
         /// </summary>
+        [CanBeNull]
         public string DotNetType { get; set; }
 
         /// <summary>
@@ -38,6 +45,7 @@ namespace ClrCoder.Logging.Std
         /// <summary>
         /// Event message.
         /// </summary>
+        [CanBeNull]
         public string Message { get; set; }
 
         /// <summary>
@@ -45,5 +53,11 @@ namespace ClrCoder.Logging.Std
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public LogSeverity Severity { get; set; }
+
+        /// <summary>
+        /// Exception dump.
+        /// </summary>
+        [CanBeNull]
+        public ExceptionDto Exception { get; set; }
     }
 }

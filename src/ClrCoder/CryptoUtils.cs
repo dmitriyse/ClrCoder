@@ -10,6 +10,8 @@ namespace ClrCoder
 
     using JetBrains.Annotations;
 
+    using Text;
+
     /// <summary>
     /// Cryptography utils.
     /// </summary>
