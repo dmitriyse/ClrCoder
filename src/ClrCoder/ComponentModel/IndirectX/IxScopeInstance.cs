@@ -9,11 +9,20 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    /// <summary>
+    /// Scope instance. TODO: Scope should be instance less.
+    /// </summary>
     public class IxScopeInstance : IxInstance
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IxScopeInstance"/> class.
+        /// </summary>
+        /// <param name="providerNode">Owner provider.</param>
+        /// <param name="parentInstance">Parent instance.</param>
         public IxScopeInstance(IxProviderNode providerNode, [CanBeNull] IIxInstance parentInstance)
-            : base(providerNode, parentInstance, providerNode)
+            : base(providerNode, parentInstance)
         {
+            Object = providerNode;
         }
 
         /// <inheritdoc/>

@@ -5,6 +5,9 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    /// <summary>
+    /// Allowed instance multiplicity inside a scope. Possibly Singleton, Unlimited, Pool etc.
+    /// </summary>
     public interface IIxMultiplicityConfig
     {
     }

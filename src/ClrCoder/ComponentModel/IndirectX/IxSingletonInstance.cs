@@ -8,10 +8,18 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Instance controlled by <see cref="IxSingletonProvider"/>.
+    /// </summary>
     public class IxSingletonInstance : IxInstance
     {
-        public IxSingletonInstance(IxProviderNode providerNode, IIxInstance parentInstance, object @object)
-            : base(providerNode, parentInstance, @object)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IxSingletonInstance"/> class.
+        /// </summary>
+        /// <param name="providerNode">Singleton provider.</param>
+        /// <param name="parentInstance">Parent instance.</param>
+        public IxSingletonInstance(IxProviderNode providerNode, IIxInstance parentInstance)
+            : base(providerNode, parentInstance)
         {
             if (parentInstance == null)
             {

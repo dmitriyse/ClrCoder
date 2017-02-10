@@ -36,8 +36,6 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Instance = instance;
             }
 
-            public IxHost Host { get; }
-
             IxProviderNode IIxInstance.ProviderNode
             {
                 get
@@ -47,7 +45,19 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
-            object IIxInstance.Object => this;
+            object IIxInstance.Object
+            {
+                get
+                {
+                    return this;
+                }
+
+                set
+                {
+                    throw new InvalidOperationException(
+                        "IIxResolver should never pass as instance to Resolve routines.");
+                }
+            }
 
             IIxInstance IIxInstance.ParentInstance
             {
@@ -108,6 +118,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
+            public IxHost Host { get; }
+
             public bool IsDisposing
             {
                 get
@@ -131,11 +143,6 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 throw new NotSupportedException(
                     "This is completely virtual object and cannot own locks.");
-            }
-
-            public void StartDispose()
-            {
-                throw new NotSupportedException("This method is too virtual to dispose it.");
             }
 
             object IIxInstance.GetData(IxProviderNode providerNode)
@@ -167,6 +174,11 @@ namespace ClrCoder.ComponentModel.IndirectX
             void IIxInstance.SetData(IxProviderNode providerNode, object data)
             {
                 throw new NotSupportedException("This object not intendet to have children and children data.");
+            }
+
+            public void StartDispose()
+            {
+                throw new NotSupportedException("This method is too virtual to dispose it.");
             }
         }
     }

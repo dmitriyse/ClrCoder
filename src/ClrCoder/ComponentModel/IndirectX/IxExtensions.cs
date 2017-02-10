@@ -18,25 +18,29 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig importFilter = null,
             IIxVisibilityFilterConfig exportToParentFilter = null,
             IIxVisibilityFilterConfig exportFilter = null,
-            IIxRawFactoryConfig factory = null,
+            IIxInstanceBuilderConfig factory = null,
             IIxMultiplicityConfig multiplicity = null,
             IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)
         {
-            nodesBuilder.Config.Add(
-                new IxStdProviderConfig
-                    {
-                        Factory = factory,
-                        Identifier = new IxIdentifier(typeof(TContract), name),
-                        ScopeBinding = scopeBinding,
-                        Multiplicity = multiplicity ?? new IxSingletonMultiplicityConfig(),
-                        ImportFilter = importFilter,
-                        ExportFilter = exportFilter,
-                        ExportToParentFilter = exportToParentFilter,
-                        DisposeHandler = disposeHandler
-                    });
+            var depNode = new IxStdProviderConfig
+                           {
+                               Factory = factory,
+                               Identifier = new IxIdentifier(typeof(TContract), name),
+                               ScopeBinding = scopeBinding,
+                               Multiplicity = multiplicity,
+                               ImportFilter = importFilter,
+                               ExportFilter = exportFilter,
+                               ExportToParentFilter = exportToParentFilter,
+                               DisposeHandler = disposeHandler
+                           };
 
-            nodes?.Invoke(new IxBuilder<List<IxScopeBaseConfig>>());
+            nodesBuilder.Config.Add(depNode);
+
+            nodes?.Invoke(new IxBuilder<List<IxScopeBaseConfig>>
+                              {
+                                  Config = depNode.Nodes
+                              });
 
             return nodesBuilder;
         }

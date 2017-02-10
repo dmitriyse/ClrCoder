@@ -9,12 +9,15 @@ namespace ClrCoder.Cluster
 
     using Threading;
 
+    /// <summary>
+    /// Cluster node.
+    /// </summary>
     public interface IClusterNode : IAsyncDisposable
     {
         /// <summary>
-        /// Executes node as daemon.
+        /// Waits termination events.
         /// </summary>
-        /// <returns></returns>
-        Task<int> Run();
+        /// <returns>Async execution TPL task.</returns>
+        Task<int> WaitTermination();
     }
 }

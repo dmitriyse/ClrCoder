@@ -15,7 +15,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     {
         IxProviderNode ProviderNode { get; }
 
-        object Object { get; }
+        object Object { get; set; }
 
         IIxInstance ParentInstance { get; }
 

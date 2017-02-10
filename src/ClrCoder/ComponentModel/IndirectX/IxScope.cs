@@ -49,25 +49,22 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(parentInstance));
             }
 
-            lock (Host.InstanceTreeSyncRoot)
+            lock (parentInstance.DataSyncRoot)
             {
-                lock (parentInstance.DataSyncRoot)
+                IxScopeInstance singleton;
+                object data = parentInstance.GetData(this);
+                if (data == null)
                 {
-                    IxScopeInstance singleton;
-                    object data = parentInstance.GetData(this);
-                    if (data == null)
-                    {
-                        singleton = new IxScopeInstance(this, parentInstance);
+                    singleton = new IxScopeInstance(this, parentInstance);
 
-                        parentInstance.SetData(this, singleton);
-                    }
-                    else
-                    {
-                        singleton = (IxScopeInstance)data;
-                    }
-
-                    return new IxInstanceTempLock(singleton);
+                    parentInstance.SetData(this, singleton);
                 }
+                else
+                {
+                    singleton = (IxScopeInstance)data;
+                }
+
+                return new IxInstanceTempLock(singleton);
             }
         }
 

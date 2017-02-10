@@ -8,9 +8,7 @@ namespace ClrCoder.AspNetCore
     /// <summary>
     /// Web application component. Helps to decompose Asp.Net core application into encapsulated components.
     /// </summary>
-    /// <remarks>
-    /// Asp.Net core have bunch of extension points (IWebHostBuilder, IApplicationBuilder, IMvc, multiple components can subscribes to those points.
-    /// </remarks>
+    /// <remarks>Usually implementation of this contract requires IWebHostBuilder dependency.</remarks>
     public interface IWebAppComponent
     {
     }

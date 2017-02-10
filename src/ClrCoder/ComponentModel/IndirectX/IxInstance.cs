@@ -34,21 +34,21 @@ namespace ClrCoder.ComponentModel.IndirectX
         [CanBeNull]
         private Dictionary<IxProviderNode, object> _childrenData;
 
+        [CanBeNull]
+        private object _object;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="IxInstance"/> class.
         /// </summary>
         /// <param name="providerNode">Node that produces instance.</param>
         /// <param name="parentInstance">Direct parent instance.</param>
-        /// <param name="object">Controlled by this placeholder object.</param>
         public IxInstance(
             IxProviderNode providerNode,
-            [CanBeNull] IIxInstance parentInstance,
-            object @object)
+            [CanBeNull] IIxInstance parentInstance)
             : base(providerNode.Host.InstanceTreeSyncRoot)
         {
             ProviderNode = providerNode;
             _parentInstance = parentInstance;
-            Object = @object;
             _ownedLocks = new ProcessableSet<IIxInstanceLock>();
             _locks = new ProcessableSet<IIxInstanceLock>();
         }
@@ -57,7 +57,34 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IxProviderNode ProviderNode { get; }
 
         /// <inheritdoc/>
-        public object Object { get; }
+        [DebuggerHidden]
+        public object Object
+        {
+            get
+            {
+                // If everything fine this method will be called from one thread and only once.
+                // We can skip thread safety check for this method.
+
+                // This should never happened even if schema have errors. Cycle detector should save us.
+                Critical.Assert(_object != null, "You cannot use half initialized dependency.");
+
+                return _object;
+            }
+
+            set
+            {
+                // If everything fine this method will be called from one thread and only once.
+                // We can skip thread safety check for this method.
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                Critical.Assert(_object == null, "Instance already initialized, you cannot init Object property twice.");
+
+                _object = value;
+            }
+        }
 
         /// <inheritdoc/>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]

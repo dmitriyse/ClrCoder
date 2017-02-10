@@ -6,6 +6,7 @@
 namespace ClrCoder.Threading
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -97,6 +98,16 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Turns CancellationToken into awaitable operation.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to wait on.</param>
+        /// <returns>Cancellation awaiter.</returns>
+        public static CancellationTokenAwaiter GetAwaiter(this CancellationToken cancellationToken)
+        {
+            return new CancellationTokenAwaiter(cancellationToken);
+        }
+
+        /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
         /// <typeparam name="T">Type of task.</typeparam>
@@ -113,6 +124,47 @@ namespace ClrCoder.Threading
 
             isAsync = !task.IsCompleted;
             return task;
+        }
+
+        /// <summary>
+        /// Allows awaits on cancellation token.
+        /// </summary>
+        public struct CancellationTokenAwaiter : INotifyCompletion
+        {
+            private readonly CancellationToken _cancellationToken;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CancellationTokenAwaiter"/> struct.
+            /// </summary>
+            /// <param name="cancellationToken">Cancellation token to await on.</param>
+            internal CancellationTokenAwaiter(CancellationToken cancellationToken)
+            {
+                _cancellationToken = cancellationToken;
+            }
+
+            /// <summary>
+            /// Gets result - none in our case.
+            /// </summary>
+            [UsedImplicitly]
+            public void GetResult()
+            {
+            }
+
+            /// <summary>
+            /// Shows that awaitable operation finished.
+            /// </summary>
+            [UsedImplicitly]
+            public bool IsCompleted => _cancellationToken.IsCancellationRequested;
+
+            /// <summary>
+            /// Registers continuation <c>action</c>..
+            /// </summary>
+            /// <param name="action">Operation continuation.</param>
+            [UsedImplicitly]
+            public void OnCompleted(Action action)
+            {
+                _cancellationToken.Register(action);
+            }
         }
     }
 }

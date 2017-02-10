@@ -50,8 +50,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="config">Configuration node.</param>
         /// <returns>Created node.</returns>
-        public delegate IxRawInstanceFactory RawInstanceFactoryBuilderDelegate(
-            IIxRawFactoryConfig config);
+        public delegate IxInstanceFactory RawInstanceFactoryBuilderDelegate(
+            IIxInstanceBuilderConfig config);
 
         public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull] Type type);
 
@@ -71,6 +71,13 @@ namespace ClrCoder.ComponentModel.IndirectX
         public async Task Initialize(IxHostConfig config)
         {
             var allConfigNodes = new HashSet<IxScopeBaseConfig>();
+
+            config.Nodes.Add(
+                new IxStdProviderConfig
+                    {
+                        Identifier = new IxIdentifier(typeof(IIxHost)),
+                        Factory = new IxExistingInstanceFactoryConfig<IIxHost>(this)
+                    });
 
             Action<IxScopeBaseConfig, IxProviderNode> buildNodeAction = null;
             buildNodeAction = (nodeConfig, parentNode) =>
@@ -165,7 +172,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
-        private Task<IIxInstanceLock> Resolve(
+        private async Task<IIxInstanceLock> Resolve(
             IIxInstance originInstance,
             IxIdentifier identifier,
             IxResolveContext context)
@@ -190,7 +197,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("You cannot do anything inside failed resolve context.");
             }
 
-            return ResolveHandler.Delegate(originInstance, identifier, context);
+            return await ResolveHandler.Delegate(originInstance, identifier, context);
         }
 
         /// <inheritdoc/>

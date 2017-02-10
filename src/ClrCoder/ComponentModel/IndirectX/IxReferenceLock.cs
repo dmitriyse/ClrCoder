@@ -26,6 +26,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(user));
             }
 
+            Critical.Assert(!ReferenceEquals(target, user), "Cannot create reference from self to self.");
+
             Target = target;
             User = user;
 

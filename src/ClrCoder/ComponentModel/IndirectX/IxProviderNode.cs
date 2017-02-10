@@ -23,7 +23,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxHost host,
             [CanBeNull] IxProviderNode parentNode,
             IxScopeBaseConfig config,
-            [CanBeNull] IxRawInstanceFactory rawInstanceFactory,
+            [CanBeNull] IxInstanceFactory instanceFactory,
             IxVisibilityFilter exportFilter,
             IxVisibilityFilter exportToParentFilter,
             IxVisibilityFilter importFilter,
@@ -66,7 +66,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             Host = host;
             ParentNode = parentNode;
             Identifier = config.Identifier;
-            RawInstanceFactory = rawInstanceFactory;
+            InstanceFactory = instanceFactory;
             ExportFilter = exportFilter;
             ExportToParentFilter = exportToParentFilter;
             ImportFilter = importFilter;
@@ -77,7 +77,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         [CanBeNull]
-        public IxRawInstanceFactory RawInstanceFactory { get; }
+        public IxInstanceFactory InstanceFactory { get; }
 
         public IxVisibilityFilter ExportFilter { get; }
 

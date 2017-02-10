@@ -107,6 +107,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(nodeConfig, parentNode);
                     }
 
+
                     var cfg = (IxStdProviderConfig)nodeConfig;
 
                     if (cfg.Multiplicity == null)
@@ -155,7 +156,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
 
                     if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassRawFactoryConfig<>))
+                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassInstanceBuilderConfig<>))
                     {
                         TypeInfo instanceClass = configTypeInfo.GenericTypeArguments[0].GetTypeInfo();
                         ConstructorInfo[] constructors =
@@ -183,9 +184,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                                 "Multiple parameters with the same type not supported by IxClassRawFactory.");
                         }
 
-                        return new IxRawInstanceFactory(
-                            (providerNode, parentInstance, resolveContext, ixInstanceFactory) => ResolveList(
-                                parentInstance,
+                        return new IxInstanceFactory(
+                            (instance, parentInstance, resolveContext) => ResolveList(
+                                instance,
                                 dependencies,
                                 resolveContext,
                                 resolvedDependencies =>
@@ -198,32 +199,30 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                         resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
                                                 .ToArray();
 
-                                            object instance = constructorInfo.Invoke(arguments);
+                                            object instanceObj = constructorInfo.Invoke(arguments);
 
                                             Critical.Assert(
-                                                instance != null,
+                                                instanceObj != null,
                                                 "Constructor call through reflection should not return null.");
 
-                                            IIxInstanceLock ixInstanceLock = ixInstanceFactory(
-                                                providerNode,
-                                                parentInstance,
-                                                resolveContext,
-                                                instance);
+                                            instance.Object = instanceObj;
 
-                                            lock (providerNode.Host.InstanceTreeSyncRoot)
+                                            lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
                                             {
                                                 foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
                                                     in resolvedDependencies)
                                                 {
                                                     // ReSharper disable once ObjectCreationAsStatement
-                                                    new IxReferenceLock(kvp.Value, ixInstanceLock.Target);
+                                                    new IxReferenceLock(kvp.Value, instance);
                                                 }
                                             }
-                                            return Task.FromResult(ixInstanceLock);
+
+                                            // Result true or false does not make sence, it's just to avoid of creation parameterless ResolveList method.
+                                            return Task.FromResult(true);
                                         }
                                         catch (Exception ex)
                                         {
-                                            return Task.FromException<IIxInstanceLock>(ex);
+                                            return Task.FromException<bool>(ex);
                                         }
                                     }),
                             configTypeInfo.GenericTypeArguments[0]);
@@ -243,25 +242,18 @@ namespace ClrCoder.ComponentModel.IndirectX
                     if (configTypeInfo.IsGenericType
                         && configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>))
                     {
-                        object instance = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
-                        if (instance == null)
+                        object instanceObj = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
+                        if (instanceObj == null)
                         {
                             throw new InvalidOperationException(
                                 "Existing instance factory config should have not null instance.");
                         }
 
-                        return new IxRawInstanceFactory(
-                            (provider, parentInstance, resolveContext, ixInstanceFactory) =>
+                        return new IxInstanceFactory(
+                            (instance, parentInstance, resolveContext) =>
                                 {
-                                    try
-                                    {
-                                        return Task.FromResult(
-                                                ixInstanceFactory(provider, parentInstance, resolveContext, instance));
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        return Task.FromException<IIxInstanceLock>(ex);
-                                    }
+                                    instance.Object = instanceObj;
+                                    return Task.CompletedTask;
                                 },
                             configTypeInfo.GenericTypeArguments[0]);
                     }
@@ -371,11 +363,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("Instance factory should be configured.");
                     }
 
-                    IxRawInstanceFactory rawInstanceFactory = RawInstanceFactoryBuilder.Delegate(cfg.Factory);
+                    IxInstanceFactory instanceFactory = RawInstanceFactoryBuilder.Delegate(cfg.Factory);
 
                     if (cfg.DisposeHandler == null)
                     {
-                        cfg.DisposeHandler = DisposeHandlerBuilder.Delegate(rawInstanceFactory.InstanceBaseType);
+                        cfg.DisposeHandler = DisposeHandlerBuilder.Delegate(instanceFactory.InstanceBaseType);
                     }
 
                     if (cfg.ExportFilter == null)
@@ -414,7 +406,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         this,
                         parentNode,
                         cfg,
-                        rawInstanceFactory,
+                        instanceFactory,
                         exportFilter,
                         exportToParent,
                         importFilter,

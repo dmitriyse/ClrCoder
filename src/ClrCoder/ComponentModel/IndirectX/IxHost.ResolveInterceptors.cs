@@ -27,11 +27,21 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxIdentifier identifier,
             IxResolveContext context);
 
-        public async Task<IIxInstanceLock> ResolveList(
+        /// <summary>
+        /// Resolves list of <c>dependencies</c> from the specified origin. TODO: Implement <c>this</c> method with parallel
+        /// resolution.
+        /// </summary>
+        /// <typeparam name="TResult">Target operation result type.</typeparam>
+        /// <param name="originInstance">Origin instance. Where <c>dependencies</c> are queried.</param>
+        /// <param name="dependencies">List of dependency identifiers.</param>
+        /// <param name="context">Resolve <c>context</c>.</param>
+        /// <param name="targetOperation">Operation that should be performed with resolved <c>dependencies</c>.</param>
+        /// <returns>Result of target opration.</returns>
+        public async Task<TResult> ResolveList<TResult>(
             IIxInstance originInstance,
             HashSet<IxIdentifier> dependencies,
             IxResolveContext context,
-            Func<Dictionary<IxIdentifier, IIxInstance>, Task<IIxInstanceLock>> targetOperation)
+            Func<Dictionary<IxIdentifier, IIxInstance>, Task<TResult>> targetOperation)
         {
             if (originInstance == null)
             {
@@ -56,7 +66,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             using (HashSet<IxIdentifier>.Enumerator enumerator = dependencies.GetEnumerator())
             {
                 var result = new Dictionary<IxIdentifier, IIxInstance>();
-                Func<Task<IIxInstanceLock>> resolveItem = null;
+                Func<Task<TResult>> resolveItem = null;
                 resolveItem = async () =>
                     {
                         // ReSharper disable once AccessToDisposedClosure

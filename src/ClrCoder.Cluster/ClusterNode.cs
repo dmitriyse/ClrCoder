@@ -5,12 +5,10 @@
 
 namespace ClrCoder.Cluster
 {
-    using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using ComponentModel.IndirectX;
-
-    using JetBrains.Annotations;
 
     using Logging;
 
@@ -27,36 +25,35 @@ namespace ClrCoder.Cluster
 
         private IWebHost _webHost;
 
-        private ClusterNode(IIxHost indirectXHost, IWebHostBuilder webHostBuilder, IJsonLogger logger)
+        private CancellationTokenSource _executeCts;
+
+        private CancellationToken _executeCancellationToken;
+
+        private ClusterNode(
+            IIxHost indirectXHost,
+            IWebHostBuilder webHostBuilder,
+            IJsonLogger logger)
         {
+            _executeCts = new CancellationTokenSource();
             _indirectXHost = indirectXHost;
+            _webHost = webHostBuilder
+                .UseStartup<ClusterNodeStartup>()
+                .Build();
+            _webHost.Start();
         }
 
         /// <inheritdoc/>
-        public async Task<int> Run()
+        public async Task<int> WaitTermination()
         {
-            _webHost.Run();
+            await _executeCancellationToken;
             return 0;
-        }
-
-        /// <summary>
-        /// Initializes instance.
-        /// </summary>
-        /// <param name="webHostBuilder">Asp.Net core web host builder.</param>
-        /// <returns>Async execution task.</returns>
-        [UsedImplicitly]
-        public async Task Initialize(IWebHostBuilder webHostBuilder)
-        {
-            _webHost = webHostBuilder
-                .UseUrls("http://*:5000")
-                .UseStartup<Startup>()
-                .Build();
         }
 
         /// <inheritdoc/>
         protected override Task AsyncDispose()
         {
-            throw new NotImplementedException();
+            _executeCts.Cancel();
+            return Task.CompletedTask;
         }
     }
 }
