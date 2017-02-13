@@ -110,20 +110,72 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
-        /// <typeparam name="T">Type of task.</typeparam>
+        /// <typeparam name="TResult">Type of task.</typeparam>
         /// <param name="task">Task that will be awaited.</param>
-        /// <param name="isAsync">Output argument, that sets to false on synchronous execution.</param>
-        /// <returns>Chained fluent syntax. Returned value provided in <see cref="task"/> argument.</returns>
-        public static T WithSyncDetection<T>(this T task, out bool isAsync)
-            where T : Task
+        /// <param name="handleDetectionResult">
+        /// Handles detection result. Receives true if await was in synchronous form, false
+        /// otherwise.
+        /// </param>
+        /// <returns>Awaitable object.</returns>
+        public static WithSyncDetectionFromTaskAwaitable<TResult> WithSyncDetection<TResult>(
+            this Task<TResult> task,
+            Action<bool> handleDetectionResult)
         {
             if (task == null)
             {
                 throw new ArgumentNullException(nameof(task));
             }
 
-            isAsync = !task.IsCompleted;
-            return task;
+            if (handleDetectionResult == null)
+            {
+                throw new ArgumentNullException(nameof(handleDetectionResult));
+            }
+
+            return new WithSyncDetectionFromTaskAwaitable<TResult>(task.GetAwaiter(), handleDetectionResult);
+        }
+
+        /// <summary>
+        /// Helps to detect synchronous execution of await <see langword="operator"/>.
+        /// </summary>
+        /// <param name="task">Task that will be awaited.</param>
+        /// <param name="handleDetectionResult">
+        /// Handles detection result. Receives true if await was in synchronous form, false
+        /// otherwise.
+        /// </param>
+        /// <returns>Awaitable object.</returns>
+        public static WithSyncDetectionFromTaskAwaitable WithSyncDetection(
+            this Task task,
+            Action<bool> handleDetectionResult)
+        {
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            if (handleDetectionResult == null)
+            {
+                throw new ArgumentNullException(nameof(handleDetectionResult));
+            }
+
+            return new WithSyncDetectionFromTaskAwaitable(task.GetAwaiter(), handleDetectionResult);
+        }
+
+        /// <summary>
+        /// Helps to detect synchronous execution of await <see langword="operator"/>.
+        /// </summary>
+        /// <param name="task">Task that will be awaited.</param>
+        /// <returns>Returns synchronous run flags (true for sync, false for async).</returns>
+        public static async Task<bool> WithSyncDetection(this Task task)
+        {
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            await task;
+
+            return threadId == Thread.CurrentThread.ManagedThreadId;
         }
 
         /// <summary>
@@ -148,6 +200,12 @@ namespace ClrCoder.Threading
             [UsedImplicitly]
             public void GetResult()
             {
+                if (!_cancellationToken.IsCancellationRequested)
+                {
+                    // GetResult can be called directly by GetAwaiter().GetResult(). 
+                    // In this case we should use synchronous style wait.
+                    _cancellationToken.WaitHandle.WaitOne();
+                }
             }
 
             /// <summary>
@@ -157,12 +215,18 @@ namespace ClrCoder.Threading
             public bool IsCompleted => _cancellationToken.IsCancellationRequested;
 
             /// <summary>
-            /// Registers continuation <c>action</c>..
+            /// Registers continuation <c>action</c>.
             /// </summary>
             /// <param name="action">Operation continuation.</param>
             [UsedImplicitly]
-            public void OnCompleted(Action action)
+            public void OnCompleted([NotNull] Action action)
             {
+                if (action == null)
+                {
+                    throw new ArgumentNullException(nameof(action));
+                }
+
+                // ReSharper disable once ImpureMethodCallOnReadonlyValueField
                 _cancellationToken.Register(action);
             }
         }

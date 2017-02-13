@@ -17,6 +17,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using ObjectModel;
 
+    using Threading;
+
     [NoReorder]
     public partial class IxHost
     {
@@ -492,7 +494,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                             try
                             {
                                 Critical.Assert(obj != null, "Dispose handler called for null object");
-                                ((IDisposable)obj)?.Dispose();
+                                ((IDisposable)obj).Dispose();
                             }
                             catch (Exception ex)
                             {
@@ -505,6 +507,62 @@ namespace ClrCoder.ComponentModel.IndirectX
                             return Task.CompletedTask;
                         };
                 };
+        }
+
+        private DisposeHandlerBuilderDelegate AsyncDisposableDisposeHandlerBuilder(DisposeHandlerBuilderDelegate next)
+        {
+            return type =>
+            {
+                if (type == null)
+                {
+                    IxDisposeHandlerDelegate nextHandler = next(null);
+                    return obj =>
+                    {
+                        var disposable = obj as IAsyncDisposable;
+                        if (disposable != null)
+                        {
+                            try
+                            {
+                                disposable.StartDispose();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (!ex.IsProcessable())
+                                {
+                                    return Task.FromException(ex);
+                                }
+                            }
+
+                            return Task.CompletedTask;
+                        }
+
+                        return nextHandler(obj);
+                    };
+                }
+
+                if (!typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                {
+                    return next(type);
+                }
+
+                return obj =>
+                {
+                    try
+                    {
+                        Critical.Assert(obj != null, "Dispose handler called for null object");
+                        ((IAsyncDisposable)obj).StartDispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!ex.IsProcessable())
+                        {
+                            return Task.FromException(ex);
+                        }
+                    }
+
+                    return Task.CompletedTask;
+                };
+            };
         }
 
         #endregion

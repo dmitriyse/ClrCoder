@@ -39,6 +39,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             ScopeBinderBuilder.Add(RegistrationScopeBinderBuilder, 100);
 
             DisposeHandlerBuilder.Add(DisposableDisposeHandlerBuilder, 100);
+            DisposeHandlerBuilder.Add(AsyncDisposableDisposeHandlerBuilder, 200);
 
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
             ResolveHandler.Add(SelfToDirectChildrenResolver, 200);
@@ -76,7 +77,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 new IxStdProviderConfig
                     {
                         Identifier = new IxIdentifier(typeof(IIxHost)),
-                        Factory = new IxExistingInstanceFactoryConfig<IIxHost>(this)
+                        Factory = new IxExistingInstanceFactoryConfig<IIxHost>(this),
+                        DisposeHandler = obj => Task.CompletedTask
                     });
 
             Action<IxScopeBaseConfig, IxProviderNode> buildNodeAction = null;

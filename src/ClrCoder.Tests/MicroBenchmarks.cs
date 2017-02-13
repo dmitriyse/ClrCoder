@@ -9,6 +9,7 @@ namespace ClrCoder.Tests
     using System.Diagnostics;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
+    using System.Threading;
 
     using NUnit.Framework;
 
@@ -105,6 +106,29 @@ namespace ClrCoder.Tests
                 if (new object().GetHashCode() == 42)
                 {
                     i++;
+                }
+            }
+
+            stopwatch.Stop();
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
+        }
+
+        /// <summary>
+        /// Tests benchmark of the <see cref="Thread.ManagedThreadId"/> method.
+        /// </summary>
+        /// <remarks>~400 millions per second.</remarks>
+        [Test]
+        public void GetThreadId()
+        {
+            var testSize = 10000000;
+            var original = Thread.CurrentThread.ManagedThreadId;
+            var stopwatch = Stopwatch.StartNew();
+
+            for (var i = 0; i < testSize; i++)
+            {
+                if (original != Thread.CurrentThread.ManagedThreadId)
+                {
+                    break;
                 }
             }
 

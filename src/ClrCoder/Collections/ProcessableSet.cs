@@ -30,7 +30,7 @@ namespace ClrCoder.Collections
         private Action<T> _processAction;
 
         /// <inheritdoc/>
-        public int Count => _inner.Count + _processed?.Count ?? 0;
+        public int Count => _inner.Count + (_processed?.Count ?? 0);
 
         /// <inheritdoc/>
         bool ICollection<T>.IsReadOnly => ((ISet<T>)_inner).IsReadOnly;
@@ -67,7 +67,7 @@ namespace ClrCoder.Collections
             {
                 Debug.Assert(_processed != null, "In processing state, processed collection should be not null.");
 
-                var result = true;
+                var result = false;
                 if (_processed.Add(item))
                 {
                     // Probably not processed collection already have this item.
@@ -243,7 +243,7 @@ namespace ClrCoder.Collections
         }
 
         /// <summary>
-        /// Performs operation on all items.
+        /// Performs operation on all items. It can process the same item multiple times if it was processed, removed and than added.
         /// </summary>
         /// <param name="action">Operation on item. This operation can remove some items or add another.</param>
         public void ForEach(Action<T> action)
@@ -268,6 +268,9 @@ namespace ClrCoder.Collections
                     var itemToProcess = _inner.First();
                    
                     Debug.Assert(_processAction != null, "_processAction should be not null while ForEachMethod not exited.");
+                    _inner.Remove(itemToProcess);
+                    Debug.Assert(_processed != null, "_processed should be not null while ForEachMethod not exited.");
+                    _processed.Add(itemToProcess);
                     _processAction(itemToProcess);
                 }
             }

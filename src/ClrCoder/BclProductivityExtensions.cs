@@ -313,6 +313,16 @@ namespace ClrCoder
         }
 
         /// <summary>
+        /// Returns <see langword="true"/> or <see langword="false"/> with equal probability.
+        /// </summary>
+        /// <param name="rnd">Random generator.</param>
+        /// <returns>Random bool.</returns>
+        public static bool NextBool(this Random rnd)
+        {
+            return rnd.Next(2) == 1;
+        }
+
+        /// <summary>
         /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the
         /// <paramref name="comparand"/>.
         /// </summary>

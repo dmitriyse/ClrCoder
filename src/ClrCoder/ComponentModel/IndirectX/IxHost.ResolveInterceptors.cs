@@ -210,7 +210,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                        // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
                                        // ReSharper disable once ObjectCreationAsStatement
-                                       new IxInstanceMasterLock(resolvedInstanceTempLock.Target, parentInstance);
+                                       new IxInstanceMasterLock(parentInstance, resolvedInstanceTempLock.Target);
 
                                        return resolvedInstanceTempLock;
                                    });

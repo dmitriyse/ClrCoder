@@ -31,6 +31,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private readonly ProcessableSet<IIxInstanceLock> _ownedLocks;
 
+        private readonly AwaitableEvent _selfDisposeCompleted;
+
         [CanBeNull]
         private Dictionary<IxProviderNode, object> _childrenData;
 
@@ -51,6 +53,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             _parentInstance = parentInstance;
             _ownedLocks = new ProcessableSet<IIxInstanceLock>();
             _locks = new ProcessableSet<IIxInstanceLock>();
+            _selfDisposeCompleted = new AwaitableEvent();
         }
 
         /// <inheritdoc/>
@@ -134,17 +137,13 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             EnsureTreeLocked();
 
-            try
-            {
-                SetDisposeSuspended(true);
-            }
-            catch (InvalidOperationException)
-            {
-                Critical.Assert(false, "Cannot set lock, self dispose was started.");
-            }
-
             bool inserted = _locks.Add(instanceLock);
             Critical.Assert(inserted, "Lock already registered in the target instance.");
+
+            UpdateDisposeSuspendState();
+
+            UpdateSelfDisposeCompleteSuspendState();
+
         }
 
         /// <inheritdoc/>
@@ -189,10 +188,32 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Critical.Assert(false, "Lock was not registered in the target or already removed.");
             }
 
-            // It's safe to use IsDisposeStarted while StartDispose was called also under tree lock.
-            if (IsDisposeStarted)
+            UpdateDisposeSuspendState();
+
+            UpdateSelfDisposeCompleteSuspendState();
+        }
+
+        private void UpdateSelfDisposeCompleteSuspendState()
+        {
+            try
             {
-                TryStartSelfDispose();
+                _selfDisposeCompleted.SuspendTrigger(_locks.Any());
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set master lock, self dispose was completed.");
+            }
+        }
+
+        private void UpdateDisposeSuspendState()
+        {
+            try
+            {
+                SetDisposeSuspended(!Locks.All(x => x is IxInstanceMasterLock));
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set lock, self dispose was started.");
             }
         }
 
@@ -239,14 +260,22 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             try
             {
-                if (Locks.Any())
+                // Here we are possibly under lock.
+                lock (ProviderNode.Host.InstanceTreeSyncRoot)
                 {
-                    Critical.Assert(
-                        false,
-                        "Dependencies schema problem, after instance object disposed no any lock are allowed.");
+                    if (_locks.Any(x => !(x is IxInstanceMasterLock)))
+                    {
+                        Critical.Assert(
+                            false,
+                            "Dependencies schema problem, after instance object disposed no any lock are allowed.");
+                    }
                 }
 
                 await SelfDispose();
+
+                UpdateSelfDisposeCompleteSuspendState();
+
+                _selfDisposeCompleted.Set();
 
                 // Sync or async execution here.
             }
@@ -262,7 +291,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                         // Here other objects can dispose synchronously.
                         OwnedLocks.First().Dispose();
                     }
+
+                    // If some master locks stayed here, we need to init some awaiter.
                 }
+
+                await _selfDisposeCompleted;
             }
         }
 
@@ -287,7 +320,10 @@ namespace ClrCoder.ComponentModel.IndirectX
             // ---------------------------------------------------------
             _locks.ForEach(x => x.PulseDispose());
 
-            TryStartSelfDispose();
+            if (Locks.All(x => x is IxInstanceMasterLock))
+            {
+                SetDisposeSuspended(false);
+            }
 
             base.OnDisposeStarted();
         }
@@ -298,13 +334,5 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
         protected abstract Task SelfDispose();
-
-        private void TryStartSelfDispose()
-        {
-            if (!Locks.Any())
-            {
-                SetDisposeSuspended(false);
-            }
-        }
     }
 }

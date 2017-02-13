@@ -21,6 +21,9 @@ namespace ClrCoder.Threading
     {
         private readonly object _syncRoot;
 
+        /// <summary>
+        /// TODO: Replace with CancellationTokenSource.
+        /// </summary>
         [CanBeNull]
         private TaskCompletionSource<bool> _disposeCompletionSource;
 
@@ -51,6 +54,7 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
+        [DebuggerHidden]
         public Task DisposeTask
         {
             get
@@ -156,7 +160,7 @@ namespace ClrCoder.Threading
                 {
                     // Here we are free from reentrancy.
                     _isDisposeSuspended = isDisposeSuspended;
-                    if (_isDisposeStarted && !_isDisposeSuspended)
+                    if (_isDisposeStarted && !_isDisposeSuspended && !_isActualDisposeCalled)
                     {
                         // Reentrancy point.
                         StartAsyncDisposeWrapped();
@@ -172,14 +176,14 @@ namespace ClrCoder.Threading
         private async Task AsynDisposeWrapped()
         {
             // We are under lock here.
-            bool isAsyncRun;
+            bool isAsyncRun = false;
 
             // This line will never throw any exception.
-            Task disposeResult = AsyncDispose().WithSyncDetection(out isAsyncRun);
+            Task disposeResult = AsyncDispose().WithSyncDetection();
 
             try
             {
-                await disposeResult;
+                await disposeResult.WithSyncDetection(isSync=>isAsyncRun = !isSync);
 
                 if (isAsyncRun)
                 {
@@ -256,9 +260,14 @@ namespace ClrCoder.Threading
             Debug.Assert(!_isActualDisposeCalled, "Actual dispose can be performed only once.");
 
             _isActualDisposeCalled = true;
-
+            
             // When _disposeTask was not asked, we are free to set it to result of DoAsyncDispose wrapper.
             Task task = AsynDisposeWrapped();
+            if (task.Status == TaskStatus.WaitingToRun)
+            {
+                task.Start();
+            }
+
             if (_disposeTask == null)
             {
                 Debug.Assert(
