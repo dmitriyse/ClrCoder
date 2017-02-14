@@ -17,7 +17,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IxTransientScope(
             IxHost host,
             IxProviderNode parentNode,
-            IxScopeBaseConfig config,
+            IxProviderNodeConfig config,
             IxInstanceFactory instanceFactory,
             IxVisibilityFilter exportFilter,
             IxVisibilityFilter exportToParentFilter,

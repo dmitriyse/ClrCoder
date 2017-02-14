@@ -5,7 +5,35 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    public interface IIxStdProviderConfig
+    using JetBrains.Annotations;
+
+    /// <summary>
+    /// Standard provider node config.
+    /// </summary>
+    public interface IIxStdProviderConfig : IIxProviderNodeConfig
     {
+        /// <summary>
+        /// Scope binding strategy config (registration, transient, etc.).
+        /// </summary>
+        [CanBeNull]
+        IIxScopeBindingConfig ScopeBinding { get; }
+
+        /// <summary>
+        /// Multiplicity config. (Singleton, pool, factory etc.).
+        /// </summary>
+        [CanBeNull]
+        IIxMultiplicityConfig Multiplicity { get; }
+
+        /// <summary>
+        /// Instance builder config. (Class constructor, existing instance, etc.).
+        /// </summary>
+        [CanBeNull]
+        IIxInstanceBuilderConfig Factory { get; }
+
+        /// <summary>
+        /// Overrides dispose operation.
+        /// </summary>
+        [CanBeNull]
+        IxDisposeHandlerDelegate DisposeHandler { get; }
     }
 }

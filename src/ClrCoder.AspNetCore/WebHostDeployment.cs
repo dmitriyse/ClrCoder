@@ -5,7 +5,17 @@
 
 namespace ClrCoder.AspNetCore
 {
+    using Microsoft.AspNetCore.Hosting;
+
+    /// <summary>
+    /// Helps to controls WebHost urls.
+    /// </summary>
     public class WebHostDeployment : IWebAppComponent
     {
+        private WebHostDeployment(IWebHostBuilder webHostBuilder, WebHostDeploymentConfig config)
+        {
+            webHostBuilder
+                .UseUrls();
+        }
     }
 }

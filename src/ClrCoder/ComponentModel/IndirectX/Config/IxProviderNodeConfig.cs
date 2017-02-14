@@ -1,4 +1,4 @@
-﻿// <copyright file="IxScopeBaseConfig.cs" company="ClrCoder project">
+﻿// <copyright file="IxProviderNodeConfig.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -7,21 +7,25 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System.Collections.Generic;
 
-    using JetBrains.Annotations;
-
-    public class IxScopeBaseConfig
+    /// <summary>
+    /// Base configuration for any provider node.
+    /// </summary>
+    public class IxProviderNodeConfig : IIxProviderNodeConfig
     {
+        /// <inheritdoc/>
         public IxIdentifier Identifier { get; set; }
 
-        public List<IxScopeBaseConfig> Nodes { get; } = new List<IxScopeBaseConfig>();
+        /// <inheritdoc/>
+        public ICollection<IIxProviderNodeConfig> Nodes { get; }
+            = new HashSet<IIxProviderNodeConfig>(new IxProviderNodeConfigComparer());
 
-        [CanBeNull]
+        /// <inheritdoc/>
         public IIxVisibilityFilterConfig ImportFilter { get; set; }
 
-        [CanBeNull]
+        /// <inheritdoc/>
         public IIxVisibilityFilterConfig ExportToParentFilter { get; set; }
 
-        [CanBeNull]
+        /// <inheritdoc/>
         public IIxVisibilityFilterConfig ExportFilter { get; set; }
     }
 }

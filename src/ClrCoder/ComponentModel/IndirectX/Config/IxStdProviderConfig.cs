@@ -5,19 +5,22 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using System;
-    using System.Threading.Tasks;
-
     using JetBrains.Annotations;
 
-    public class IxStdProviderConfig : IxScopeBaseConfig
+    /// <summary>
+    /// Standard provider node config.
+    /// </summary>
+    public class IxStdProviderConfig : IxProviderNodeConfig, IIxStdProviderConfig
     {
+        /// <inheritdoc/>
         [CanBeNull]
         public IIxScopeBindingConfig ScopeBinding { get; set; }
 
+        /// <inheritdoc/>
         [CanBeNull]
         public IIxMultiplicityConfig Multiplicity { get; set; }
 
+        /// <inheritdoc/>
         [CanBeNull]
         public IIxInstanceBuilderConfig Factory { get; set; }
 

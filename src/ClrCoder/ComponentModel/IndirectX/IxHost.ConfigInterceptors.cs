@@ -19,14 +19,15 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using Threading;
 
+    /// <content>Configuration loading related routines.</content>
     [NoReorder]
     public partial class IxHost
     {
         /// <summary>
         /// Raw instance factory from config builder.
         /// </summary>
-        public InterceptableDelegate<RawInstanceFactoryBuilderDelegate> RawInstanceFactoryBuilder { get; } =
-            new InterceptableDelegate<RawInstanceFactoryBuilderDelegate>(
+        public InterceptableDelegate<InstanceFactoryBuilderDelegate> RawInstanceFactoryBuilder { get; } =
+            new InterceptableDelegate<InstanceFactoryBuilderDelegate>(
                 config =>
                     {
                         throw new NotSupportedException(
@@ -40,10 +41,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="parentNode">Parent node.</param>
         /// <returns>Created node.</returns>
         public delegate IxProviderNode ProviderNodeBuilderDelegate(
-            IxScopeBaseConfig config,
+            IIxProviderNodeConfig config,
             [CanBeNull] IxProviderNode parentNode);
-
-        public delegate IxScopeBinderDelegate ScopeBinderBuilderDelegate(IIxScopeBindingConfig bindingConfig);
 
         /// <summary>
         /// Visibility filter builder.
@@ -56,6 +55,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                             $"Visibility filter with type {config.GetType()} is not supported.");
                     });
 
+        /// <summary>
+        /// Interceptors chain that builds node provider.
+        /// </summary>
         public InterceptableDelegate<ProviderNodeBuilderDelegate> ProviderNodeBuilder { get; } =
             new InterceptableDelegate<ProviderNodeBuilderDelegate>(
                 (cfg, parent) =>
@@ -63,6 +65,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new NotSupportedException($"Node with type {cfg.GetType()} is not supported.");
                     });
 
+        /// <summary>
+        /// Interceptors chain that builds scope binder.
+        /// </summary>
         public InterceptableDelegate<ScopeBinderBuilderDelegate> ScopeBinderBuilder { get; } =
             new InterceptableDelegate<ScopeBinderBuilderDelegate>(
                 config =>
@@ -71,6 +76,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                     })
             ;
 
+        /// <summary>
+        /// Interceptors chain that builds dispose handler.
+        /// </summary>
         public InterceptableDelegate<DisposeHandlerBuilderDelegate> DisposeHandlerBuilder { get; } =
             new InterceptableDelegate<DisposeHandlerBuilderDelegate>(
                 type =>
@@ -94,9 +102,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                         // By default no any dispose action required on object.
                         return obj => Task.CompletedTask;
-                    }
-
-            );
+                    });
 
         #region Provider Node Builders
 
@@ -104,13 +110,28 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return (nodeConfig, parentNode) =>
                 {
-                    if (nodeConfig.GetType() != typeof(IxStdProviderConfig))
+                    TypeInfo nodeConfigType = nodeConfig.GetType().GetTypeInfo();
+                    if (!typeof(IIxStdProviderConfig).GetTypeInfo().IsAssignableFrom(nodeConfigType))
                     {
                         return next(nodeConfig, parentNode);
                     }
 
-
-                    var cfg = (IxStdProviderConfig)nodeConfig;
+                    var cfg = nodeConfig as IxStdProviderConfig;
+                    var cfgContract = (IIxStdProviderConfig)nodeConfig;
+                    if (cfg == null)
+                    {
+                        cfg = new IxStdProviderConfig
+                                  {
+                                      ScopeBinding = cfgContract.ScopeBinding,
+                                      Identifier = cfgContract.Identifier,
+                                      Factory = cfgContract.Factory,
+                                      Multiplicity = cfgContract.Multiplicity,
+                                      DisposeHandler = cfgContract.DisposeHandler,
+                                      ExportFilter = cfgContract.ExportFilter,
+                                      ExportToParentFilter = cfgContract.ExportToParentFilter,
+                                      ImportFilter = cfgContract.ImportFilter
+                                  };
+                    }
 
                     if (cfg.Multiplicity == null)
                     {
@@ -150,8 +171,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         #endregion
 
-        private RawInstanceFactoryBuilderDelegate ClassRawFactoryBuilder(
-            RawInstanceFactoryBuilderDelegate next)
+        private InstanceFactoryBuilderDelegate ClassRawFactoryBuilder(
+            InstanceFactoryBuilderDelegate next)
         {
             return factoryConfig =>
                 {
@@ -234,8 +255,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
-        private RawInstanceFactoryBuilderDelegate ExistingInstanceRawFactoryBuilder(
-            RawInstanceFactoryBuilderDelegate next)
+        private InstanceFactoryBuilderDelegate ExistingInstanceRawFactoryBuilder(
+            InstanceFactoryBuilderDelegate next)
         {
             return factoryConfig =>
                 {
@@ -279,26 +300,41 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private ProviderNodeBuilderDelegate ScopeBuilder(ProviderNodeBuilderDelegate next)
         {
-            return (cfg, parentNode) =>
+            return (nodeConfig, parentNode) =>
                 {
-                    if (cfg.Identifier == default(IxIdentifier))
-                    {
-                        cfg.Identifier = new IxIdentifier(typeof(IxScope));
-                    }
-
+                    TypeInfo configType = nodeConfig.GetType().GetTypeInfo();
                     if (parentNode == null)
                     {
-                        if (cfg.GetType() != typeof(IxHostConfig))
+                        if (!typeof(IIxHostConfig).GetTypeInfo().IsAssignableFrom(configType))
                         {
-                            return next(cfg, null);
+                            return next(nodeConfig, null);
                         }
                     }
                     else
                     {
-                        if (cfg.GetType() != typeof(IxScopeConfig))
+                        if (!typeof(IIxScopeConfig).GetTypeInfo().IsAssignableFrom(configType))
                         {
-                            return next(cfg, parentNode);
+                            return next(nodeConfig, parentNode);
                         }
+                    }
+
+                    var cfg = nodeConfig as IxScopeConfig;
+                    var cfgContract = (IIxScopeConfig)nodeConfig;
+                    if (cfg == null)
+                    {
+                        cfg = new IxScopeConfig
+                                  {
+                                      Identifier = cfgContract.Identifier,
+                                      ExportFilter = cfgContract.ExportFilter,
+                                      ExportToParentFilter = cfgContract.ExportToParentFilter,
+                                      ImportFilter = cfgContract.ImportFilter,
+                                      IsInstanceless = cfgContract.IsInstanceless
+                                  };
+                    }
+
+                    if (cfg.Identifier == default(IxIdentifier))
+                    {
+                        cfg.Identifier = new IxIdentifier(typeof(IxScope));
                     }
 
                     if (cfg.ExportFilter == null)
@@ -326,7 +362,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     return new IxScope(
                         this,
                         parentNode,
-                        (IxScopeConfig)cfg,
+                        cfg,
                         exportFilter,
                         exportToParent,
                         importFilter);
@@ -512,18 +548,45 @@ namespace ClrCoder.ComponentModel.IndirectX
         private DisposeHandlerBuilderDelegate AsyncDisposableDisposeHandlerBuilder(DisposeHandlerBuilderDelegate next)
         {
             return type =>
-            {
-                if (type == null)
                 {
-                    IxDisposeHandlerDelegate nextHandler = next(null);
-                    return obj =>
+                    if (type == null)
                     {
-                        var disposable = obj as IAsyncDisposable;
-                        if (disposable != null)
+                        IxDisposeHandlerDelegate nextHandler = next(null);
+                        return obj =>
+                            {
+                                var disposable = obj as IAsyncDisposable;
+                                if (disposable != null)
+                                {
+                                    try
+                                    {
+                                        disposable.StartDispose();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        if (!ex.IsProcessable())
+                                        {
+                                            return Task.FromException(ex);
+                                        }
+                                    }
+
+                                    return Task.CompletedTask;
+                                }
+
+                                return nextHandler(obj);
+                            };
+                    }
+
+                    if (!typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    {
+                        return next(type);
+                    }
+
+                    return obj =>
                         {
                             try
                             {
-                                disposable.StartDispose();
+                                Critical.Assert(obj != null, "Dispose handler called for null object");
+                                ((IAsyncDisposable)obj).StartDispose();
                             }
                             catch (Exception ex)
                             {
@@ -534,35 +597,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                             }
 
                             return Task.CompletedTask;
-                        }
-
-                        return nextHandler(obj);
-                    };
-                }
-
-                if (!typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
-                {
-                    return next(type);
-                }
-
-                return obj =>
-                {
-                    try
-                    {
-                        Critical.Assert(obj != null, "Dispose handler called for null object");
-                        ((IAsyncDisposable)obj).StartDispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (!ex.IsProcessable())
-                        {
-                            return Task.FromException(ex);
-                        }
-                    }
-
-                    return Task.CompletedTask;
+                        };
                 };
-            };
         }
 
         #endregion

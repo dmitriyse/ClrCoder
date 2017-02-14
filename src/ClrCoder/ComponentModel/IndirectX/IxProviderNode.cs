@@ -22,7 +22,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IxProviderNode(
             IxHost host,
             [CanBeNull] IxProviderNode parentNode,
-            IxScopeBaseConfig config,
+            IxProviderNodeConfig config,
             [CanBeNull] IxInstanceFactory instanceFactory,
             IxVisibilityFilter exportFilter,
             IxVisibilityFilter exportToParentFilter,

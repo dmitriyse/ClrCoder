@@ -22,7 +22,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         private IxScopeInstance _rootScopeInstance;
 
         /// <summary>
-        /// Creates new host.
+        /// Initializes a new instance of the <see cref="IxHost"/> class.
+        /// This is first build phase. Second phase performed by <see cref="Initialize"/>.
         /// </summary>
         public IxHost()
         {
@@ -47,20 +48,20 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <summary>
-        /// Creates dependency node from <paramref name="config"/>.
+        /// Root resolver.
         /// </summary>
-        /// <param name="config">Configuration node.</param>
-        /// <returns>Created node.</returns>
-        public delegate IxInstanceFactory RawInstanceFactoryBuilderDelegate(
-            IIxInstanceBuilderConfig config);
-
-        public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull] Type type);
-
-        public delegate IxVisibilityFilter VisibilityFilterBuilderDelegate(IIxVisibilityFilterConfig config);
-
+        /// <remarks>
+        /// TODO: Add initialized assurance.
+        /// </remarks>
         [CanBeNull]
         public IIxResolver Resolver { get; private set; }
 
+        /// <summary>
+        /// Object that synchronizes instances tree manipulations.
+        /// </summary>
+        /// <remarks>
+        /// Currently there are many cases where control flow have cycles on tree, thus we need centralized <c>lock</c>.
+        /// </remarks>
         public object InstanceTreeSyncRoot { get; } = new object();
 
         /// <inheritdoc/>
@@ -69,9 +70,14 @@ namespace ClrCoder.ComponentModel.IndirectX
             _rootScopeInstance.StartDispose();
         }
 
-        public async Task Initialize(IxHostConfig config)
+        /// <summary>
+        /// Second initialization phase.
+        /// </summary>
+        /// <param name="config">Host configuration.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public async Task Initialize(IIxHostConfig config)
         {
-            var allConfigNodes = new HashSet<IxScopeBaseConfig>();
+            var allConfigNodes = new HashSet<IIxProviderNodeConfig>();
 
             config.Nodes.Add(
                 new IxStdProviderConfig
@@ -81,7 +87,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         DisposeHandler = obj => Task.CompletedTask
                     });
 
-            Action<IxScopeBaseConfig, IxProviderNode> buildNodeAction = null;
+            Action<IIxProviderNodeConfig, IxProviderNode> buildNodeAction = null;
             buildNodeAction = (nodeConfig, parentNode) =>
                 {
                     if (!allConfigNodes.Add(nodeConfig))
@@ -93,13 +99,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                     IxProviderNode node = ProviderNodeBuilder.Delegate(nodeConfig, parentNode);
 
                     // parent node is null only for root scope.
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (parentNode == null)
                     {
                         _rootScope = (IxScope)node;
                     }
 
-                    foreach (IxScopeBaseConfig childConfig in nodeConfig.Nodes)
+                    foreach (IIxProviderNodeConfig childConfig in nodeConfig.Nodes)
                     {
                         buildNodeAction(childConfig, node);
                     }
@@ -167,7 +172,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             var resolveContext = new IxResolveContext(null);
             using (IIxInstanceLock rootResolverLock = await Resolve(
                                                           _rootScopeInstance,
-                                                          new IxIdentifier(typeof(IIxResolver), null),
+                                                          new IxIdentifier(typeof(IIxResolver)),
                                                           resolveContext))
             {
                 Resolver = (IIxResolver)rootResolverLock.Target.Object;
@@ -206,18 +211,72 @@ namespace ClrCoder.ComponentModel.IndirectX
         public Task DisposeTask => _rootScopeInstance.DisposeTask;
     }
 
+    /// <summary>
+    /// Handles instance disposing.
+    /// </summary>
+    /// <param name="object">Instance <c>object</c> to dispose.</param>
+    /// <returns>Async execution TPL task.</returns>
     public delegate Task IxDisposeHandlerDelegate(object @object);
 
+    /// <summary>
+    /// Visibility filter.
+    /// </summary>
+    /// <param name="identifier">Identifier of provider to filter.</param>
+    /// <returns><see langword="true"/>, identifier is visible, <see langword="false"/> otherwise.</returns>
     public delegate bool IxVisibilityFilter(IxIdentifier identifier);
 
+    /// <summary>
+    /// Scope binder, chooses scope/instance to which created <c>object</c> should belongs.
+    /// </summary>
+    /// <param name="originInstance">Instance from which resolve is performed.</param>
+    /// <param name="resolvePath">Path to provider node that <c>finally</c> resolves instance.</param>
+    /// <param name="context">Resolve <c>context</c>.</param>
+    /// <param name="resolveBound">Handler that resolves instance when scope resolved.</param>
+    /// <returns>Resolved instance temp <c>lock</c>.</returns>
     public delegate Task<IIxInstanceLock> IxScopeBinderDelegate(
         IIxInstance originInstance,
         IxResolvePath resolvePath,
         IxHost.IxResolveContext context,
         IxResolveBoundDelegate resolveBound);
 
+    /// <summary>
+    /// Resolves instance when scope resolved.
+    /// </summary>
+    /// <param name="parentInstance">Scope/parent instance.</param>
+    /// <param name="provider">Provider node that should resolve instance.</param>
+    /// <param name="context">Resolve <c>context</c>.</param>
+    /// <returns>Resolved instance temp <c>lock</c>.</returns>
     public delegate Task<IIxInstanceLock> IxResolveBoundDelegate(
         IIxInstance parentInstance,
         IxProviderNode provider,
         IxHost.IxResolveContext context);
+
+    /// <summary>
+    /// Creates dependency node from <paramref name="config"/>.
+    /// </summary>
+    /// <param name="config">Configuration node.</param>
+    /// <returns>Created node.</returns>
+    public delegate IxInstanceFactory InstanceFactoryBuilderDelegate(
+        IIxInstanceBuilderConfig config);
+
+    /// <summary>
+    /// Builds instance <c>object</c> disposing handler.
+    /// </summary>
+    /// <param name="type">Type of instance.</param>
+    /// <returns>Dispose handler.</returns>
+    public delegate IxDisposeHandlerDelegate DisposeHandlerBuilderDelegate([CanBeNull] Type type);
+
+    /// <summary>
+    /// Builds visibility filter.
+    /// </summary>
+    /// <param name="config">Visibility filter <c>config</c>.</param>
+    /// <returns>Visibility filter.</returns>
+    public delegate IxVisibilityFilter VisibilityFilterBuilderDelegate(IIxVisibilityFilterConfig config);
+
+    /// <summary>
+    /// Builds scope binder.
+    /// </summary>
+    /// <param name="bindingConfig">Bining config.</param>
+    /// <returns>Scope binder.</returns>
+    public delegate IxScopeBinderDelegate ScopeBinderBuilderDelegate(IIxScopeBindingConfig bindingConfig);
 }

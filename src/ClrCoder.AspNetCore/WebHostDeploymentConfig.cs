@@ -5,7 +5,14 @@
 
 namespace ClrCoder.AspNetCore
 {
+    using JetBrains.Annotations;
+
+    /// <summary>
+    /// Web host deployment configuration.
+    /// </summary>
     public class WebHostDeploymentConfig
     {
+        [CanBeNull]
+        public string UrlsEnvironmentVariableName { get; set; }
     }
 }

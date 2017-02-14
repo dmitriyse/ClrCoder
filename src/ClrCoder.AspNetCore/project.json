@@ -2,7 +2,8 @@
   "version": "0.1.1-*",
   "dependencies": {
     "ClrCoder": "0.1.1-*",
-    "JetBrains.Annotations": "10.1.4"
+    "JetBrains.Annotations": "10.1.4",
+    "Microsoft.AspNetCore.Hosting.Abstractions": "1.0.0"
   },
 
   "frameworks": {
@@ -18,7 +19,6 @@
         "NETStandard.Library": "1.6.0",
         "Microsoft.AspNetCore.Mvc.Core": "1.0.0",
         "System.Buffers": "4.0.0",
-        "Microsoft.AspNetCore.Hosting.Abstractions": "1.0.0",
         "Microsoft.Extensions.ObjectPool": "1.0.0",
         "Microsoft.Extensions.Options": "1.0.0",
         "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.0"
@@ -27,7 +27,6 @@
     "net46": {
       "dependencies": {
         "Microsoft.AspNetCore.Mvc.Core": "1.0.0",
-        "Microsoft.AspNetCore.Hosting.Abstractions": "1.0.0",
         "System.Buffers": "4.0.0",
         "Microsoft.Extensions.ObjectPool": "1.0.0",
         "Microsoft.Extensions.Options": "1.0.0",

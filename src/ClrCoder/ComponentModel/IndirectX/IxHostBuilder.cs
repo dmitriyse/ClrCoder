@@ -14,21 +14,24 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <summary>
     /// IndirectX Host builder implementation.
     /// </summary>
-    public class IxHostBuilder : IxBuilder<IxHostConfig>, IIxHostBuilder
+    public class IxHostBuilder : IxBuilder<IIxHostConfig>, IIxHostBuilder
     {
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IxHostBuilder"/> class. 
+        /// </summary>
         public IxHostBuilder()
         {
 
             Config = new IxHostConfig();
-            Nodes = new IxBuilder<List<IxScopeBaseConfig>>
+            Nodes = new IxBuilder<ICollection<IIxProviderNodeConfig>>
                         {
                             Config = Config.Nodes
                         };
         }
 
         /// <inheritdoc/>
-        public IIxBuilder<List<IxScopeBaseConfig>> Nodes { get; }
+        public IIxBuilder<ICollection<IIxProviderNodeConfig>> Nodes { get; }
 
         /// <inheritdoc/>
         public async Task<IIxHost> Build()
@@ -38,10 +41,15 @@ namespace ClrCoder.ComponentModel.IndirectX
             return host;
         }
 
-        public IxHostBuilder Configure([CanBeNull] Action<IIxBuilder<List<IxScopeBaseConfig>>> nodes = null)
+        /// <summary>
+        /// Configures IndirectX fluently.
+        /// </summary>
+        /// <param name="nodes">Action that configures node.</param>
+        /// <returns>Host configuration fluent syntax continuation.</returns>
+        public IIxHostBuilder Configure([CanBeNull] Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
         {
             nodes?.Invoke(
-                new IxBuilder<List<IxScopeBaseConfig>>
+                new IxBuilder<ICollection<IIxProviderNodeConfig>>
                     {
                         Config = Config.Nodes
                     });

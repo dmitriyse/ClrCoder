@@ -5,7 +5,15 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    public class IxScopeConfig : IxScopeBaseConfig
+    using JetBrains.Annotations;
+
+    /// <summary>
+    /// Configuration for a scope.
+    /// </summary>
+    [PublicAPI]
+    public class IxScopeConfig : IxProviderNodeConfig, IIxScopeConfig
     {
+        /// <inheritdoc/>
+        public bool IsInstanceless { get; set; }
     }
 }

@@ -8,9 +8,20 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public interface IIxHostBuilder : IIxBuilder<IxHostConfig>
+    /// <summary>
+    /// Host builder, allows fluent syntax for IndirectX host configuration.
+    /// </summary>
+    public interface IIxHostBuilder : IIxBuilder<IIxHostConfig>
     {
-        IIxBuilder<List<IxScopeBaseConfig>> Nodes { get; }
+        /// <summary>
+        /// Builds root nodes.
+        /// </summary>
+        IIxBuilder<ICollection<IIxProviderNodeConfig>> Nodes { get; }
+
+        /// <summary>
+        /// Performs actual build.
+        /// </summary>
+        /// <returns>Configured IndirectX host.</returns>
         Task<IIxHost> Build();
     }
 }
