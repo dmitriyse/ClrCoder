@@ -15,6 +15,30 @@ namespace ClrCoder.ComponentModel.IndirectX
     public static class IxExtensions
     {
         /// <summary>
+        /// Adds config node to nodes list builder.
+        /// </summary>
+        /// <param name="nodesBuilder">Nodes list builder.</param>
+        /// <param name="nodeConfig">Config to add.</param>
+        /// <returns>Fluent syntax continuation.</returns>
+        public static IIxBuilder<ICollection<IIxProviderNodeConfig>> Add(
+            this IIxBuilder<ICollection<IIxProviderNodeConfig>> nodesBuilder,
+            IIxProviderNodeConfig nodeConfig)
+        {
+            if (nodesBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(nodesBuilder));
+            }
+
+            if (nodeConfig == null)
+            {
+                throw new ArgumentNullException(nameof(nodeConfig));
+            }
+
+            nodesBuilder.Config.Add(nodeConfig);
+            return nodesBuilder;
+        }
+
+        /// <summary>
         /// Adds standard provider node.
         /// </summary>
         /// <typeparam name="TContract">Registration target type.</typeparam>
@@ -22,7 +46,10 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="name">Registration <c>name</c>.</param>
         /// <param name="scopeBinding">Scope binding strategy config (registration, transient, etc.).</param>
         /// <param name="importFilter">Import filter. Controls which registrations of parent node are visible for current node.</param>
-        /// <param name="exportToParentFilter">Export to parent filter. Controls which registrations of <c>this</c> node will be visible in parent node.</param>
+        /// <param name="exportToParentFilter">
+        /// Export to parent filter. Controls which registrations of <c>this</c> node will be
+        /// visible in parent node.
+        /// </param>
         /// <param name="exportFilter">Export to children filter. Controls which registrations of <c>this</c> node.</param>
         /// <param name="factory">Instance builder config. (Class constructor, existing instance, etc.).</param>
         /// <param name="multiplicity">Multiplicity config. (Singleton, pool, <c>factory</c> etc.).</param>
@@ -42,23 +69,24 @@ namespace ClrCoder.ComponentModel.IndirectX
             Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
         {
             var depNode = new IxStdProviderConfig
-                           {
-                               Factory = factory,
-                               Identifier = new IxIdentifier(typeof(TContract), name),
-                               ScopeBinding = scopeBinding,
-                               Multiplicity = multiplicity,
-                               ImportFilter = importFilter,
-                               ExportFilter = exportFilter,
-                               ExportToParentFilter = exportToParentFilter,
-                               DisposeHandler = disposeHandler
-                           };
+                              {
+                                  Factory = factory,
+                                  Identifier = new IxIdentifier(typeof(TContract), name),
+                                  ScopeBinding = scopeBinding,
+                                  Multiplicity = multiplicity,
+                                  ImportFilter = importFilter,
+                                  ExportFilter = exportFilter,
+                                  ExportToParentFilter = exportToParentFilter,
+                                  DisposeHandler = disposeHandler
+                              };
 
             nodesBuilder.Config.Add(depNode);
 
-            nodes?.Invoke(new IxBuilder<ICollection<IIxProviderNodeConfig>>
-                              {
-                                  Config = depNode.Nodes
-                              });
+            nodes?.Invoke(
+                new IxBuilder<ICollection<IIxProviderNodeConfig>>
+                    {
+                        Config = depNode.Nodes
+                    });
 
             return nodesBuilder;
         }
@@ -69,7 +97,10 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="nodesBuilder">Nodes builder of a parent node.</param>
         /// <param name="name">Scope should be named.</param>
         /// <param name="importFilter">Import filter. Controls which registrations of parent node are visible for current node.</param>
-        /// <param name="exportToParentFilter">Export to parent filter. Controls which registrations of <c>this</c> node will be visible in parent node.</param>
+        /// <param name="exportToParentFilter">
+        /// Export to parent filter. Controls which registrations of <c>this</c> node will be
+        /// visible in parent node.
+        /// </param>
         /// <param name="exportFilter">Export to children filter. Controls which registrations of <c>this</c> node.</param>
         /// <param name="nodes">Action that builds children <c>nodes</c>.</param>
         /// <returns>Fluent syntax continuation.</returns>

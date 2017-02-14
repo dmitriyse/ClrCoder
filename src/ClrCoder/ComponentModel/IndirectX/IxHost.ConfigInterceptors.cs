@@ -129,8 +129,19 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       DisposeHandler = cfgContract.DisposeHandler,
                                       ExportFilter = cfgContract.ExportFilter,
                                       ExportToParentFilter = cfgContract.ExportToParentFilter,
-                                      ImportFilter = cfgContract.ImportFilter
+                                      ImportFilter = cfgContract.ImportFilter,
                                   };
+                    }
+
+                    IIxProviderNodeConfig configProviderConfig = null;
+
+                    if (nodeConfigType.GetCustomAttribute<ProvideConfigAttribute>() != null)
+                    {
+                        configProviderConfig = new IxStdProviderConfig
+                                                   {
+                                                       Identifier = new IxIdentifier(nodeConfig.GetType()),
+                                                       Factory = new IxExistingInstanceFactoryConfig<object>(nodeConfig),
+                                                   };
                     }
 
                     if (cfg.Multiplicity == null)
@@ -165,7 +176,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                         cfg.ScopeBinding = new IxRegistrationScopeBindingConfig();
                     }
 
-                    return next(nodeConfig, parentNode);
+                    IxProviderNode result = next(cfg, parentNode);
+                    if (configProviderConfig != null)
+                    {
+                        ProviderNodeBuilder.Delegate(configProviderConfig, result);
+                    }
+
+                    return result;
                 };
         }
 
