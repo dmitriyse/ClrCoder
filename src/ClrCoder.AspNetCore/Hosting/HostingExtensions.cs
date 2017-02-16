@@ -5,22 +5,26 @@
 
 namespace ClrCoder.AspNetCore.Hosting
 {
+    using System.Linq;
     using JetBrains.Annotations;
 
 #if NET46 || NETSTANDARD1_6
     using System;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.AspNetCore.Mvc.Formatters;
-
     using System.Buffers;
+    using System.Collections.Generic;
+    using System.Reflection;
 
-    using Newtonsoft.Json;
 
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Controllers;
+    using Microsoft.AspNetCore.Mvc.Formatters;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.ObjectPool;
     using Microsoft.Extensions.Options;
+
+    using Newtonsoft.Json;
 
 #endif
 #if NET46
@@ -113,8 +117,60 @@ namespace ClrCoder.AspNetCore.Hosting
 
             return hostBuilder;
         }
+
+        /// <summary>
+        /// Allows MVC to discover only one specified controller.
+        /// </summary>
+        /// <typeparam name="TController">Controller type.</typeparam>
+        /// <param name="builder">Web host <c>builder</c>.</param>
+        /// <returns>Fluent syntax continuation.</returns>
+        public static IWebHostBuilder UseOnlyController<TController>(this IWebHostBuilder builder)
+        {
+            builder.ConfigureServices(
+                x =>
+                    {
+                        x.AddMvcCore()
+                        .AddApplicationPart(typeof(TController).GetTypeInfo().Assembly)
+                        .ConfigureApplicationPartManager(
+                            m =>
+                                {
+                                    var controllerProviders =
+                                        m.FeatureProviders.Where(f => f is ControllerFeatureProvider).ToArray();
+                                    foreach (var controllerProvider in controllerProviders)
+                                    {
+                                        m.FeatureProviders.Remove(controllerProvider);
+                                    }
+
+                                    m.FeatureProviders.Add(
+                                        new SingleControllerProvider(
+                                            new HashSet<TypeInfo> { typeof(TController).GetTypeInfo() }));
+                                });
+                    });
+            return builder;
+        }
+
+        private class SingleControllerProvider : ControllerFeatureProvider
+        {
+            private readonly HashSet<TypeInfo> _allowedControllers;
+
+            public SingleControllerProvider(HashSet<TypeInfo> allowedControllers)
+            {
+                if (allowedControllers == null)
+                {
+                    throw new ArgumentNullException(nameof(allowedControllers));
+                }
+
+                _allowedControllers = allowedControllers;
+            }
+
+            protected override bool IsController(TypeInfo typeInfo)
+            {
+                return _allowedControllers.Contains(typeInfo);
+            }
+        }
 #endif
 #if NET46
+
 /// <summary>
 /// Allow self-host to be terminated by posix termination signals (SIGINT, SIGTERM).
 /// </summary>

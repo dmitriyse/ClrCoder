@@ -3,17 +3,17 @@
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace ClrCoder.NUnit
+namespace ClrCoder.Testing
 {
     using System;
     using System.Linq;
-
-    using global::NUnit.Framework;
 
     using Logging;
     using Logging.Std;
 
     using NodaTime;
+
+    using NUnit.Framework;
 
     using Runtime.Serialization;
 
