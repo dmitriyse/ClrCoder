@@ -28,7 +28,6 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task EmptyHostCycle()
         {
             await new IxHostBuilder()
-                .Configure(rootNodes => { })
                 .Build()
                 .AsyncUsing((IIxHost host) => Task.CompletedTask);
         }
@@ -62,13 +61,13 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
-                        {
-                            rootNodes.Add<Dummy>(
+                        rootNodes
+                            .Add<Dummy>(
                                 factory: new IxClassInstanceBuilderConfig<Dummy>(),
                                 nodes:
                                 nodes =>
-                                    nodes.Add<string>(factory: new IxExistingInstanceFactoryConfig<string>("Test me!")));
-                        })
+                                    nodes.Add<string>(factory: new IxExistingInstanceFactoryConfig<string>("Test me!")))
+                )
                 .Build()
                 .AsyncUsing(
                     async host =>

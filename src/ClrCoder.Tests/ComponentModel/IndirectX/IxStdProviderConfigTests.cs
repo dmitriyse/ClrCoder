@@ -5,16 +5,12 @@
 
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;
     using ClrCoder.Threading;
 
     using FluentAssertions;
-
-    using JetBrains.Annotations;
 
     using NUnit.Framework;
 
@@ -24,6 +20,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     [TestFixture]
     public class IxStdProviderConfigTests
     {
+        private interface IDummy
+        {
+        }
+
         /// <summary>
         /// Provides config.
         /// </summary>
@@ -33,27 +33,19 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             await new IxHostBuilder()
                 .Configure(
-                    rootNodes =>
-                    {
-                        rootNodes.Add(new DummyConfig());
-                    })
+                    rootNodes => rootNodes.Add(new DummyConfig()))
                 .Build()
                 .AsyncUsing(
                     async host =>
-                    {
-                        using (IxLock<Dummy> resolvedInstanceLock = await host.Resolver.Get<Dummy>())
                         {
-                            resolvedInstanceLock.Target.Should().NotBeNull();
-                        }
-                    });
+                            using (IxLock<Dummy> resolvedInstanceLock = await host.Resolver.Get<Dummy>())
+                            {
+                                resolvedInstanceLock.Target.Should().NotBeNull();
+                            }
+                        });
         }
 
-        private interface IDummy
-        {
-            
-        }
-
-        private class Dummy:IDummy
+        private class Dummy : IDummy
         {
             public Dummy(DummyConfig config)
             {
@@ -68,9 +60,6 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
 
             IIxInstanceBuilderConfig IIxStdProviderConfig.Factory
                 => new IxClassInstanceBuilderConfig<Dummy>();
-
-            [NotNull]
-            public string Name { get; set; }
         }
     }
 }

@@ -34,12 +34,11 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
-                        {
-                            rootNodes.Add<SimplestDummy>(
-                                factory: new IxClassInstanceBuilderConfig<SimplestDummy>());
-                            rootNodes.Add<WithSimplestDependencyDummy>(
-                                factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>());
-                        })
+                        rootNodes
+                            .Add<SimplestDummy>(
+                                factory: new IxClassInstanceBuilderConfig<SimplestDummy>())
+                            .Add<WithSimplestDependencyDummy>(
+                                factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
                 .Build()
                 .AsyncUsing(
                     async host =>
@@ -64,11 +63,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
-                        {
-                            rootNodes.Add<PrivateConstructorDummy>(
+                        rootNodes
+                            .Add<PrivateConstructorDummy>(
                                 factory: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
-                                disposeHandler: obj => Task.CompletedTask);
-                        })
+                                disposeHandler: obj => Task.CompletedTask))
                 .Build()
                 .AsyncUsing(
                     async host =>
@@ -94,11 +92,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                     await new IxHostBuilder()
                         .Configure(
                             n =>
-                                {
-                                    n.Add<DuplicateArgumentConstructorDummy>(
-                                        factory:
-                                        new IxClassInstanceBuilderConfig<DuplicateArgumentConstructorDummy>());
-                                })
+                                n.Add<DuplicateArgumentConstructorDummy>(
+                                    factory:
+                                    new IxClassInstanceBuilderConfig<DuplicateArgumentConstructorDummy>()))
                         .Build();
                 };
 
@@ -116,12 +112,11 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                     await new IxHostBuilder()
                         .Configure(
                             n =>
-                                {
-                                    n.Add<MultiConstructorsDummy>(
-                                        factory:
-                                        new IxClassInstanceBuilderConfig<MultiConstructorsDummy>());
-                                })
-                        .Build();
+                                n.Add<MultiConstructorsDummy>(
+                                    factory:
+                                    new IxClassInstanceBuilderConfig<MultiConstructorsDummy>()))
+                        .
+                        Build();
                 };
 
             action.ShouldThrow<IxConfigurationException>().Which.Message.Should().Contain("more than one");
@@ -137,11 +132,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
-                        {
-                            rootNodes.Add<SimplestDummy>(
-                                factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
-                                disposeHandler: obj => Task.CompletedTask);
-                        })
+                        rootNodes.Add<SimplestDummy>(
+                            factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
+                            disposeHandler: obj => Task.CompletedTask))
                 .Build()
                 .AsyncUsing(
                     async host =>

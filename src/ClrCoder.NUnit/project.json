@@ -1,0 +1,15 @@
+﻿{
+  "version": "0.1.1-*",
+
+  "dependencies": {
+    "ClrCoder": "0.1.1-*",
+    "NETStandard.Library": "1.6.1",
+    "NUnit": "3.5.0"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50"
+    }
+  }
+}

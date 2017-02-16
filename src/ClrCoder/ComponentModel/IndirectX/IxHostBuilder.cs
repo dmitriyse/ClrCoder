@@ -16,13 +16,11 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// </summary>
     public class IxHostBuilder : IxBuilder<IIxHostConfig>, IIxHostBuilder
     {
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="IxHostBuilder"/> class. 
+        /// Initializes a new instance of the <see cref="IxHostBuilder"/> class.
         /// </summary>
         public IxHostBuilder()
         {
-
             Config = new IxHostConfig();
             Nodes = new IxBuilder<ICollection<IIxProviderNodeConfig>>
                         {
@@ -46,7 +44,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="nodes">Action that configures node.</param>
         /// <returns>Host configuration fluent syntax continuation.</returns>
-        public IIxHostBuilder Configure([CanBeNull] Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
+        public IIxHostBuilder Configure(
+            [CanBeNull] Func<IIxBuilder<ICollection<IIxProviderNodeConfig>>, IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes =
+                null)
         {
             nodes?.Invoke(
                 new IxBuilder<ICollection<IIxProviderNodeConfig>>
@@ -56,6 +56,5 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             return this;
         }
-
     }
 }
