@@ -62,28 +62,12 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         }
 
         [ProvideConfig]
-        private class DummyConfig : IIxStdProviderConfig
+        private class DummyConfig : IxStdProviderConfig, IIxStdProviderConfig
         {
             IxIdentifier IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(Dummy), Name);
 
-            IIxVisibilityFilterConfig IIxProviderNodeConfig.ImportFilter => null;
-
-            IIxVisibilityFilterConfig IIxProviderNodeConfig.ExportToParentFilter => null;
-
-            IIxVisibilityFilterConfig IIxProviderNodeConfig.ExportFilter => null;
-
-            [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1502:ElementMustNotBeOnSingleLine",
-                Justification = "Reviewed. Suppression is OK here.")]
-            ICollection<IIxProviderNodeConfig> IIxProviderNodeConfig.Nodes => new IIxProviderNodeConfig[] { };
-
-            IIxScopeBindingConfig IIxStdProviderConfig.ScopeBinding => null;
-
-            IIxMultiplicityConfig IIxStdProviderConfig.Multiplicity => null;
-
             IIxInstanceBuilderConfig IIxStdProviderConfig.Factory
                 => new IxClassInstanceBuilderConfig<Dummy>();
-
-            IxDisposeHandlerDelegate IIxStdProviderConfig.DisposeHandler => null;
 
             [NotNull]
             public string Name { get; set; }

@@ -30,7 +30,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await new IxHostBuilder()
                 .Configure(rootNodes => { })
                 .Build()
-                .AsyncUsing(host => Task.CompletedTask);
+                .AsyncUsing((IIxHost host) => Task.CompletedTask);
         }
 
         /// <summary>

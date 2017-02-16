@@ -9,11 +9,15 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Diagnostics;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Standard singleton provider.
+    /// </summary>
     public class IxSingletonProvider : IxProviderNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IxSingletonProvider"/> class.
         /// </summary>
+        /// <param name="host">IndirectX host.</param>
         public IxSingletonProvider(
             IxHost host,
             IxProviderNode parentNode,

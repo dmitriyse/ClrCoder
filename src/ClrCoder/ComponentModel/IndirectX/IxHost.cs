@@ -28,8 +28,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IxHost()
         {
             // TODO: Load priorities from configs.
-            RawInstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
-            RawInstanceFactoryBuilder.Add(ClassRawFactoryBuilder, 100);
+            InstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
+            InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 100);
 
             VisibilityFilterBuilder.Add(StdVisibilityFilterBuilder, 100);
 

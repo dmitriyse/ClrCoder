@@ -15,5 +15,8 @@ namespace ClrCoder.ComponentModel.IndirectX
     {
         /// <inheritdoc/>
         public bool IsInstanceless { get; set; }
+
+        /// <inheritdoc/>
+        public string Name { get; set; }
     }
 }

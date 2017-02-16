@@ -5,6 +5,8 @@
 
 namespace ClrCoder.AspNetCore
 {
+    using System;
+
     using Microsoft.AspNetCore.Hosting;
 
     /// <summary>
@@ -14,8 +16,27 @@ namespace ClrCoder.AspNetCore
     {
         private WebHostDeployment(IWebHostBuilder webHostBuilder, WebHostDeploymentConfig config)
         {
-            webHostBuilder
-                .UseUrls();
+            string urls = null;
+
+            if (config.UrlsEnvironmentVariableName != null)
+            {
+                string urlsFromEnv = Environment.GetEnvironmentVariable(config.UrlsEnvironmentVariableName);
+                if (!string.IsNullOrWhiteSpace(urlsFromEnv))
+                {
+                    urls = urlsFromEnv.Trim();
+                }
+            }
+
+            if (urls == null && config.DefaultUrls != null)
+            {
+                urls = config.DefaultUrls;
+            }
+
+            if (urls != null)
+            {
+                webHostBuilder
+                    .UseUrls(urls);
+            }
         }
     }
 }

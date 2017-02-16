@@ -5,6 +5,8 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Scope provider node configuration.
     /// </summary>
@@ -17,5 +19,11 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// TODO: Implement <c>this</c> feature.
         /// </remarks>
         bool IsInstanceless { get; }
+
+        /// <summary>
+        /// Name that will be used to generate identifier.
+        /// </summary>
+        [CanBeNull]
+        string Name { get; }
     }
 }

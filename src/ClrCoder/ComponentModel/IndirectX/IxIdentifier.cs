@@ -17,6 +17,9 @@ namespace ClrCoder.ComponentModel.IndirectX
     [PublicAPI]
     public struct IxIdentifier : IEquatable<IxIdentifier>
     {
+        [CanBeNull]
+        private readonly Type _type;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="IxIdentifier"/> struct.
         /// </summary>
@@ -29,14 +32,29 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(type));
             }
 
-            Type = type;
+            _type = type;
             Name = name;
+        }
+
+        private void EnsureNotDefault()
+        {
+            if (_type == null)
+            {
+                throw new InvalidOperationException("Cannot use default IxIdentifier.");
+            }
         }
 
         /// <summary>
         /// Type part of identifier.
         /// </summary>
-        public Type Type { get; }
+        public Type Type
+        {
+            get
+            {
+                EnsureNotDefault();
+                return _type;
+            }
+        }
 
         /// <summary>
         /// Specifies additional name.
@@ -47,7 +65,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public bool Equals(IxIdentifier other)
         {
-            return Type == other.Type && string.Equals(Name, other.Name);
+            return _type == other._type && string.Equals(Name, other.Name);
         }
 
         /// <inheritdoc/>
@@ -66,7 +84,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             unchecked
             {
-                return ((Type?.GetHashCode() ?? 0) * 397) ^ (Name?.GetHashCode() ?? 0);
+                return ((_type?.GetHashCode() ?? 0) * 397) ^ (Name?.GetHashCode() ?? 0);
             }
         }
 
@@ -78,7 +96,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <returns><see langword="true"/> if operands equal, <see langword="false"/> otherwise.</returns>
         public static bool operator ==(IxIdentifier left, IxIdentifier right)
         {
-            return left.Type == right.Type && left.Name == right.Name;
+            return left._type == right._type && left.Name == right.Name;
         }
 
         /// <summary>
@@ -89,7 +107,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <returns><see langword="true"/> if operands differs, <see langword="false"/> otherwise.</returns>
         public static bool operator !=(IxIdentifier left, IxIdentifier right)
         {
-            return left.Type != right.Type || left.Name != right.Name;
+            return left._type != right._type || left.Name != right.Name;
         }
     }
 }

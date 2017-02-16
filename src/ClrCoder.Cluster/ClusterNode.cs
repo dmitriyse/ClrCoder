@@ -104,7 +104,6 @@ namespace ClrCoder.Cluster
 
                 try
                 {
-                    _hostLifetimeService.StopApplication();
                     _webHost?.Dispose();
                 }
                 catch (Exception ex)

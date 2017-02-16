@@ -11,7 +11,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     using JetBrains.Annotations;
 
     /// <summary>
-    /// Base encapsulation primitive.
+    /// Provider node <c>base</c> implementation.
     /// </summary>
     public abstract class IxProviderNode
     {

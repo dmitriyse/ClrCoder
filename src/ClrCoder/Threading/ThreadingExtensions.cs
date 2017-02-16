@@ -66,6 +66,68 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
+        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
+        /// <param name="action">Action that should be performed on <c>object</c>.</param>
+        /// <returns>All operation completion task.</returns>
+        public static async Task AsyncUsing<T>(this T objTask, Func<T, Task> action)
+            where T : IAsyncDisposable
+        {
+            if (objTask == null)
+            {
+                throw new ArgumentNullException(nameof(objTask));
+            }
+
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            T obj = objTask;
+            try
+            {
+                await action(obj);
+            }
+            finally
+            {
+                await obj.AsyncDispose();
+            }
+        }
+
+        /// <summary>
+        /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
+        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
+        /// <param name="action">Action that should be performed on <c>object</c>.</param>
+        /// <returns>All operation completion task.</returns>
+        public static async Task AsyncUsing<T>(this T objTask, Action<T> action)
+            where T : IAsyncDisposable
+        {
+            if (objTask == null)
+            {
+                throw new ArgumentNullException(nameof(objTask));
+            }
+
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            T obj = objTask;
+            try
+            {
+                action(obj);
+            }
+            finally
+            {
+                await obj.AsyncDispose();
+            }
+        }
+
+        /// <summary>
         /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c> with return value.
         /// </summary>
         /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>

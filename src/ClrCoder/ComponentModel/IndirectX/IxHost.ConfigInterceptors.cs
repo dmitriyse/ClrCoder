@@ -11,9 +11,13 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Reflection;
     using System.Threading.Tasks;
 
+    using Attributes;
+
     using JetBrains.Annotations;
 
     using MoreLinq;
+
+    using NodaTime.TimeZones;
 
     using ObjectModel;
 
@@ -24,9 +28,9 @@ namespace ClrCoder.ComponentModel.IndirectX
     public partial class IxHost
     {
         /// <summary>
-        /// Raw instance factory from config builder.
+        /// Instance factory from config builder.
         /// </summary>
-        public InterceptableDelegate<InstanceFactoryBuilderDelegate> RawInstanceFactoryBuilder { get; } =
+        public InterceptableDelegate<InstanceFactoryBuilderDelegate> InstanceFactoryBuilder { get; } =
             new InterceptableDelegate<InstanceFactoryBuilderDelegate>(
                 config =>
                     {
@@ -118,7 +122,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     var cfg = nodeConfig as IxStdProviderConfig;
                     var cfgContract = (IIxStdProviderConfig)nodeConfig;
-                    if (cfg == null)
+                    if (cfg == null || nodeConfig.GetType() != typeof(IxStdProviderConfig))
                     {
                         cfg = new IxStdProviderConfig
                                   {
@@ -129,8 +133,19 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       DisposeHandler = cfgContract.DisposeHandler,
                                       ExportFilter = cfgContract.ExportFilter,
                                       ExportToParentFilter = cfgContract.ExportToParentFilter,
-                                      ImportFilter = cfgContract.ImportFilter,
+                                      ImportFilter = cfgContract.ImportFilter
                                   };
+
+                    }
+
+                    // TODO: Write test on this feature.
+                    if (cfgContract.Identifier == default(IxIdentifier) && nodeConfig is IIxBasicIdentificationConfig)
+                    {
+                        var basicIdentificationConfig = nodeConfig as IIxBasicIdentificationConfig;
+                        if (basicIdentificationConfig.ContractType != null)
+                        {
+                            cfg.Identifier = new IxIdentifier(basicIdentificationConfig.ContractType, basicIdentificationConfig.Name);
+                        }
                     }
 
                     IIxProviderNodeConfig configProviderConfig = null;
@@ -188,7 +203,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         #endregion
 
-        private InstanceFactoryBuilderDelegate ClassRawFactoryBuilder(
+        private InstanceFactoryBuilderDelegate ClassInstanceFactoryBuilder(
             InstanceFactoryBuilderDelegate next)
         {
             return factoryConfig =>
@@ -205,13 +220,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             // Currently impossible case.
                             throw new IxConfigurationException(
-                                $"Cannot use IxClassRawFactory because no any constructors found in the class {instanceClass.FullName}.");
+                                $"Cannot use IxClassInstanceFactory because no any constructors found in the class {instanceClass.FullName}.");
                         }
 
                         if (constructors.Length > 1)
                         {
                             throw new IxConfigurationException(
-                                $"Cannot use IxClassRawFactory because more than one constructors defined in the class {instanceClass.FullName}.");
+                                $"Cannot use IxClassInstanceFactory because more than one constructors defined in the class {instanceClass.FullName}.");
                         }
 
                         ConstructorInfo constructorInfo = constructors.Single();
@@ -222,6 +237,17 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             throw new IxConfigurationException(
                                 "Multiple parameters with the same type not supported by IxClassRawFactory.");
+                        }
+
+                        // TODO: Add tests for this feature
+                        var requireAttributes = constructorInfo.GetCustomAttributes<RequireAttribute>().ToList();
+                        foreach (RequireAttribute requireAttribute in requireAttributes)
+                        {
+                            if (!dependencies.Add(new IxIdentifier(requireAttribute.Type)))
+                            {
+                                throw new IxConfigurationException(
+                                    "Multiple parameters with the same type not supported by IxClassRawFactory.");
+                            }
                         }
 
                         return new IxInstanceFactory(
@@ -418,7 +444,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("Instance factory should be configured.");
                     }
 
-                    IxInstanceFactory instanceFactory = RawInstanceFactoryBuilder.Delegate(cfg.Factory);
+                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.Factory);
 
                     if (cfg.DisposeHandler == null)
                     {
