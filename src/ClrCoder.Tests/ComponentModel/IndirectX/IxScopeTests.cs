@@ -28,9 +28,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task Registered_scope_should_be_resolved_with_the_same_instance()
         {
-            await new IxHostBuilder()
-                .Configure(n => n.AddScope("test"))
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure(n => n.AddScope("test"))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -56,9 +56,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task RegisteredScopeShouldBeResolved()
         {
-            await new IxHostBuilder()
-                .Configure(n => n.AddScope("test"))
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure(n => n.AddScope("test"))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -76,9 +76,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task RootScopeShouldBeResolved()
         {
-            await new IxHostBuilder()
-                .Configure()
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure()
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -98,18 +98,18 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             var instance = new DummyObject();
 
-            await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes.AddScope(
-                            "private",
-                            nodes: nodes =>
-                                {
-                                    nodes.Add<DummyObject>(
-                                        factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
-                                        disposeHandler: obj => Task.CompletedTask);
-                                }))
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes.AddScope(
+                                   "private",
+                                   nodes: nodes =>
+                                       {
+                                           nodes.Add<DummyObject>(
+                                               factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               disposeHandler: obj => Task.CompletedTask);
+                                       }))
+                       .Build())
                 .AsyncUsing(
                     host =>
                         {
@@ -146,18 +146,18 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             var instance = new DummyObject();
 
-            await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes.AddScope(
-                            exportToParentFilter: new IxStdVisibilityFilterConfig(),
-                            nodes: nodes =>
-                                {
-                                    nodes.Add<DummyObject>(
-                                        factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
-                                        disposeHandler: obj => Task.CompletedTask);
-                                }))
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes.AddScope(
+                                   exportToParentFilter: new IxStdVisibilityFilterConfig(),
+                                   nodes: nodes =>
+                                       {
+                                           nodes.Add<DummyObject>(
+                                               factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               disposeHandler: obj => Task.CompletedTask);
+                                       }))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {

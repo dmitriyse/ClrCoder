@@ -31,7 +31,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task Simplest_dependency_should_be_resolved()
         {
-            await new IxHostBuilder()
+            await (await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
                         rootNodes
@@ -39,7 +39,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                 factory: new IxClassInstanceBuilderConfig<SimplestDummy>())
                             .Add<WithSimplestDependencyDummy>(
                                 factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
-                .Build()
+                .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -60,14 +60,14 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task Class_with_private_constructor_should_be_instantiated()
         {
-            await new IxHostBuilder()
+            await (await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
                         rootNodes
                             .Add<PrivateConstructorDummy>(
                                 factory: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
                                 disposeHandler: obj => Task.CompletedTask))
-                .Build()
+                .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -129,13 +129,13 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task Simplest_class_should_be_instantiated()
         {
-            await new IxHostBuilder()
+            await (await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
                         rootNodes.Add<SimplestDummy>(
                             factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
                             disposeHandler: obj => Task.CompletedTask))
-                .Build()
+                .Build())
                 .AsyncUsing(
                     async host =>
                         {

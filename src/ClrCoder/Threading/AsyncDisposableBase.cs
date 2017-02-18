@@ -19,8 +19,6 @@ namespace ClrCoder.Threading
     [PublicAPI]
     public abstract class AsyncDisposableBase : IAsyncDisposable
     {
-        private readonly object _syncRoot;
-
         /// <summary>
         /// TODO: Replace with CancellationTokenSource.
         /// </summary>
@@ -47,10 +45,10 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncDisposableBase"/> class with synchronization root object.
         /// </summary>
-        /// <param name="syncRoot">Synchronization root.</param>
-        protected AsyncDisposableBase(object syncRoot)
+        /// <param name="disposeSyncRoot">Synchronization root.</param>
+        protected AsyncDisposableBase(object disposeSyncRoot)
         {
-            _syncRoot = syncRoot;
+            DisposeSyncRoot = disposeSyncRoot;
         }
 
         /// <inheritdoc/>
@@ -61,7 +59,7 @@ namespace ClrCoder.Threading
             {
                 if (Volatile.Read(ref _disposeTask) == null)
                 {
-                    lock (_syncRoot)
+                    lock (DisposeSyncRoot)
                     {
                         // Implicit memory barrier here
                         if (_disposeTask == null)
@@ -86,6 +84,11 @@ namespace ClrCoder.Threading
         /// </remarks>
         public bool IsDisposeStarted => Volatile.Read(ref _isDisposeStarted);
 
+        /// <summary>
+        /// Dispose synchronization root.
+        /// </summary>
+        public object DisposeSyncRoot { get; }
+
         /// <inheritdoc/>
         public void StartDispose()
         {
@@ -93,7 +96,7 @@ namespace ClrCoder.Threading
             if (!Volatile.Read(ref _isDisposeStarted))
             {
                 // But here we are free of reentrancy.
-                lock (_syncRoot)
+                lock (DisposeSyncRoot)
                 {
                     // -------Implicit memory barrier here-----------
                     if (!_isDisposeStarted)
@@ -148,7 +151,7 @@ namespace ClrCoder.Threading
         {
             // This method is reentrant.
             // ----------------------------------
-            lock (_syncRoot)
+            lock (DisposeSyncRoot)
             {
                 // -------Implicit memory barrier here-----------
                 if (isDisposeSuspended && _isActualDisposeCalled)
@@ -156,7 +159,7 @@ namespace ClrCoder.Threading
                     throw new InvalidOperationException("Cannot suspend already started dispose process.");
                 }
 
-                if (_isDisposeStarted != isDisposeSuspended)
+                if (_isDisposeSuspended != isDisposeSuspended)
                 {
                     // Here we are free from reentrancy.
                     _isDisposeSuspended = isDisposeSuspended;
@@ -176,19 +179,19 @@ namespace ClrCoder.Threading
         private async Task AsynDisposeWrapped()
         {
             // We are under lock here.
-            bool isAsyncRun = false;
+            var isAsyncRun = false;
 
             // This line will never throw any exception.
             Task disposeResult = AsyncDispose().WithSyncDetection();
 
             try
             {
-                await disposeResult.WithSyncDetection(isSync=>isAsyncRun = !isSync);
+                await disposeResult.WithSyncDetection(isSync => isAsyncRun = !isSync);
 
                 if (isAsyncRun)
                 {
                     // We are out of lock (not luck :) ) here.
-                    lock (_syncRoot)
+                    lock (DisposeSyncRoot)
                     {
                         // -------Implicit memory barrier here-----------
                         Debug.Assert(
@@ -218,7 +221,7 @@ namespace ClrCoder.Threading
                 if (isAsyncRun)
                 {
                     // We are out of lock here.
-                    lock (_syncRoot)
+                    lock (DisposeSyncRoot)
                     {
                         // -------Implicit memory barrier here-----------
                         Debug.Assert(
@@ -260,7 +263,7 @@ namespace ClrCoder.Threading
             Debug.Assert(!_isActualDisposeCalled, "Actual dispose can be performed only once.");
 
             _isActualDisposeCalled = true;
-            
+
             // When _disposeTask was not asked, we are free to set it to result of DoAsyncDispose wrapper.
             Task task = AsynDisposeWrapped();
             if (task.Status == TaskStatus.WaitingToRun)

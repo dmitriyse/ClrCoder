@@ -31,10 +31,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task ProvideConfigAttributeTest()
         {
-            await new IxHostBuilder()
-                .Configure(
-                    rootNodes => rootNodes.Add(new DummyConfig()))
-                .Build()
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes => rootNodes.Add(new DummyConfig()))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {

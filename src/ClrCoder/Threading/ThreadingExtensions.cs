@@ -38,15 +38,16 @@ namespace ClrCoder.Threading
         /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
         /// </summary>
         /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
-        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
+        /// <typeparam name="TResult">Type of async using block result.</typeparam>
+        /// <param name="obj">Task that provides disposable <c>object</c>.</param>
         /// <param name="action">Action that should be performed on <c>object</c>.</param>
         /// <returns>All operation completion task.</returns>
-        public static async Task AsyncUsing<T>(this Task<T> objTask, Func<T, Task> action)
+        public static async Task<TResult> AsyncUsing<T, TResult>(this T obj, Func<T, Task<TResult>> action)
             where T : IAsyncDisposable
         {
-            if (objTask == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(objTask));
+                throw new ArgumentNullException(nameof(obj));
             }
 
             if (action == null)
@@ -54,10 +55,15 @@ namespace ClrCoder.Threading
                 throw new ArgumentNullException(nameof(action));
             }
 
-            T obj = await objTask;
             try
             {
-                await action(obj);
+                return await action(obj);
+            }
+            catch (Exception ex)
+            {
+                var exceptional = obj as IExceptionalAsyncDisposable;
+                exceptional?.HandleException(ex);
+                throw;
             }
             finally
             {
@@ -69,15 +75,15 @@ namespace ClrCoder.Threading
         /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
         /// </summary>
         /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
-        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
+        /// <param name="obj">Task that provides disposable <c>object</c>.</param>
         /// <param name="action">Action that should be performed on <c>object</c>.</param>
         /// <returns>All operation completion task.</returns>
-        public static async Task AsyncUsing<T>(this T objTask, Func<T, Task> action)
+        public static async Task AsyncUsing<T>(this T obj, Func<T, Task> action)
             where T : IAsyncDisposable
         {
-            if (objTask == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(objTask));
+                throw new ArgumentNullException(nameof(obj));
             }
 
             if (action == null)
@@ -85,10 +91,16 @@ namespace ClrCoder.Threading
                 throw new ArgumentNullException(nameof(action));
             }
 
-            T obj = objTask;
             try
             {
                 await action(obj);
+            }
+            catch (Exception ex)
+            {
+                var exceptional = obj as IExceptionalAsyncDisposable;
+                exceptional?.HandleException(ex);
+
+                throw;
             }
             finally
             {
@@ -100,15 +112,15 @@ namespace ClrCoder.Threading
         /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
         /// </summary>
         /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
-        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
+        /// <param name="obj">Task that provides disposable <c>object</c>.</param>
         /// <param name="action">Action that should be performed on <c>object</c>.</param>
         /// <returns>All operation completion task.</returns>
-        public static async Task AsyncUsing<T>(this T objTask, Action<T> action)
+        public static async Task AsyncUsing<T>(this T obj, Action<T> action)
             where T : IAsyncDisposable
         {
-            if (objTask == null)
+            if (obj == null)
             {
-                throw new ArgumentNullException(nameof(objTask));
+                throw new ArgumentNullException(nameof(obj));
             }
 
             if (action == null)
@@ -116,42 +128,16 @@ namespace ClrCoder.Threading
                 throw new ArgumentNullException(nameof(action));
             }
 
-            T obj = objTask;
             try
             {
                 action(obj);
             }
-            finally
+            catch (Exception ex)
             {
-                await obj.AsyncDispose();
-            }
-        }
+                var exceptional = obj as IExceptionalAsyncDisposable;
+                exceptional?.HandleException(ex);
 
-        /// <summary>
-        /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c> with return value.
-        /// </summary>
-        /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
-        /// <typeparam name="TResult">Type of return value.</typeparam>
-        /// <param name="objTask">Task that provides disposable <c>object</c>.</param>
-        /// <param name="action">Action that should be performed on <c>object</c>.</param>
-        /// <returns>All operation completion task with result.</returns>
-        public static async Task<TResult> AsyncUsing<T, TResult>(this Task<T> objTask, Func<T, Task<TResult>> action)
-            where T : IAsyncDisposable
-        {
-            if (objTask == null)
-            {
-                throw new ArgumentNullException(nameof(objTask));
-            }
-
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
-            T obj = await objTask;
-            try
-            {
-                return await action(obj);
+                throw;
             }
             finally
             {

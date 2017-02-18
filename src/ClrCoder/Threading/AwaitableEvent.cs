@@ -63,9 +63,9 @@ namespace ClrCoder.Threading
         /// Allows "await" syntax.
         /// </summary>
         /// <returns>Event awaiter.</returns>
-        public Awaiter GetAwaiter()
+        public AwaitableEventAwaiter GetAwaiter()
         {
-            return new Awaiter(this);
+            return new AwaitableEventAwaiter(this);
         }
 
         /// <summary>
@@ -144,15 +144,15 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Awaiter for <see cref="AwaitableEvent"/>.
         /// </summary>
-        public struct Awaiter : INotifyCompletion
+        public struct AwaitableEventAwaiter : INotifyCompletion
         {
             private readonly AwaitableEvent _awaitableEvent;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="Awaiter"/> struct.
+            /// Initializes a new instance of the <see cref="AwaitableEventAwaiter"/> struct.
             /// </summary>
             /// <param name="awaitableEvent">Event that owns this awaiter.</param>
-            internal Awaiter(AwaitableEvent awaitableEvent)
+            internal AwaitableEventAwaiter(AwaitableEvent awaitableEvent)
             {
                 _awaitableEvent = awaitableEvent;
             }

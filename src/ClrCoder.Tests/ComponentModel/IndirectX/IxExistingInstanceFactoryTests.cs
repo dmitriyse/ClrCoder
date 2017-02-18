@@ -29,13 +29,13 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             var instance = new DummyObject();
 
-            await new IxHostBuilder()
+            await (await new IxHostBuilder()
                 .Configure(
                     rootNodes =>
                         rootNodes.Add<DummyObject>(
                             factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                             disposeHandler: obj => Task.CompletedTask))
-                .Build()
+                .Build())
                 .AsyncUsing(
                     async host =>
                         {
