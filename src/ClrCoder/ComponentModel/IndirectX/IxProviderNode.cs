@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
@@ -112,6 +113,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             _nodes.Add(child);
             _nodesById.Add(child.Identifier, child);
             VisibleNodes[child.Identifier] = new IxResolvePath(this, new[] { child });
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return Identifier.ToString();
         }
     }
 }

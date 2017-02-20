@@ -12,8 +12,11 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+
+    using Annotations;
 
     using DomainModel.InMemory;
 
@@ -28,19 +31,17 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     /// <typeparam name="TUnitOfWork">Final unit of work type.</typeparam>
     /// <typeparam name="TStorage">Final in-memory storage type.</typeparam>
     /// <typeparam name="TRepository">Final repository type.</typeparam>
-    /// <typeparam name="TRepositoryContract">Final repository contract type.</typeparam>
     /// <typeparam name="TKey">Key type.</typeparam>
     /// <typeparam name="TEntity">entity type.</typeparam>
-    public abstract class InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey,
+    public abstract class InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey,
                                           TEntity>
         : PersistencePluginBase<TPersistence, TUnitOfWork>
         where TPersistence : PersistenceBase<TPersistence, TUnitOfWork>
         where TUnitOfWork : UnitOfWorkBase<TPersistence, TUnitOfWork>
         where TStorage :
-        InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey, TEntity>
+        InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey, TEntity>
         where TRepository :
-        InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey, TEntity>
-        where TRepositoryContract : IRepository
+        InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TKey, TEntity>
         where TKey : IEntityKey<TKey>
         where TEntity : class, IKeyed<TKey>, IDeepCloneable<TEntity>
     {
@@ -50,12 +51,16 @@ namespace ClrCoder.DomainModel.Impl.InMemory
 
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TRepositoryContract,TKey,TEntity}"/> class.
+        /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/> class.
         /// </summary>
         /// <param name="persistence">Owner persistence.</param>
+        /// <param name="supportedRepositoryTypes">Provides repository types that can be resolved with <c>this</c> plugin.</param>
         /// <param name="mergeComparer">Compares entities in merge algorithms.</param>
-        public InMemoryStorage(TPersistence persistence, IEqualityComparer<TEntity> mergeComparer)
-            : base(persistence, false)
+        public InMemoryStorage(
+            TPersistence persistence,
+            IEqualityComparer<TEntity> mergeComparer,
+            [Immutable] IReadOnlyCollection<Type> supportedRepositoryTypes)
+            : base(persistence, supportedRepositoryTypes, false)
         {
             if (mergeComparer == null)
             {
@@ -64,18 +69,15 @@ namespace ClrCoder.DomainModel.Impl.InMemory
 
             _mergeComparer = mergeComparer;
 
-            SupportedRepositoryTypes = new List<Type> { typeof(TRepositoryContract) };
             persistence.UnitOfWorkOpened += UnitOfWorkOpened;
         }
 
-        /// <inheritdoc/>
-        public override IReadOnlyCollection<Type> SupportedRepositoryTypes { get; }
 
         /// <inheritdoc/>
         [CanBeNull]
         public override TR ResolveRepository<TR>(TUnitOfWork uow)
         {
-            if (typeof(TR) != typeof(TRepositoryContract))
+            if (!SupportedRepositoryTypes.Contains(typeof(TR)))
             {
                 return null;
             }

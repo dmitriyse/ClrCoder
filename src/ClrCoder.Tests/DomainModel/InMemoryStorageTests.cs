@@ -27,7 +27,7 @@ namespace ClrCoder.Tests.DomainModel
 
     /// <summary>
     /// Tests related to the
-    /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TRepositoryContract,TKey,TEntity}"/>
+    /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/>
     /// </summary>
     [TestFixture]
     public class InMemoryStorageTests
@@ -139,7 +139,6 @@ namespace ClrCoder.Tests.DomainModel
                 SimpleUnitOfWork,
                 SimpleInMemoryStorage,
                 DummyEntityRepository,
-                IDummyEntityRepository,
                 DummyEntityKey,
                 DummyEntity>,
             IDummyEntityRepository
@@ -191,12 +190,11 @@ namespace ClrCoder.Tests.DomainModel
                 SimpleUnitOfWork,
                 SimpleInMemoryStorage,
                 DummyEntityRepository,
-                IDummyEntityRepository,
                 DummyEntityKey,
                 DummyEntity>
         {
             public SimpleInMemoryStorage(SimplePersistence persistence, IEqualityComparer<DummyEntity> mergeComparer)
-                : base(persistence, mergeComparer)
+                : base(persistence, mergeComparer, new HashSet<Type> {typeof(IDummyEntityRepository)})
             {
             }
 

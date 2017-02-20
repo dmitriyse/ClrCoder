@@ -26,19 +26,17 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     /// <typeparam name="TUnitOfWork">Final unit of work type.</typeparam>
     /// <typeparam name="TStorage">Final in-memory storage type.</typeparam>
     /// <typeparam name="TRepository">Final repository type.</typeparam>
-    /// <typeparam name="TRepositoryContract">Final repository contract type.</typeparam>
     /// <typeparam name="TKey">Key type.</typeparam>
     /// <typeparam name="TEntity">entity type.</typeparam>
     [PublicAPI]
-    public class InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey,
+    public class InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TKey,
                                            TEntity> : IDisposablePluginEntry<TPersistence, TUnitOfWork>
         where TPersistence : PersistenceBase<TPersistence, TUnitOfWork>
         where TUnitOfWork : UnitOfWorkBase<TPersistence, TUnitOfWork>
         where TStorage :
-        InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey, TEntity>
+        InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey, TEntity>
         where TRepository :
-        InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TRepositoryContract, TKey, TEntity>
-        where TRepositoryContract : IRepository
+        InMemoryStorageRepository<TPersistence, TUnitOfWork, TStorage, TRepository, TKey, TEntity>
         where TKey : IEntityKey<TKey>
         where TEntity : class, IKeyed<TKey>, IDeepCloneable<TEntity>
     {
@@ -51,12 +49,10 @@ namespace ClrCoder.DomainModel.Impl.InMemory
 
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="InMemoryStorageRepository{TPersistence,TUnitOfWork,TStorage,TRepository,TRepositoryContract,TKey,TEntity}"/>
+        /// <see cref="InMemoryStorageRepository{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/>
         /// class.
         /// </summary>
-        /// <param name="storage">
-        /// Storage that is serviced by <c>this</c> repository.
-        /// </param>
+        /// <param name="storage">Storage that is serviced by <c>this</c> repository.</param>
         /// <param name="dataSnapshot">Current state of the storage.</param>
         public InMemoryStorageRepository(TStorage storage, ImmutableDictionary<TKey, TEntity> dataSnapshot)
         {

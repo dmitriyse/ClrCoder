@@ -143,7 +143,6 @@ namespace ClrCoder.ComponentModel.IndirectX
             UpdateDisposeSuspendState();
 
             UpdateSelfDisposeCompleteSuspendState();
-
         }
 
         /// <inheritdoc/>
@@ -193,30 +192,6 @@ namespace ClrCoder.ComponentModel.IndirectX
             UpdateSelfDisposeCompleteSuspendState();
         }
 
-        private void UpdateSelfDisposeCompleteSuspendState()
-        {
-            try
-            {
-                _selfDisposeCompleted.SuspendTrigger(_locks.Any());
-            }
-            catch (InvalidOperationException)
-            {
-                Critical.Assert(false, "Cannot set master lock, self dispose was completed.");
-            }
-        }
-
-        private void UpdateDisposeSuspendState()
-        {
-            try
-            {
-                SetDisposeSuspended(!Locks.All(x => x is IxInstanceMasterLock));
-            }
-            catch (InvalidOperationException)
-            {
-                Critical.Assert(false, "Cannot set lock, self dispose was started.");
-            }
-        }
-
         /// <inheritdoc/>
         public void RemoveOwnedLock(IIxInstanceLock instanceLock)
         {
@@ -250,6 +225,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 ChildrenData[providerNode] = data;
             }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{ProviderNode}({GetHashCode()})";
         }
 
         /// <inheritdoc/>
@@ -334,5 +315,29 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
         protected abstract Task SelfDispose();
+
+        private void UpdateDisposeSuspendState()
+        {
+            try
+            {
+                SetDisposeSuspended(!Locks.All(x => x is IxInstanceMasterLock));
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set lock, self dispose was started.");
+            }
+        }
+
+        private void UpdateSelfDisposeCompleteSuspendState()
+        {
+            try
+            {
+                _selfDisposeCompleted.SuspendTrigger(_locks.Any());
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set master lock, self dispose was completed.");
+            }
+        }
     }
 }

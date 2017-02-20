@@ -8,6 +8,8 @@ namespace ClrCoder.DomainModel.Impl
     using System;
     using System.Collections.Generic;
 
+    using Annotations;
+
     using JetBrains.Annotations;
 
     using Threading;
@@ -25,11 +27,15 @@ namespace ClrCoder.DomainModel.Impl
         /// Initializes a new instance of the <see cref="PersistencePluginBase{TPersistence,TUnitOfWork}"/> class.
         /// </summary>
         /// <param name="persistence">Owner persistence.</param>
+        /// <param name="supportedRepositoryTypes">Provides repository types that can be resolved with <c>this</c> plugin.</param>
         /// <param name="areNonDeclaredRepositoryTypesSupported">
         /// Shows that plugin can resolve non declared repository types in the
         /// <see cref="SupportedRepositoryTypes"/>.
         /// </param>
-        protected PersistencePluginBase(TPersistence persistence, bool areNonDeclaredRepositoryTypesSupported)
+        protected PersistencePluginBase(
+            TPersistence persistence,
+            [Immutable] IReadOnlyCollection<Type> supportedRepositoryTypes,
+            bool areNonDeclaredRepositoryTypesSupported)
         {
             if (persistence == null)
             {
@@ -37,14 +43,15 @@ namespace ClrCoder.DomainModel.Impl
             }
 
             Persistence = persistence;
+            SupportedRepositoryTypes = supportedRepositoryTypes;
             AreNonDeclaredRepositoryTypesSupported = areNonDeclaredRepositoryTypesSupported;
             persistence.RegisterPlugin(this);
         }
 
         /// <summary>
-        /// Provides repository types that can be resolved with this plugin.
+        /// Provides repository types that can be resolved with <c>this</c> plugin.
         /// </summary>
-        public abstract IReadOnlyCollection<Type> SupportedRepositoryTypes { get; }
+        public IReadOnlyCollection<Type> SupportedRepositoryTypes { get; }
 
         /// <summary>
         /// Shows that plugin can resolve non declared repository types in the <see cref="SupportedRepositoryTypes"/>.

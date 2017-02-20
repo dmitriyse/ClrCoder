@@ -7,6 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     public partial class IxHost
     {
         public InterceptableDelegate<ResolveDelegate> ResolveHandler = new InterceptableDelegate<ResolveDelegate>(
-            (originInstanceLock, identifier, context) =>
+            (originInstance, identifier, context) =>
                 {
                     throw new IxResolveTargetNotFound(
                         $"No any rule found to resolve {identifier.Type}|{identifier.Name} dependency.",
@@ -141,11 +142,11 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private ResolveDelegate ResolverResolveInterceptor(ResolveDelegate next)
         {
-            return async (originInstanceLock, identifier, context) =>
+            return async (originInstance, identifier, context) =>
                 {
                     if (identifier.Type != typeof(IIxResolver))
                     {
-                        return await next(originInstanceLock, identifier, context);
+                        return await next(originInstance, identifier, context);
                     }
 
                     if (identifier.Name != null)
@@ -153,22 +154,22 @@ namespace ClrCoder.ComponentModel.IndirectX
                         throw new InvalidOperationException("IIxResolver cannot be queried with name.");
                     }
 
-                    if (originInstanceLock.Resolver == null)
+                    if (originInstance.Resolver == null)
                     {
-                        lock (originInstanceLock)
+                        lock (originInstance)
                         {
-                            if (originInstanceLock.Resolver == null)
+                            if (originInstance.Resolver == null)
                             {
-                                originInstanceLock.Resolver = new IxResolver(this, originInstanceLock, context);
+                                originInstance.Resolver = new IxResolver(this, originInstance, context);
                             }
                         }
                     }
 
-                    return new IxInstanceNoLock(originInstanceLock.Resolver);
+                    return new IxInstanceNoLock(originInstance.Resolver);
                 };
         }
 
-        private ResolveDelegate SelfToDirectChildrenResolver(ResolveDelegate next)
+        private ResolveDelegate SelfToChildrenResolver(ResolveDelegate next)
         {
             return async (originInstance, identifier, context) =>
                 {
@@ -179,7 +180,23 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             if (!resolvePath.Path.Any())
                             {
-                                return new IxInstanceTempLock(originInstance);
+                                lock (InstanceTreeSyncRoot)
+                                {
+                                    IIxInstance curInstance = originInstance;
+                                    while (curInstance != null)
+                                    {
+                                        if (curInstance.ProviderNode == resolvePath.Root)
+                                        {
+                                            break;
+                                        }
+
+                                        curInstance = curInstance.ParentInstance;
+                                    }
+                                    
+                                    Critical.Assert(curInstance != null, "Instance of an appropriate provider should be found.");
+
+                                    return new IxInstanceTempLock(curInstance);
+                                }
                             }
                         }
                     }
@@ -207,10 +224,6 @@ namespace ClrCoder.ComponentModel.IndirectX
                                        // While we have temporary lock, we needs to put permanent lock.
                                        IIxInstanceLock resolvedInstanceTempLock =
                                            await provider.GetInstance(parentInstance, c);
-
-                                       // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
-                                       // ReSharper disable once ObjectCreationAsStatement
-                                       new IxInstanceMasterLock(parentInstance, resolvedInstanceTempLock.Target);
 
                                        return resolvedInstanceTempLock;
                                    });

@@ -29,6 +29,14 @@ namespace ClrCoder.Testing
         /// <summary>
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
+        public NUnitJsonLogger()
+            : this(new SyncHandler())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
+        /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
         public NUnitJsonLogger(IAsyncHandler asyncHandler)
         {

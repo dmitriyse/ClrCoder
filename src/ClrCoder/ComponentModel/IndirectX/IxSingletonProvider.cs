@@ -53,6 +53,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] { }));
         }
 
+        /// <inheritdoc/>
         public override async Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
             IxHost.IxResolveContext context)
@@ -123,6 +124,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                 context);
 
             Critical.Assert(halfInstantiatedInstance.Object != null, "Factory should initialize Object property of an instance.");
+
+            // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
+            // ReSharper disable once ObjectCreationAsStatement
+            new IxInstanceMasterLock(parentInstance, halfInstantiatedInstance);
 
             return result;
         }

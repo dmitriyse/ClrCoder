@@ -43,7 +43,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             DisposeHandlerBuilder.Add(AsyncDisposableDisposeHandlerBuilder, 200);
 
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
-            ResolveHandler.Add(SelfToDirectChildrenResolver, 200);
+            ResolveHandler.Add(SelfToChildrenResolver, 200);
             ResolveHandler.Add(StdResolveInterceptor, 300);
         }
 

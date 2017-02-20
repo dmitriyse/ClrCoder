@@ -109,5 +109,17 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return left._type != right._type || left.Name != right.Name;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var result = Type.Name;
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                result += "|" + Name;
+            }
+
+            return result;
+        }
     }
 }

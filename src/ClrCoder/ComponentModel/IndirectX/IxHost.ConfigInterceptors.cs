@@ -271,10 +271,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                 instanceObj != null,
                                                 "Constructor call through reflection should not return null.");
 
-                                            instance.Object = instanceObj;
 
                                             lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
                                             {
+                                                instance.Object = instanceObj;
+
                                                 foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
                                                     in resolvedDependencies)
                                                 {
