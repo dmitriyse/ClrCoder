@@ -2,13 +2,16 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.Text
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
+
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Text related extension methods.
@@ -50,7 +53,7 @@ namespace ClrCoder.Text
         {
             for (;;)
             {
-                var line = reader.ReadLine();
+                string line = reader.ReadLine();
                 if (line != null)
                 {
                     yield return line;
@@ -60,6 +63,39 @@ namespace ClrCoder.Text
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Replaces set of chars to a specified <c>replacement</c> <c>char</c>.
+        /// </summary>
+        /// <param name="str">String to replace charters in.</param>
+        /// <param name="charsToReplace">Collection chars to replace.</param>
+        /// <param name="replacement">Replacement <c>char</c>.</param>
+        /// <returns>String with replaced chars.</returns>
+        [CanBeNull]
+        [ContractAnnotation("str:null=>null")]
+        public static string ReplaceChars(
+            [CanBeNull] this string str,
+            IReadOnlyCollection<char> charsToReplace,
+            char replacement)
+        {
+            if (str == null)
+            {
+                return null;
+            }
+
+            if (charsToReplace == null)
+            {
+                throw new ArgumentNullException(nameof(charsToReplace));
+            }
+
+            var result = new StringBuilder();
+            foreach (char c in str)
+            {
+                result.Append(charsToReplace.Contains(c) ? replacement : c);
+            }
+
+            return result.ToString();
         }
     }
 }
