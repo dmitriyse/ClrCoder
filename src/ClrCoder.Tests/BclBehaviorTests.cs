@@ -2,7 +2,6 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.Tests
 {
     using System;
@@ -69,6 +68,111 @@ namespace ClrCoder.Tests
         }
 
         /// <summary>
+        /// Longest directory creation test. Result is 255 (Windows without <c>long</c> file names feature).
+        /// </summary>
+        /// <param name="dirNameLength">Test directory name length.</param>
+        [Test]
+        [TestCase(244)]
+        [TestCase(245)]
+        [TestCase(246)]
+        [TestCase(247)]
+        [TestCase(248)]
+        [TestCase(255)]
+        [TestCase(256)]
+        [TestCase(257)]
+        [TestCase(260)]
+        [Ignore("For manual testing")]
+        public void LongestDirectoryCreateTest(int dirNameLength)
+        {
+            string rootPath = EnvironmentEx.OSFamily.HasFlag(OSFamilyTypes.Posix) ? "/" : "c:\\";
+            var name = new string('t', dirNameLength);
+            string dirFullName = rootPath + name;
+            Directory.CreateDirectory(dirFullName);
+            Directory.Delete(dirFullName);
+        }
+
+        /// <summary>
+        /// Longest file creation test. Result is 255 for .Net Core, and !Surprise 197! for Net46 (Windows without <c>long</c> file
+        /// names feature).
+        /// </summary>
+        [Test]
+        [Ignore("For manual testing")]
+        public void LongestFileCreateTest()
+        {
+            string rootPath = EnvironmentEx.OSFamily.HasFlag(OSFamilyTypes.Posix) ? "/" : "c:\\";
+            for (var i = 150; i < short.MaxValue; i++)
+            {
+                int fileNameLength = i;
+                var ext = ".txt";
+                var name = new string('t', fileNameLength - ext.Length);
+                string fileFullName = rootPath + name + ext;
+                File.WriteAllText(name, "Hello world!");
+                File.Delete(fileFullName);
+                TestContext.WriteLine($"File name length = {fileNameLength} is supported.");
+            }
+        }
+
+        /// <summary>
+        /// Longest path creation test. Result is 32700+ .Net Core, and 247 for .Net46 (Windows without <c>long</c> file names
+        /// feature).
+        /// </summary>
+        /// <remarks>
+        /// TODO: Rewrite <c>this</c> to reusable test.
+        /// </remarks>
+        [Test]
+        [Ignore("For manual testing")]
+        public void LongestPathCreateTest()
+        {
+            string rootPath = EnvironmentEx.OSFamily.HasFlag(OSFamilyTypes.Posix) ? "/" : "c:\\";
+#if NET46
+            var dirName = new string('d', 1);
+#else
+            var dirName = new string('d', EnvironmentEx.MaxDirectoryNameLength);
+#endif
+            string dirFullName = rootPath + new string('d', 200);
+            Directory.CreateDirectory(dirFullName);
+            try
+            {
+                while (true)
+                {
+                    dirFullName = dirFullName + Path.DirectorySeparatorChar + dirName;
+#if NET46
+                    if (dirFullName.Length == 244)
+                    {
+                        dirFullName = dirFullName + Path.DirectorySeparatorChar + dirName + 'd';
+                    }
+#endif
+                    Directory.CreateDirectory(dirFullName);
+                    if (dirFullName.Length == 32715)
+                    {
+                        while (true)
+                        {
+                            dirFullName = dirFullName + Path.DirectorySeparatorChar + new string('d', 1);
+                            Directory.CreateDirectory(dirFullName);
+                            
+                            if (dirFullName.Length > 32730)
+                            {
+                                TestContext.WriteLine($"Path length={dirFullName.Length} is supported.");
+                            }
+                        }
+                    }
+
+#if NET46
+                    TestContext.WriteLine($"Path length={dirFullName.Length} is supported.");
+#endif
+                    if (dirFullName.Length > 32715)
+                    {
+                        TestContext.WriteLine($"Path length={dirFullName.Length} is supported.");
+                    }
+                }
+            }
+            finally
+            {
+                Directory.Delete(dirFullName, true);
+            }
+        }
+
+        /// <summary>
         /// Long running TPL task should use background thread. This behavior required to implement supporting background services
         /// that is terminated on application exit.
         /// </summary>
@@ -77,7 +181,7 @@ namespace ClrCoder.Tests
         {
             var cts = new CancellationTokenSource();
 #if NET46
-            var task = Task.Factory.StartNew(
+            Task task = Task.Factory.StartNew(
                 () =>
                     {
                         Thread.CurrentThread.IsBackground.Should()
