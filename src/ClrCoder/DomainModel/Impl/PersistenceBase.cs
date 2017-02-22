@@ -18,6 +18,7 @@ namespace ClrCoder.DomainModel.Impl
     /// <summary>
     /// Base implementation of persistence abstraction.
     /// </summary>
+    /// <remarks>TODO: Change initialization scheme to AsyncInitializable.</remarks>
     /// <typeparam name="TPersistence">Final persistence type.</typeparam>
     /// <typeparam name="TUnitOfWork">Final unit of work type.</typeparam>
     public abstract class PersistenceBase<TPersistence, TUnitOfWork> : AsyncDisposableBase, IPersistenceImpl

@@ -40,12 +40,15 @@ namespace ClrCoder.Tests.Threading
                         }
 
                         // Simple expected processing schedule.
+                        // ~ - grace period
+                        // X - blocked period
+                        // - - delay
                         //// ====================>t
                         //// ~~---XX 
-                        ////    ---XX~~
-                        ////           ---XX
-                        ////            ---XX~~
-                        //// =====================>t
+                        ////   ~~---XX
+                        ////          ~~---XX
+                        ////            ~~---XX
+                        //// ====================>t
                         // Estimated speed is 2 task in 350ms
                         await Task.Delay(150);
 
@@ -59,7 +62,7 @@ namespace ClrCoder.Tests.Threading
             await activeWorker.AsyncUsing(
                 async w => { await Task.Delay(delayMilliseconds); });
 
-            int expectedAsymptotically = (int)(((delayMilliseconds - 100) * 2) / 350.0);
+            var expectedAsymptotically = (int)Math.Round((delayMilliseconds * 2) / 350.0, MidpointRounding.AwayFromZero);
             int maxDelta = 3;
             writer.WriteLine($"Total executed work items = {allWorkItems.Count}");
             writer.WriteLine($"Expected asymptotically = {expectedAsymptotically}");

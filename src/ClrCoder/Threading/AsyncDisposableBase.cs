@@ -16,6 +16,9 @@ namespace ClrCoder.Threading
     /// <summary>
     /// Standard implementation of <see cref="IAsyncDisposable"/> pattern suited for basing.
     /// </summary>
+    /// <remarks>
+    /// TODO: Add async-initializable optional feature.
+    /// </remarks>
     [PublicAPI]
     public abstract class AsyncDisposableBase : IAsyncDisposable
     {
