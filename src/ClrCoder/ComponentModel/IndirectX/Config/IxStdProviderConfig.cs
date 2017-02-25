@@ -12,36 +12,37 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <summary>
     /// Standard provider node config.
     /// </summary>
+    /// <remarks>We needs to monitor https://github.com/dotnet/roslyn/issues/9482 to improve configuration pattern.</remarks>
     public class IxStdProviderConfig : IxProviderNodeConfig, IIxStdProviderConfig, IIxBasicIdentificationConfig
     {
         /// <inheritdoc/>
         [CanBeNull]
-        public IIxScopeBindingConfig ScopeBinding { get; set; }
+        public virtual IIxScopeBindingConfig ScopeBinding { get; set; }
 
         /// <inheritdoc/>
         [CanBeNull]
-        public IIxMultiplicityConfig Multiplicity { get; set; }
+        public virtual IIxMultiplicityConfig Multiplicity { get; set; }
 
         /// <inheritdoc/>
         [CanBeNull]
-        public IIxInstanceBuilderConfig Factory { get; set; }
+        public virtual IIxInstanceBuilderConfig Factory { get; set; }
 
         /// <summary>
         /// Overrides dispose operation.
         /// </summary>
         [CanBeNull]
-        public IxDisposeHandlerDelegate DisposeHandler { get; set; }
+        public virtual IxDisposeHandlerDelegate DisposeHandler { get; set; }
 
         /// <inheritdoc/>
-        public Type ContractType { get; set; }
+        public virtual Type ContractType { get; set; }
 
         /// <inheritdoc/>
-        public Type ImplementationType { get; set; }
+        public virtual Type ImplementationType { get; set; }
 
         /// <inheritdoc/>
-        public bool AllowAccessByBaseTypes { get; set; }
+        public virtual bool AllowAccessByBaseTypes { get; set; }
 
         /// <inheritdoc/>
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
     }
 }

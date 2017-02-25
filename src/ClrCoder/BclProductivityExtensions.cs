@@ -139,6 +139,7 @@ namespace ClrCoder
         /// <param name="dictionary"><c>Dictionary</c> to get value from.</param>
         /// <param name="key">Key to search value.</param>
         /// <returns>Value for the specified key or default value.</returns>
+        [CanBeNull]
         public static TValue GetOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
         {
             if (dictionary == null)

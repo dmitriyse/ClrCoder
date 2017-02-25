@@ -122,8 +122,8 @@
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1307/@EntryIndexRemoved">True</s:Boolean>
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1308/@EntryIndexedValue"></s:String>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1308/@EntryIndexRemoved">True</s:Boolean>
-	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1309/@EntryIndexedValue"></s:String>
-	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1309/@EntryIndexRemoved">True</s:Boolean>
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1309/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+	
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1310/@EntryIndexedValue"></s:String>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1310/@EntryIndexRemoved">True</s:Boolean>
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=StyleCop_002ESA1311/@EntryIndexedValue"></s:String>

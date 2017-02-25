@@ -13,19 +13,19 @@ namespace ClrCoder.ComponentModel.IndirectX
     public class IxProviderNodeConfig : IIxProviderNodeConfig
     {
         /// <inheritdoc/>
-        public IxIdentifier Identifier { get; set; }
+        public virtual IxIdentifier Identifier { get; set; }
 
         /// <inheritdoc/>
-        public ICollection<IIxProviderNodeConfig> Nodes { get; }
+        public virtual ICollection<IIxProviderNodeConfig> Nodes { get; }
             = new HashSet<IIxProviderNodeConfig>(new IxProviderNodeConfigComparer());
 
         /// <inheritdoc/>
-        public IIxVisibilityFilterConfig ImportFilter { get; set; }
+        public virtual IIxVisibilityFilterConfig ImportFilter { get; set; }
 
         /// <inheritdoc/>
-        public IIxVisibilityFilterConfig ExportToParentFilter { get; set; }
+        public virtual IIxVisibilityFilterConfig ExportToParentFilter { get; set; }
 
         /// <inheritdoc/>
-        public IIxVisibilityFilterConfig ExportFilter { get; set; }
+        public virtual IIxVisibilityFilterConfig ExportFilter { get; set; }
     }
 }

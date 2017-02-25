@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder
 {
     using System;
@@ -15,26 +16,31 @@ namespace ClrCoder
     [PublicAPI]
     public static class EnvironmentEx
     {
-#if PCL
-        private static bool _isInitialized = false;
-
-#else
-
         /// <summary>
-        /// Maximal file name length for the current environment.
+        /// Initializes static members of the <see cref="EnvironmentEx"/> class.
         /// </summary>
-        /// <remarks>TODO: Test linux.</remarks>
-        public static int MaxFileNameLength
+        static EnvironmentEx()
         {
-            get
+            if (Path.DirectorySeparatorChar == '\\')
             {
-#if NET46
-                return 197;
-#else
-                return 255;
-#endif
+                OSFamily = OSFamilyTypes.Windows;
+            }
+            else
+            {
+                // TOOD: Add support for different families.
+                OSFamily = OSFamilyTypes.Linux;
             }
         }
+
+        /// <summary>
+        /// Directory with binary files.
+        /// </summary>
+        public static string BinPath => AppContext.BaseDirectory;
+
+        /// <summary>
+        /// Checks if we are running in a mono runtime.
+        /// </summary>
+        public static bool IsMonoRuntime => Type.GetType("Mono.Runtime") != null;
 
         /// <summary>
         /// Maximal directory name length for the current environment.
@@ -46,6 +52,22 @@ namespace ClrCoder
             {
 #if NET46
                 return 244;
+#else
+                return 255;
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Maximal file name length for the current environment.
+        /// </summary>
+        /// <remarks>TODO: Test linux.</remarks>
+        public static int MaxFileNameLength
+        {
+            get
+            {
+#if NET46
+                return 197;
 #else
                 return 255;
 #endif
@@ -67,24 +89,6 @@ namespace ClrCoder
             }
         }
 
-        /// <summary>
-        /// Initializes static members of the <see cref="EnvironmentEx"/> class.
-        /// </summary>
-        static EnvironmentEx()
-        {
-            if (Path.DirectorySeparatorChar == '\\')
-            {
-                OSFamily = OSFamilyTypes.Windows;
-            }
-            else
-            {
-                // TOOD: Add support for different families.
-                OSFamily = OSFamilyTypes.Linux;
-            }
-        }
-
-#endif
-
         //// ReSharper disable once InconsistentNaming
 
         /// <summary>
@@ -92,33 +96,35 @@ namespace ClrCoder
         /// </summary>
         public static OSFamilyTypes OSFamily { get; private set; }
 
-#if !PCL
-
         /// <summary>
-        /// Directory with binary files.
+        /// Gets filesystem root directory.
         /// </summary>
-        public static string BinPath => AppContext.BaseDirectory;
-
-        /// <summary>
-        /// Checks that mono runtime.
-        /// </summary>
-        public static bool IsMonoRuntime => Type.GetType("Mono.Runtime") != null;
-#endif
-#if PCL
-
-/// <summary>
-/// Initializes environment.
-/// </summary>
-/// <param name="osFamily">Specified OS family.</param>
-        public static void InitEnvironment(OSFamilyTypes? osFamily)
+        /// <returns>For windows: "%SystemDrive%\", for posix = "/".</returns>
+        public static string GetFileSystemRoot()
         {
-            if (_isInitialized)
+            string result;
+            if (OSFamily.HasFlag(OSFamilyTypes.Windows))
             {
-                return;
+                string systemDrive = Environment.GetEnvironmentVariable("SystemDrive");
+                if (string.IsNullOrWhiteSpace(systemDrive))
+                {
+                    result = "C:\\";
+                }
+                else
+                {
+                    result = systemDrive;
+                    if (result.Length == 2)
+                    {
+                        result += "\\";
+                    }
+                }
+            }
+            else
+            {
+                return "/";
             }
 
-            OSFamily = osFamily ?? default(OSFamilyTypes);
+            return result;
         }
-#endif
     }
 }
