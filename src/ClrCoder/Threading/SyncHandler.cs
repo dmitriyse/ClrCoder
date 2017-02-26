@@ -8,6 +8,8 @@ namespace ClrCoder.Threading
     using System;
     using System.Threading;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Handles work items synchronously.
     /// </summary>
@@ -33,7 +35,7 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void RunAsync<T>(Action<T> action, T arg)
+        public void RunAsync<T>(Action<T> action, [CanBeNull] T arg)
         {
             if (action == null)
             {
@@ -52,7 +54,7 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void RunAsync<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2)
+        public void RunAsync<T1, T2>(Action<T1, T2> action, [CanBeNull] T1 arg1, [CanBeNull] T2 arg2)
         {
             if (action == null)
             {
@@ -71,7 +73,11 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void RunAsync<T1, T2, T3>(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3)
+        public void RunAsync<T1, T2, T3>(
+            Action<T1, T2, T3> action,
+            [CanBeNull] T1 arg1,
+            [CanBeNull] T2 arg2,
+            [CanBeNull] T3 arg3)
         {
             if (action == null)
             {
@@ -90,7 +96,12 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void RunAsync<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+        public void RunAsync<T1, T2, T3, T4>(
+            Action<T1, T2, T3, T4> action,
+            [CanBeNull] T1 arg1,
+            [CanBeNull] T2 arg2,
+            [CanBeNull] T3 arg3,
+            [CanBeNull] T4 arg4)
         {
             if (action == null)
             {
@@ -111,11 +122,11 @@ namespace ClrCoder.Threading
         /// <inheritdoc/>
         public void RunAsync<T1, T2, T3, T4, T5>(
             Action<T1, T2, T3, T4, T5> action,
-            T1 arg1,
-            T2 arg2,
-            T3 arg3,
-            T4 arg4,
-            T5 arg5)
+            [CanBeNull] T1 arg1,
+            [CanBeNull] T2 arg2,
+            [CanBeNull] T3 arg3,
+            [CanBeNull] T4 arg4,
+            [CanBeNull] T5 arg5)
         {
             if (action == null)
             {
@@ -125,6 +136,32 @@ namespace ClrCoder.Threading
             try
             {
                 action(arg1, arg2, arg3, arg4, arg5);
+            }
+            catch (Exception ex)
+            {
+                ThreadPool.QueueUserWorkItem(
+                    state => { throw ex; });
+            }
+        }
+
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2, T3, T4, T5, T6>(
+            Action<T1, T2, T3, T4, T5, T6> action,
+            [CanBeNull] T1 arg1,
+            [CanBeNull] T2 arg2,
+            [CanBeNull] T3 arg3,
+            [CanBeNull] T4 arg4,
+            [CanBeNull] T5 arg5,
+            [CanBeNull] T6 arg6)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                action(arg1, arg2, arg3, arg4, arg5, arg6);
             }
             catch (Exception ex)
             {
