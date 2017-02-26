@@ -51,9 +51,10 @@ namespace ClrCoder
         /// <param name="fileName">Sources file name where an assertion faulted./</param>
         /// <param name="memberName">Member name where an assertion faulted.</param>
         /// <param name="lineNumber">Source file line number where an assertion faulted.</param>
-        [ContractAnnotation("condition:false=>halt")]
+        [AssertionMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Assert(
+            [AssertionCondition(AssertionConditionType.IS_TRUE)]
             bool condition,
             string message,
             string detailMessage = null,

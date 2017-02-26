@@ -73,7 +73,7 @@ namespace ClrCoder.Text
         /// <param name="replacement">Replacement <c>char</c>.</param>
         /// <returns>String with replaced chars.</returns>
         [CanBeNull]
-        [ContractAnnotation("str:null=>null")]
+        [ContractAnnotation("str:null=>null; str:notnull => notnull")]
         public static string ReplaceChars(
             [CanBeNull] this string str,
             IReadOnlyCollection<char> charsToReplace,

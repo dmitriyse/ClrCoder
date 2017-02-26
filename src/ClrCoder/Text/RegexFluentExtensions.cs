@@ -22,7 +22,7 @@ namespace ClrCoder.Text
         /// <param name="pattern">Search pattern.</param>
         /// <param name="replacement">Replacement pattern.</param>
         /// <returns>Result string after replacements.</returns>
-        public static string ReplaceEx(this string str, string pattern, string replacement)
+        public static string ReplaceEx(this string str, [RegexPattern] string pattern, string replacement)
         {
             return Regex.Replace(str, pattern, replacement);
         }
