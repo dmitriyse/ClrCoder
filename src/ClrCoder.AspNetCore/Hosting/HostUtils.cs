@@ -9,6 +9,8 @@ namespace ClrCoder.AspNetCore.Hosting
     using System;
     using System.IO;
 
+    using JetBrains.Annotations;
+
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
@@ -22,22 +24,30 @@ namespace ClrCoder.AspNetCore.Hosting
         /// Starts Asp.Net core host for the specified controller on the specified <c>urls</c>.
         /// </summary>
         /// <typeparam name="TController">Type of controller to host.</typeparam>
-        /// <param name="urls"></param>
-        /// <returns></returns>
-        public static IWebHost HostController<TController>(string urls)
+        /// <param name="urls">Hosting <c>urls</c>.</param>
+        /// <param name="configureServicesAction">Action that will be called to configure services. (Registers DI dependencies).</param>
+        /// <returns>Configured and running asp.net core host.</returns>
+        public static IWebHost HostController<TController>(
+            string urls,
+            [CanBeNull] Action<IServiceCollection> configureServicesAction = null)
         {
             if (urls == null)
             {
                 throw new ArgumentNullException(nameof(urls));
             }
-
-            IWebHost host = new WebHostBuilder()
+            var builder = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseOnlyController<TController>()
-                .Configure(
-                    app => { app.UseMvc(); })
+                .UseOnlyController<TController>();
 
+            if (configureServicesAction != null)
+            {
+                builder.ConfigureServices(configureServicesAction);
+            }
+
+            IWebHost host = 
+                builder.Configure(
+                    app => { app.UseMvc(); })
                 .UseUrls(urls)
                 .Build();
 
