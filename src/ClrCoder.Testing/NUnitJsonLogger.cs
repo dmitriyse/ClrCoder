@@ -14,6 +14,7 @@ namespace ClrCoder.Testing
     using NodaTime;
 
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
 
     using Runtime.Serialization;
 
@@ -26,12 +27,15 @@ namespace ClrCoder.Testing
     {
         private readonly DateTimeZone _localZone;
 
+        private TestExecutionContext _testExecutionContext;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
         public NUnitJsonLogger()
             : this(new SyncHandler())
         {
+            _testExecutionContext = TestExecutionContext.CurrentContext;
         }
 
         /// <summary>
@@ -65,34 +69,34 @@ namespace ClrCoder.Testing
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
-            TestContext.WriteLine(
+            _testExecutionContext.OutWriter.WriteLine(
                 $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
 
             if (logEntry.Exception != null)
             {
                 var baseIntent = "  |";
-                TestContext.Write(baseIntent);
-                TestContext.WriteLine(
+                _testExecutionContext.OutWriter.Write(baseIntent);
+                _testExecutionContext.OutWriter.WriteLine(
                     "------------------------------------- Exception ---------------------------------------");
                 string intent = string.Empty;
                 ExceptionDto curException = logEntry.Exception;
                 do
                 {
-                    TestContext.Write(baseIntent);
-                    TestContext.Write(intent);
+                    _testExecutionContext.OutWriter.Write(baseIntent);
+                    _testExecutionContext.OutWriter.Write(intent);
                     if (intent != string.Empty)
                     {
-                        TestContext.Write("<--");
+                        _testExecutionContext.OutWriter.Write("<--");
                     }
 
                     string name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
-                    TestContext.WriteLine($"{name}: {curException.Message}");
+                    _testExecutionContext.OutWriter.WriteLine($"{name}: {curException.Message}");
                     curException = curException.InnerException;
                     intent += "    ";
                 }
                 while (curException != null);
-                TestContext.Write(baseIntent);
-                TestContext.WriteLine(
+                _testExecutionContext.OutWriter.Write(baseIntent);
+                _testExecutionContext.OutWriter.WriteLine(
                     "---------------------------------------------------------------------------------------");
             }
         }
