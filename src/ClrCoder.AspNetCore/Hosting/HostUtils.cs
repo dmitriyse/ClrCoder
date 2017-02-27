@@ -2,18 +2,14 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
-
 namespace ClrCoder.AspNetCore.Hosting
 {
 #if NET46 || NETSTANDARD1_6
     using System;
     using System.IO;
 
-    using JetBrains.Annotations;
-
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// Asp.Net core hosting utils.
@@ -25,29 +21,30 @@ namespace ClrCoder.AspNetCore.Hosting
         /// </summary>
         /// <typeparam name="TController">Type of controller to host.</typeparam>
         /// <param name="urls">Hosting <c>urls</c>.</param>
-        /// <param name="configureServicesAction">Action that will be called to configure services. (Registers DI dependencies).</param>
+        /// <param name="hostBuilderAction">Performs additional steps to build host.</param>
         /// <returns>Configured and running asp.net core host.</returns>
         public static IWebHost HostController<TController>(
             string urls,
-            [CanBeNull] Action<IServiceCollection> configureServicesAction = null)
+            Func<IWebHostBuilder, IWebHostBuilder> hostBuilderAction = null)
         {
             if (urls == null)
             {
                 throw new ArgumentNullException(nameof(urls));
             }
-            var builder = new WebHostBuilder()
+
+            IWebHostBuilder builder = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseOnlyController<TController>();
+                .UseOnlyController<TController>()
+                .Configure(
+                    app => { app.UseMvc(); });
 
-            if (configureServicesAction != null)
+            if (hostBuilderAction != null)
             {
-                builder.ConfigureServices(configureServicesAction);
+                builder = hostBuilderAction(builder);
             }
 
-            IWebHost host = 
-                builder.Configure(
-                    app => { app.UseMvc(); })
+            IWebHost host = builder
                 .UseUrls(urls)
                 .Build();
 

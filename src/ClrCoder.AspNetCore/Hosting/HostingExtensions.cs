@@ -106,6 +106,7 @@ namespace ClrCoder.AspNetCore.Hosting
             hostBuilder.ConfigureServices(
                 services =>
                     {
+                        services.AddTransient<CustomSerializerSettingsSetup>();
                         services.AddTransient<IConfigureOptions<MvcOptions>>(
                             provider =>
                                 {
