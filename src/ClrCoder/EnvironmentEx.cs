@@ -35,6 +35,10 @@ namespace ClrCoder
         /// <summary>
         /// Directory with binary files.
         /// </summary>
+        /// <remarks>
+        /// Since DotNet core 1.0, Mono 4.6.2, .Net Framework 4.6.2 we can use AppContext.BaseDirectory, so <c>this</c> workaround is not required any more! Cool!.
+        /// </remarks>
+        [Obsolete("Consider using AppContext.BaseDirectory")]
         public static string BinPath => AppContext.BaseDirectory;
 
         /// <summary>
