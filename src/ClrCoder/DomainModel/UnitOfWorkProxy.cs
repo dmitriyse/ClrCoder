@@ -6,6 +6,7 @@
 namespace ClrCoder.DomainModel
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -36,6 +37,12 @@ namespace ClrCoder.DomainModel
         protected IUnitOfWorkImpl Impl { get; }
 
         /// <inheritdoc/>
+        public Task Commit()
+        {
+            return Impl.Commit();
+        }
+
+        /// <inheritdoc/>
         public void HandleException(Exception exception)
         {
             if (exception == null)
@@ -57,6 +64,8 @@ namespace ClrCoder.DomainModel
     /// Proxy for Unit of Work with 1 repository.
     /// </summary>
     /// <typeparam name="TR1">Type of repository 1.</typeparam>
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass",
+        Justification = "Reviewed. Suppression is OK here.")]
     public class UnitOfWorkProxy<TR1> : UnitOfWorkProxy, IUnitOfWork<TR1>
         where TR1 : class, IRepository
     {

@@ -5,13 +5,11 @@
 
 namespace ClrCoder.DomainModel
 {
-    using Threading;
-
     /// <summary>
     /// Unit of work implementation. Classes <see cref="IUnitOfWork"/> are implemented usually by transparent proxy to this
     /// contract.
     /// </summary>
-    public interface IUnitOfWorkImpl : IExceptionalAsyncDisposable
+    public interface IUnitOfWorkImpl : IUnitOfWork
     {
         /// <summary>
         /// Gets repository of the specified type.

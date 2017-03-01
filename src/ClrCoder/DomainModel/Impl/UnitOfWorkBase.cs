@@ -53,6 +53,12 @@ namespace ClrCoder.DomainModel.Impl
         public TPersistence Persistence { get; }
 
         /// <inheritdoc/>
+        public Task Commit()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
         public T GetRepository<T>() where T : class, IRepository
         {
             return Persistence.ResolveRepository<T>((TUnitOfWork)this);

@@ -5,6 +5,8 @@
 
 namespace ClrCoder.DomainModel
 {
+    using System.Threading.Tasks;
+
     using Threading;
 
     /// <summary>
@@ -12,6 +14,11 @@ namespace ClrCoder.DomainModel
     /// </summary>
     public interface IUnitOfWork : IExceptionalAsyncDisposable
     {
+        /// <summary>
+        /// Use <c>this</c> method only if you want to access some entities after db commit.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        Task Commit();
     }
 
     /// <summary>

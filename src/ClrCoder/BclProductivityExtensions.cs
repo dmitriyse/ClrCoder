@@ -77,6 +77,7 @@ namespace ClrCoder
             {
                 throw new ArgumentNullException(nameof(dictionary));
             }
+
             if (createFunc == null)
             {
                 throw new ArgumentNullException(nameof(createFunc));
@@ -113,6 +114,7 @@ namespace ClrCoder
             {
                 throw new ArgumentNullException(nameof(dictionary));
             }
+
             if (createFunc == null)
             {
                 throw new ArgumentNullException(nameof(createFunc));
@@ -192,9 +194,11 @@ namespace ClrCoder
         /// <see cref="OutOfMemoryException"/>,
         /// <see cref="CriticalException"/>,
 #if NET46
-        /// <see cref="StackOverflowException"/>,
-        /// <see cref="ThreadAbortException"/>.
+
+/// <see cref="StackOverflowException"/>,
+/// <see cref="ThreadAbortException"/>.
 #endif
+
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
         /// <returns><see langword="true"/>, if exception can be muted/handled.</returns>
@@ -206,6 +210,7 @@ namespace ClrCoder
             {
                 return false;
             }
+
 #endif
 #if NET46
             if (ex is StackOverflowException 
@@ -221,6 +226,44 @@ namespace ClrCoder
                      || ex is CriticalException
                      || ex is BadImageFormatException
                      || ex is InvalidProgramException);
+        }
+
+        /// <summary>
+        /// Compares two doubles with the specified <c>precision</c>.
+        /// </summary>
+        /// <param name="x">First operand.</param>
+        /// <param name="y">Second operand.</param>
+        /// <param name="precision">
+        /// Compare <c>precision</c>. Values are equal when they differ in less than specified
+        /// <c>precision</c>.
+        /// </param>
+        /// <returns><see langword="true"/> if values near to equal.</returns>
+        public static bool NearEquals(this double x, double y, double precision)
+        {
+            return Math.Abs(x - y) < precision;
+        }
+
+        /// <summary>
+        /// Verifies that operand fit in the specified range with a specified <c>precision</c>.
+        /// </summary>
+        /// <param name="x">Operand to check.</param>
+        /// <param name="start">Interval <c>start</c>.</param>
+        /// <param name="end">Interval <c>end</c>.</param>
+        /// <param name="precision">Check <c>precision</c>.</param>
+        /// <returns><see langword="true"/> if value fit in renage with extended boundaries by a specified precision.</returns>
+        public static bool NearInRange(this double x, double start, double end, double precision)
+        {
+            return x > start - precision && x < end + precision;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> or <see langword="false"/> with equal probability.
+        /// </summary>
+        /// <param name="rnd">Random generator.</param>
+        /// <returns>Random bool.</returns>
+        public static bool NextBool(this Random rnd)
+        {
+            return rnd.Next(2) == 1;
         }
 
         /// <summary>
@@ -314,16 +357,6 @@ namespace ClrCoder
         }
 
         /// <summary>
-        /// Returns <see langword="true"/> or <see langword="false"/> with equal probability.
-        /// </summary>
-        /// <param name="rnd">Random generator.</param>
-        /// <returns>Random bool.</returns>
-        public static bool NextBool(this Random rnd)
-        {
-            return rnd.Next(2) == 1;
-        }
-
-        /// <summary>
         /// Replaces the <paramref name="source"/> value with the <paramref name="substitute"/>, if it is equals to the
         /// <paramref name="comparand"/>.
         /// </summary>
@@ -348,9 +381,11 @@ namespace ClrCoder
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
 #if NET46
+
 /// <see cref="StackOverflowException"/>,
 /// <see cref="ThreadAbortException"/>.
 #endif
+
         /// Also we add <see cref="NotImplementedException"/> to this list in DEBUG mode.
         /// </remarks>
         public static void RethrowUnprocessable([NotNull] this Exception ex)
@@ -367,6 +402,7 @@ namespace ClrCoder
             {
                 throw ex;
             }
+
 #endif
 #else
 #if NET46
