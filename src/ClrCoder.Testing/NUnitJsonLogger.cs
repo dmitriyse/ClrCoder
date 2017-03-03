@@ -35,7 +35,6 @@ namespace ClrCoder.Testing
         public NUnitJsonLogger()
             : this(new SyncHandler())
         {
-            _testExecutionContext = TestExecutionContext.CurrentContext;
         }
 
         /// <summary>
@@ -49,12 +48,14 @@ namespace ClrCoder.Testing
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
 
-            AsyncHandler = asyncHandler;
-
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
+
+            AsyncHandler = asyncHandler;
+
+            _testExecutionContext = TestExecutionContext.CurrentContext;
 
             _localZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         }
