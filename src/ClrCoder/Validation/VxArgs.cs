@@ -6,7 +6,9 @@
 namespace ClrCoder.Validation
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
+    using System.Reflection;
 
     using JetBrains.Annotations;
 
@@ -64,10 +66,82 @@ namespace ClrCoder.Validation
         /// <param name="name">Name of argument.</param>
         public static void NonNullOrWhiteSpace(string str, [InvokerParameterName] string name)
         {
+            if (str == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
             if (string.IsNullOrWhiteSpace(str))
             {
-                throw new ArgumentNullException(name, $"{name} should not be null or whitespace string.");
+                throw new ArgumentException($"{name} should not be an empty or whitespace string.", name);
             }
+        }
+
+        /// <summary>
+        /// Validates that <c>collection</c> is not empty. Also validates items not <c>null</c> in debug mode.
+        /// </summary>
+        /// <typeparam name="T">Type of <c>collection</c> item.</typeparam>
+        /// <param name="collection">Collection to validate.</param>
+        /// <param name="name">Name of an argument.</param>
+        [Pure]
+        public static void NotEmpty<T>(ICollection<T> collection, string name)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            if (collection.Count == 0)
+            {
+                throw new ArgumentException($"{name} collection should not be empty.", name);
+            }
+
+#if DEBUG
+            if (!typeof(T).GetTypeInfo().IsValueType)
+            {
+                foreach (T item in collection)
+                {
+                    if (item == null)
+                    {
+                        throw new ArgumentException($"{name} collection element is null.", name);
+                    }
+                }
+            }
+
+#endif
+        }
+
+        /// <summary>
+        /// Validates that <c>collection</c> is not empty. Also validates items not <c>null</c> in debug mode.
+        /// </summary>
+        /// <typeparam name="T">Type of <c>collection</c> item.</typeparam>
+        /// <param name="collection">Collection to validate.</param>
+        /// <param name="name">Name of an argument.</param>
+        public static void NotEmptyReadOnly<T>(IReadOnlyCollection<T> collection, string name)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            if (collection.Count == 0)
+            {
+                throw new ArgumentException($"{name} collection should not be empty.", name);
+            }
+
+#if DEBUG
+            if (!typeof(T).GetTypeInfo().IsValueType)
+            {
+                foreach (T item in collection)
+                {
+                    if (item == null)
+                    {
+                        throw new ArgumentException($"{name} collection element is null.", name);
+                    }
+                }
+            }
+
+#endif
         }
 
         /// <summary>
@@ -93,6 +167,51 @@ namespace ClrCoder.Validation
             if (size != null && (size.Value.Width <= 0 || size.Value.Height <= 0))
             {
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non-zero positive");
+            }
+        }
+
+        /// <summary>
+        /// Validates that provided Uri is valid http and absolute.
+        /// </summary>
+        /// <param name="uri">Uri to validate.</param>
+        /// <param name="name">Argument <c>name</c>.</param>
+        public static void ValidAbsoluteHttpUri(string uri, [InvokerParameterName] string name)
+        {
+            NonNullOrWhiteSpace(uri, name);
+
+            try
+            {
+                // ReSharper disable once ObjectCreationAsStatement
+                var uriObj = new Uri(uri, UriKind.Absolute);
+
+                if (uriObj.Scheme != "http" || uriObj.Scheme != "https")
+                {
+                    throw new ArgumentException($"{name} should use http/https", name);
+                }
+            }
+            catch (UriFormatException ex)
+            {
+                throw new ArgumentException(ex.Message, name, ex);
+            }
+        }
+
+        /// <summary>
+        /// Validates that provided Uri is valid and absolute.
+        /// </summary>
+        /// <param name="uri">Uri to validate.</param>
+        /// <param name="name">Argument <c>name</c>.</param>
+        public static void ValidAbsoluteUri(string uri, [InvokerParameterName] string name)
+        {
+            NonNullOrWhiteSpace(uri, name);
+
+            try
+            {
+                // ReSharper disable once ObjectCreationAsStatement
+                new Uri(uri, UriKind.Absolute);
+            }
+            catch (UriFormatException ex)
+            {
+                throw new ArgumentException(ex.Message, name, ex);
             }
         }
     }

@@ -13,7 +13,8 @@
     "System.ValueTuple": "4.0.0-rc3-24212-01",
     "System.Diagnostics.StackTrace": "4.0.1",
     "System.Collections.Immutable": "1.2.0",
-    "System.Drawing.Primitives": "4.0.0"
+    "System.Drawing.Primitives": "4.0.0",
+    "ClrCoder.Polyfill": "0.1.1-*"
   },
 
   "frameworks": {
