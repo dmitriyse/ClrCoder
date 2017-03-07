@@ -22,7 +22,7 @@ namespace System.Collections.Generic
     /// <typeparam name="T">The type of the item in the collection.</typeparam>
     /// <typeparam name="TCollection">The type of the inner collection.</typeparam>
     /// <filterpriority>1</filterpriority>
-    internal class CollectionExtender<T, TCollection> : IImmutableCollection<T>, ICollectionEx<T>, IWrapLinqOperation
+    internal class CollectionExtender<T, TCollection> : ICollectionEx<T>, IWrapLinqOperation
         where TCollection : IEnumerable<T>
     {
         private readonly bool _isConcludedImmutable;
@@ -55,12 +55,6 @@ namespace System.Collections.Generic
             AssumeImmutable = assumeImmutable;
             AssumeIsReadOnly = AssumeIsReadOnly;
             _isConcludedImmutable = AssumeImmutable;
-
-            var immutableInner = innerCollection as IImmutableEnumerable<T>;
-            if (assumeImmutable && immutableInner != null)
-            {
-                // Allowing unsafely to wrap any collection as immutable.
-            }
 
             InnerCollection = innerCollection;
 
@@ -98,7 +92,8 @@ namespace System.Collections.Generic
                     return true;
                 }
 
-                return (InnerCollection as IImmutableEnumerable<T>)?.IsImmutable ?? false;
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                return (InnerCollection as IImmutable<T>)?.IsImmutable ?? false;
             }
         }
 

@@ -20,8 +20,7 @@ namespace System.Collections.Generic
     /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     [PublicAPI]
     public class DictionaryEx<TKey, TValue> : IDictionaryEx<TKey, TValue>,
-                                              IDictionary,
-                                              IFreezable<IImmutableDictionarySlim<TKey, TValue>>
+                                              IDictionary
     {
         private readonly Dictionary<TKey, TValue> _dict;
 
@@ -325,7 +324,6 @@ namespace System.Collections.Generic
         /// Collection of dictionary keys.
         /// </summary>
         public sealed class KeyCollection : ICollection<TKey>,
-                                            IImmutableCollection<TKey>,
                                             ICollection
         {
             private readonly DictionaryEx<TKey, TValue> _ownerDict;
@@ -416,8 +414,7 @@ namespace System.Collections.Generic
         /// Dictionary values collection.
         /// </summary>
         [PublicAPI]
-        public sealed class ValueCollection : IImmutableCollection<TValue>,
-                                              ICollectionEx<TValue>,
+        public sealed class ValueCollection : ICollectionEx<TValue>,
                                               ICollection
         {
             private readonly DictionaryEx<TKey, TValue> _ownerDict;

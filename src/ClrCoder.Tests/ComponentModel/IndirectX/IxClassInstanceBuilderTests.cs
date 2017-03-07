@@ -1,4 +1,4 @@
-﻿// <copyright file="IxClassRawInstanceFactoryTests.cs" company="ClrCoder project">
+﻿// <copyright file="IxClassInstanceBuilderTests.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -22,7 +22,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     /// </summary>
     [NoReorder]
     [TestFixture]
-    public class IxClassRawInstanceFactoryTests
+    public class IxClassInstanceBuilderTests
     {
         /// <summary>
         /// Simplest dependency resolve test.
@@ -32,14 +32,14 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task Simplest_dependency_should_be_resolved()
         {
             await (await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes
-                            .Add<SimplestDummy>(
-                                factory: new IxClassInstanceBuilderConfig<SimplestDummy>())
-                            .Add<WithSimplestDependencyDummy>(
-                                factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
-                .Build())
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<SimplestDummy>(
+                                       factory: new IxClassInstanceBuilderConfig<SimplestDummy>())
+                                   .Add<WithSimplestDependencyDummy>(
+                                       factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -61,13 +61,13 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task Class_with_private_constructor_should_be_instantiated()
         {
             await (await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes
-                            .Add<PrivateConstructorDummy>(
-                                factory: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
-                                disposeHandler: obj => Task.CompletedTask))
-                .Build())
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<PrivateConstructorDummy>(
+                                       factory: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
+                                       disposeHandler: obj => Task.CompletedTask))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -130,12 +130,12 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task Simplest_class_should_be_instantiated()
         {
             await (await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes.Add<SimplestDummy>(
-                            factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
-                            disposeHandler: obj => Task.CompletedTask))
-                .Build())
+                       .Configure(
+                           rootNodes =>
+                               rootNodes.Add<SimplestDummy>(
+                                   factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
+                                   disposeHandler: obj => Task.CompletedTask))
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -143,6 +143,37 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                             )
                             {
                                 resolvedInstanceLock.Target.Should().BeOfType<SimplestDummy>();
+                            }
+                        });
+        }
+
+        /// <summary>
+        /// Resolve dependency with registration by contracts test.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Resolve_by_contract_should_be_success()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add(new DummyImplementationConfig())
+                                   .Add(new DummyContractConsumerConfig()))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                        {
+                            using (IxLock<IDummyConsumer> consumer = await host.Resolver.Get<IDummyConsumer>())
+                            {
+                                var consumerImpl = consumer.Target as DummyContractConsumer;
+                                consumerImpl.Should().NotBeNull();
+                                consumerImpl.Dummy.Should().NotBeNull();
+                            }
+                            using (IxLock<IDummyContract> impl = await host.Resolver.Get<IDummyContract>())
+                            {
+                                var i = impl.Target;
+                                i.Should().NotBeNull();
                             }
                         });
         }
@@ -175,6 +206,44 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             }
 
             public SimplestDummy Dummy { get; }
+        }
+
+        private interface IDummyContract
+        {
+        }
+
+        private class DummyImplementation : IDummyContract
+        {
+        }
+
+        private interface IDummyConsumer
+        {
+        }
+
+        [ProvideConfig]
+        private class DummyImplementationConfig: IxStdProviderConfig, IIxStdProviderConfig, IIxBasicIdentificationConfig
+        {
+            Type IIxBasicIdentificationConfig.ContractType { get; } = typeof(IDummyContract);
+
+            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } = new IxClassInstanceBuilderConfig<DummyImplementation>();
+        }
+
+        [ProvideConfig]
+        private class DummyContractConsumerConfig: IxStdProviderConfig, IIxStdProviderConfig, IIxBasicIdentificationConfig
+        {
+            Type IIxBasicIdentificationConfig.ContractType { get; }= typeof(IDummyConsumer);
+
+            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } = new IxClassInstanceBuilderConfig<DummyContractConsumer>();
+        }
+
+        private class DummyContractConsumer : IDummyConsumer
+        {
+            private DummyContractConsumer(IDummyContract dummy, DummyContractConsumerConfig config)
+            {
+                Dummy = dummy;
+            }
+
+            public IDummyContract Dummy { get; }
         }
 
         private class MultiConstructorsDummy

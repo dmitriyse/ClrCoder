@@ -21,7 +21,7 @@ namespace System.Collections.Generic
     /// <typeparam name="T">The type of the item in the collection.</typeparam>
     /// <typeparam name="TCollection">The type of the inner collection.</typeparam>
     /// <filterpriority>1</filterpriority>
-    internal class SetExtender<T, TCollection> : CollectionExtender<T, TCollection>, IImmutableSetSlim<T>, ISetEx<T>
+    internal class SetExtender<T, TCollection> : CollectionExtender<T, TCollection>
         where TCollection : IEnumerable<T>
     {
         private readonly IEqualityComparer<T> _comparer;

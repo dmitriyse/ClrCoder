@@ -17,7 +17,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         /// <inheritdoc/>
         public virtual ICollection<IIxProviderNodeConfig> Nodes { get; }
-            = new HashSet<IIxProviderNodeConfig>(new IxProviderNodeConfigComparer());
+            = new HashSet<IIxProviderNodeConfig>();
 
         /// <inheritdoc/>
         public virtual IIxVisibilityFilterConfig ImportFilter { get; set; }

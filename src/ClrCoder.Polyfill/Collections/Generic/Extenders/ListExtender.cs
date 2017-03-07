@@ -23,7 +23,6 @@ namespace System.Collections.Generic
     /// <filterpriority>1</filterpriority>
     [PublicAPI]
     internal class ListExtender<T, TCollection> : CollectionExtender<T, TCollection>,
-                                                  IImmutableListSlim<T>,
                                                   IListEx<T>
         where TCollection : IEnumerable<T>
     {
@@ -73,14 +72,6 @@ namespace System.Collections.Generic
                 VerifyIsModifiable();
 
                 ((IList<T>)InnerCollection)[index] = value;
-            }
-        }
-
-        T IImmutableListSlim<T>.this[int index]
-        {
-            get
-            {
-                return this[index];
             }
         }
 

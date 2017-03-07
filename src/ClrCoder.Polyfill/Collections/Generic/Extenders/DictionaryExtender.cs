@@ -25,8 +25,7 @@ namespace System.Collections.Generic
     /// <filterpriority>1</filterpriority>
     internal class DictionaryExtender<TKey, TValue, TDictionary> :
         CollectionExtender<KeyValuePair<TKey, TValue>, TDictionary>,
-        IDictionaryEx<TKey, TValue>,
-        IImmutableDictionarySlim<TKey, TValue>
+        IDictionaryEx<TKey, TValue>
         where TDictionary : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         [CanBeNull]
@@ -158,10 +157,6 @@ namespace System.Collections.Generic
                 return _comparer;
             }
         }
-
-        IImmutableSetSlim<TKey> IImmutableDictionarySlim<TKey, TValue>.Keys => _keys.ToImmutable(true);
-
-        IImmutableCollection<TValue> IImmutableDictionarySlim<TKey, TValue>.Values => _values.ToImmutable(true);
 
         /// <inheritdoc/>
         [CanBeNull]
