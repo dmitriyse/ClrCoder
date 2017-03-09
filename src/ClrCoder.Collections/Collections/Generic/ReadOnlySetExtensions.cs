@@ -41,8 +41,29 @@ namespace System.Collections.Generic
         [CanBeNull]
         public static ISetEx<T> Extend<T>([CanBeNull] this ISet<T> set, IEqualityComparer<T> comparer = null)
         {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             return set == null ? null : new SetExWrapper<T>(set, comparer);
+        }
+
+        /// <summary>
+        /// Creates extended hash set from the specified enumeration and the specified comparer.
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the enumeration.</typeparam>
+        /// <param name="enumeration">The enumeration to create hash set from.</param>
+        /// <param name="comparer">Comparer for the new hash set.</param>
+        /// <returns>New hash set with items from the specifie enumeration.</returns>
+        public static HashSetEx<T> ToHashSetEx<T>(this IEnumerable<T> enumeration, IEqualityComparer<T> comparer = null)
+        {
+            if (enumeration == null)
+            {
+                throw new ArgumentNullException(nameof(enumeration));
+            }
+
+            if (comparer == null)
+            {
+                return new HashSetEx<T>(enumeration);
+            }
+
+            return new HashSetEx<T>(enumeration, comparer);
         }
     }
 }
