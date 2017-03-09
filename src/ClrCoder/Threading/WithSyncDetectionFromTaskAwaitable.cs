@@ -20,7 +20,7 @@ namespace ClrCoder.Threading
         private readonly Action<bool> _handleDetectionResult;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WithSyncDetectionFromTaskAwaitable"/> struct. 
+        /// Initializes a new instance of the <see cref="WithSyncDetectionFromTaskAwaitable"/> struct.
         /// </summary>
         /// <param name="awaiter">Original awaiter.</param>
         /// <param name="handleDetectionResult">Action that receives detection result.</param>

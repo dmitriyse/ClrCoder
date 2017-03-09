@@ -8,8 +8,6 @@ namespace ClrCoder.DomainModel.Impl
     using System;
     using System.Collections.Generic;
 
-    using Annotations;
-
     using JetBrains.Annotations;
 
     using Threading;

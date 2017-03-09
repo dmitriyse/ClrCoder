@@ -69,7 +69,7 @@ namespace ClrCoder.Logging.Std
             var jLogEntry = entry as JLogEntry;
             if (jLogEntry != null)
             {
-                var serializedJLogEntry = JsonConvert.SerializeObject(jLogEntry, LogEntriesSerializerSettings);
+                string serializedJLogEntry = JsonConvert.SerializeObject(jLogEntry, LogEntriesSerializerSettings);
                 var deserializedLogEntry = JsonConvert.DeserializeObject<LogEntry>(
                     serializedJLogEntry,
                     LogEntriesSerializerSettings);
@@ -95,6 +95,7 @@ namespace ClrCoder.Logging.Std
             if (logEntryString != null)
             {
 #if (DEBUG)
+
                 // Just to ensure that string is valid log entry.
                 JsonConvert.DeserializeObject<LogEntry>(logEntryString);
 #endif
@@ -104,14 +105,14 @@ namespace ClrCoder.Logging.Std
             var logEntry = entry as JLogEntry;
             if (logEntry != null)
             {
-                var serializedEntry = JsonConvert.SerializeObject(logEntry, LogEntriesSerializerSettings);
+                string serializedEntry = JsonConvert.SerializeObject(logEntry, LogEntriesSerializerSettings);
                 return serializedEntry;
             }
 
             var jLogEntry = entry as JObject;
             if (jLogEntry != null)
             {
-                var serializedEntry = jLogEntry.ToString(
+                string serializedEntry = jLogEntry.ToString(
                     LogEntriesSerializerSettings.Formatting,
                     LogEntriesSerializerSettings.Converters.ToArray());
                 return serializedEntry;

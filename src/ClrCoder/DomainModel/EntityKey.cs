@@ -7,8 +7,6 @@ namespace ClrCoder.DomainModel
 {
     using System;
 
-    using Annotations;
-
     using JetBrains.Annotations;
 
     /// <summary>

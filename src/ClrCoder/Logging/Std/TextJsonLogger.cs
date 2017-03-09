@@ -1,4 +1,4 @@
-﻿// <copyright file="StreamJsonLogger.cs" company="ClrCoder project">
+﻿// <copyright file="TextJsonLogger.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -16,7 +16,7 @@ namespace ClrCoder.Logging.Std
     /// <summary>
     /// Writes logs messages into text stream
     /// </summary>
-    public class TextJsonLogger: IJsonLogger
+    public class TextJsonLogger : IJsonLogger
     {
         [NotNull]
         private readonly Action<string> _writeAction;
@@ -36,6 +36,7 @@ namespace ClrCoder.Logging.Std
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
+
             if (writeAction == null)
             {
                 throw new ArgumentNullException(nameof(writeAction));
@@ -52,9 +53,9 @@ namespace ClrCoder.Logging.Std
         /// <inheritdoc/>
         public void Log(object entry)
         {
-            var logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
 
-            var dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
+            string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
             _writeAction($"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
         }

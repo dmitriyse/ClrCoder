@@ -8,6 +8,7 @@ namespace ClrCoder
     using System;
 
     using JetBrains.Annotations;
+
 #if NET46
     using System.Runtime.Serialization;
 #endif

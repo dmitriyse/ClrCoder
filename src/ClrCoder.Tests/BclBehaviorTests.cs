@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace ClrCoder.Tests
 {
     using System;
@@ -149,7 +150,7 @@ namespace ClrCoder.Tests
                         {
                             dirFullName = dirFullName + Path.DirectorySeparatorChar + new string('d', 1);
                             Directory.CreateDirectory(dirFullName);
-                            
+
                             if (dirFullName.Length > 32730)
                             {
                                 TestContext.WriteLine($"Path length={dirFullName.Length} is supported.");

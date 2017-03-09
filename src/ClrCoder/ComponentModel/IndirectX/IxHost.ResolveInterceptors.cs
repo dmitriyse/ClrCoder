@@ -7,7 +7,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -192,8 +191,10 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                         curInstance = curInstance.ParentInstance;
                                     }
-                                    
-                                    Critical.Assert(curInstance != null, "Instance of an appropriate provider should be found.");
+
+                                    Critical.Assert(
+                                        curInstance != null,
+                                        "Instance of an appropriate provider should be found.");
 
                                     return new IxInstanceTempLock(curInstance);
                                 }

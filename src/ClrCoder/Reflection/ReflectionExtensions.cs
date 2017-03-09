@@ -34,7 +34,7 @@ namespace ClrCoder
         /// <returns><c>Object</c> data member value.</returns>
         public static ReflectedClassDataMember<TObject> GetMember<TObject>(this TObject obj, string memberName)
         {
-            var type = typeof(TObject);
+            Type type = typeof(TObject);
             if (type.GetTypeInfo().IsClass)
             {
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
@@ -68,8 +68,8 @@ namespace ClrCoder
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            var type = obj.GetType();
-            var membersCache = GetDataMemberInfoesCache(type);
+            Type type = obj.GetType();
+            DataMemberInfoesCacheEntry membersCache = GetDataMemberInfoesCache(type);
 
             return
                 membersCache.Fields.Values.Where(x => !x.Name.StartsWith("<") && !x.IsStatic)
@@ -121,7 +121,7 @@ namespace ClrCoder
         /// <param name="value">Value to set.</param>
         public static void SetMemberValue<TObject, TValue>(this TObject obj, string memberName, TValue value)
         {
-            var type = typeof(TObject);
+            Type type = typeof(TObject);
             if (typeof(TObject).GetTypeInfo().IsClass)
             {
                 // ReSharper disable once CompareNonConstrainedGenericWithNull
@@ -138,11 +138,11 @@ namespace ClrCoder
                 throw new ArgumentNullException(nameof(memberName));
             }
 
-            var setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
+            Action<TObject, TValue> setter = SetterCache<TObject, TValue>.Setters.GetOrAdd(
                 new ValueTuple<Type, string>(type, memberName),
                 typeAndName =>
                     {
-                        var cache = GetDataMemberInfoesCache(type);
+                        DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(type);
 
                         PropertyInfo propertyInfo;
                         if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))
@@ -221,7 +221,7 @@ namespace ClrCoder
             {
                 get
                 {
-                    var cache = GetDataMemberInfoesCache(_type);
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(_name, out propertyInfo))
@@ -251,7 +251,7 @@ namespace ClrCoder
             {
                 get
                 {
-                    var cache = GetDataMemberInfoesCache(_type);
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(_type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(_name, out propertyInfo))
@@ -276,7 +276,7 @@ namespace ClrCoder
             {
                 get
                 {
-                    var cache = GetDataMemberInfoesCache(this._type);
+                    DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(this._type);
 
                     PropertyInfo propertyInfo;
                     if (cache.Properties.TryGetValue(this._name, out propertyInfo))
@@ -301,13 +301,13 @@ namespace ClrCoder
             /// <returns>Value of the <c>object</c> member.</returns>
             public TValue Value<TValue>()
             {
-                var typeLocal = this._type;
-                var getter =
+                Type typeLocal = this._type;
+                Func<TObject, TValue> getter =
                     GetterCache<TObject, TValue>.Getters.GetOrAdd(
                         new ValueTuple<Type, string>(typeLocal, this._name),
                         typeAndName =>
                             {
-                                var cache = GetDataMemberInfoesCache(typeLocal);
+                                DataMemberInfoesCacheEntry cache = GetDataMemberInfoesCache(typeLocal);
 
                                 PropertyInfo propertyInfo;
                                 if (cache.Properties.TryGetValue(typeAndName.Item2, out propertyInfo))

@@ -123,7 +123,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                 parentInstance,
                 context);
 
-            Critical.Assert(halfInstantiatedInstance.Object != null, "Factory should initialize Object property of an instance.");
+            Critical.Assert(
+                halfInstantiatedInstance.Object != null,
+                "Factory should initialize Object property of an instance.");
 
             // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
             // ReSharper disable once ObjectCreationAsStatement

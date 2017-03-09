@@ -86,7 +86,7 @@ namespace ClrCoder.Threading
                     tasksToWaitCopy = _tasksToWait.ToArray();
                 }
 
-                var task = await Task.WhenAny(tasksToWaitCopy);
+                Task task = await Task.WhenAny(tasksToWaitCopy);
                 lock (_tasksToWait)
                 {
                     _tasksToWait.Remove(task);

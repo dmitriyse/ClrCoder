@@ -155,7 +155,7 @@ namespace ClrCoder.Logic
                 newIntervalStartIndex = 0;
             }
 
-            var nextPartIndex = _parts.Count;
+            int nextPartIndex = _parts.Count;
             for (; i < _parts.Count; i++)
             {
                 if (EndBoundaryComparer.Compare(interval.EndExclusive, _parts[i].Start) < 0)
@@ -203,8 +203,8 @@ namespace ClrCoder.Logic
         /// <returns>Index of the interval that contains specified <c>point</c>.</returns>
         private int FindIntervalIndex(int startIndex, T? point)
         {
-            var comparer = Comparer<T?>.Default;
-            for (var i = startIndex; i < _parts.Count; i++)
+            Comparer<T?> comparer = Comparer<T?>.Default;
+            for (int i = startIndex; i < _parts.Count; i++)
             {
                 if (comparer.Compare(_parts[i].Start, point) >= 0)
                 {
@@ -222,7 +222,7 @@ namespace ClrCoder.Logic
 
         private void VerifyIsValid()
         {
-            var comparer = Comparer<T?>.Default;
+            Comparer<T?> comparer = Comparer<T?>.Default;
             for (var i = 0; i < _parts.Count; i++)
             {
                 if (_parts[i].IsEmpty)

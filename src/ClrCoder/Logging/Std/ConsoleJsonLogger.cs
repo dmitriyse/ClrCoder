@@ -46,10 +46,10 @@ namespace ClrCoder.Logging.Std
         /// <inheritdoc/>
         public void Log(object entry)
         {
-            var logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
 
-            var dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
-            var colorBackup = Console.ForegroundColor;
+            string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
+            ConsoleColor colorBackup = Console.ForegroundColor;
             try
             {
                 switch (logEntry.Severity)
@@ -81,11 +81,12 @@ namespace ClrCoder.Logging.Std
                     $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
                 if (logEntry.Exception != null)
                 {
-                    string baseIntent = "  |";
+                    var baseIntent = "  |";
                     Console.Write(baseIntent);
-                    Console.WriteLine("------------------------------------- Exception ---------------------------------------");
+                    Console.WriteLine(
+                        "------------------------------------- Exception ---------------------------------------");
                     string intent = string.Empty;
-                    var curException = logEntry.Exception;
+                    ExceptionDto curException = logEntry.Exception;
                     do
                     {
                         Console.Write(baseIntent);
@@ -95,14 +96,15 @@ namespace ClrCoder.Logging.Std
                             Console.Write("<--");
                         }
 
-                        var name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
+                        string name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
                         Console.WriteLine($"{name}: {curException.Message}");
                         curException = curException.InnerException;
                         intent += "    ";
                     }
-                    while(curException != null);
+                    while (curException != null);
                     Console.Write(baseIntent);
-                    Console.WriteLine("---------------------------------------------------------------------------------------");
+                    Console.WriteLine(
+                        "---------------------------------------------------------------------------------------");
                 }
             }
             finally

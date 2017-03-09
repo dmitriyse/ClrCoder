@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Net.Http
 {
+    using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ namespace ClrCoder.Net.Http
         public static async Task<HttpRequestMessage> Clone(this HttpRequestMessage message)
         {
             var newMessage = new HttpRequestMessage(message.Method, message.RequestUri);
-            foreach (var header in message.Headers)
+            foreach (KeyValuePair<string, IEnumerable<string>> header in message.Headers)
             {
                 newMessage.Headers.Add(header.Key, header.Value);
             }
@@ -34,7 +35,7 @@ namespace ClrCoder.Net.Http
                 newMessage.Content = await message.Content.Clone();
             }
 
-            foreach (var property in message.Properties)
+            foreach (KeyValuePair<string, object> property in message.Properties)
             {
                 newMessage.Properties.Add(property.Key, property.Value);
             }
@@ -50,7 +51,7 @@ namespace ClrCoder.Net.Http
         public static async Task<HttpContent> Clone(this HttpContent content)
         {
             var clonedContent = new ByteArrayContent(await content.ReadAsByteArrayAsync());
-            foreach (var httpContentHeader in content.Headers)
+            foreach (KeyValuePair<string, IEnumerable<string>> httpContentHeader in content.Headers)
             {
                 clonedContent.Headers.Add(httpContentHeader.Key, httpContentHeader.Value);
             }

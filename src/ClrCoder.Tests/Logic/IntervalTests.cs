@@ -31,7 +31,7 @@ namespace ClrCoder.Tests.Logic
         {
             var original =
                 new Interval<double>(Math.PI, 10);
-            var serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSettings);
+            string serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSettings);
             TestContext.WriteLine(serialized);
 
             var deserialized = JsonConvert.DeserializeObject<Interval<double>>(serialized);
@@ -79,8 +79,8 @@ namespace ClrCoder.Tests.Logic
         [TestCase("", "6-", "6-")]
         public void UnionTest(string originalStateString, string intervalString, string expectedNewState)
         {
-            var multiInterval = ParseMultiInterval(originalStateString);
-            var interval = ParseInterval(intervalString);
+            MultiInterval<int> multiInterval = ParseMultiInterval(originalStateString);
+            Interval<int> interval = ParseInterval(intervalString);
             multiInterval.Union(interval);
             MultiIntervalToString(multiInterval).Should().Be(expectedNewState);
         }
@@ -88,7 +88,7 @@ namespace ClrCoder.Tests.Logic
         private string MultiIntervalToString(MultiInterval<int> multiInterval)
         {
             StringBuilder sb = null;
-            foreach (var interval in multiInterval)
+            foreach (Interval<int> interval in multiInterval)
             {
                 if (sb == null)
                 {
@@ -117,7 +117,7 @@ namespace ClrCoder.Tests.Logic
 
         private Interval<int> ParseInterval(string intervalString)
         {
-            var startEnd = intervalString.Split('-');
+            string[] startEnd = intervalString.Split('-');
             return new Interval<int>(ParseInt(startEnd[0]), ParseInt(startEnd[1]));
         }
 

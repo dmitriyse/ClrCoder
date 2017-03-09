@@ -38,7 +38,7 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            var serializedEntry = LoggerUtils.NormalizeToString(entry);
+            string serializedEntry = LoggerUtils.NormalizeToString(entry);
             _innerLogger.Log(serializedEntry);
         }
     }

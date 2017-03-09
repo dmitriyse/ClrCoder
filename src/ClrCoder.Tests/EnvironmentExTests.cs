@@ -23,7 +23,7 @@ namespace ClrCoder.Tests
         [Test]
         public void GetFileSystemRootPath()
         {
-            var fileSystemRoot = EnvironmentEx.GetFileSystemRoot();
+            string fileSystemRoot = EnvironmentEx.GetFileSystemRoot();
             TestContext.WriteLine(fileSystemRoot);
 
             fileSystemRoot.Should().Be(Path.GetFullPath(fileSystemRoot));

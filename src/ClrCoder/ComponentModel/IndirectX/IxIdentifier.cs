@@ -113,7 +113,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public override string ToString()
         {
-            var result = Type.Name;
+            string result = Type.Name;
             if (!string.IsNullOrWhiteSpace(Name))
             {
                 result += "|" + Name;

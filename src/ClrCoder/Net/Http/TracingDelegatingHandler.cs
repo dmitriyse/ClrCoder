@@ -48,7 +48,7 @@ namespace ClrCoder.Net.Http
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
 
             // Allows to load
             string requestBody = null;
@@ -68,7 +68,7 @@ namespace ClrCoder.Net.Http
 
             try
             {
-                var response = await base.SendAsync(request, cancellationToken);
+                HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
                 string responseBody = null;
                 try
                 {
@@ -80,7 +80,7 @@ namespace ClrCoder.Net.Http
                     // Mute error.
                 }
 
-                var duration = DateTime.UtcNow - startTime;
+                TimeSpan duration = DateTime.UtcNow - startTime;
                 try
                 {
                     this.OnMessageProcessed(
@@ -102,7 +102,7 @@ namespace ClrCoder.Net.Http
             }
             catch (Exception ex)
             {
-                var duration = DateTime.UtcNow - startTime;
+                TimeSpan duration = DateTime.UtcNow - startTime;
                 try
                 {
                     this.OnMessageProcessed(

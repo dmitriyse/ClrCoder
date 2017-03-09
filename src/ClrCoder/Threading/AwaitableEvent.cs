@@ -31,7 +31,7 @@ namespace ClrCoder.Threading
         private bool _actualCancellationRequested;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AwaitableEvent"/> class. 
+        /// Initializes a new instance of the <see cref="AwaitableEvent"/> class.
         /// </summary>
         public AwaitableEvent()
         {

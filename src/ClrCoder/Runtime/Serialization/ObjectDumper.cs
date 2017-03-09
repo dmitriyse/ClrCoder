@@ -51,7 +51,8 @@ namespace ClrCoder.Runtime.Serialization
         /// <summary>
         /// Minimal filter for object type. Required for known target work.
         /// </summary>
-        public static DumpObjectFilterDelegate DefaultObjectFilter { get; } = (maxType, dump, target, dumper) => dump ?? target;
+        public static DumpObjectFilterDelegate DefaultObjectFilter { get; } =
+            (maxType, dump, target, dumper) => dump ?? target;
 
         /// <inheritdoc/>
         public object Filter(Type type, object dump, object target)
@@ -89,7 +90,6 @@ namespace ClrCoder.Runtime.Serialization
                     }
                 }
 
-
                 Type typeToFilter = type;
 
                 DumpObjectFilterDelegate filterToCall;
@@ -114,7 +114,7 @@ namespace ClrCoder.Runtime.Serialization
                 object knownDump;
                 if (_knownTargets.TryGetValue(target, out knownDump))
                 {
-                    if (dump!= null && !ReferenceEquals(knownDump, dump))
+                    if (dump != null && !ReferenceEquals(knownDump, dump))
                     {
                         throw new InvalidOperationException("Filter should not change dump instance.");
                     }

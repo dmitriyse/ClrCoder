@@ -232,8 +232,8 @@ namespace ClrCoder.Collections
                     throw new ArgumentException("Target array size is not enough to copy collection.");
                 }
 
-                var index = arrayIndex;
-                foreach (var entry in this._entries)
+                int index = arrayIndex;
+                foreach (KeyValuePair<TKey, Entry> entry in this._entries)
                 {
                     array[index] = new KeyValuePair<TKey, TValue>(entry.Key, entry.Value.Value);
                     index++;
@@ -316,7 +316,7 @@ namespace ClrCoder.Collections
                 lock (this._entries)
                 {
                     Entry entry;
-                    var result = this._entries.TryGetValue(key, out entry);
+                    bool result = this._entries.TryGetValue(key, out entry);
                     value = result ? entry.Value : default(TValue);
                     this._entries.Remove(key);
                     return result;
@@ -430,7 +430,7 @@ namespace ClrCoder.Collections
                 lock (this._entries)
                 {
                     Entry entry;
-                    var result = this._entries.TryGetValue(key, out entry);
+                    bool result = this._entries.TryGetValue(key, out entry);
                     value = result ? entry.Value : default(TValue);
 
                     return result;

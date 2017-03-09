@@ -111,7 +111,7 @@ namespace ClrCoder.Collections
         }
 
         /// <inheritdoc/>
-        public void CopyTo([NotNull]T[] array, int arrayIndex)
+        public void CopyTo([NotNull] T[] array, int arrayIndex)
         {
             if (_processAction != null)
             {
@@ -243,7 +243,8 @@ namespace ClrCoder.Collections
         }
 
         /// <summary>
-        /// Performs operation on all items. It can process the same item multiple times if it was processed, removed and than added.
+        /// Performs operation on all items. It can process the same item multiple times if it was processed, removed and than
+        /// added.
         /// </summary>
         /// <param name="action">Operation on item. This operation can remove some items or add another.</param>
         public void ForEach(Action<T> action)
@@ -265,9 +266,11 @@ namespace ClrCoder.Collections
             {
                 while (_inner.Any())
                 {
-                    var itemToProcess = _inner.First();
-                   
-                    Debug.Assert(_processAction != null, "_processAction should be not null while ForEachMethod not exited.");
+                    T itemToProcess = _inner.First();
+
+                    Debug.Assert(
+                        _processAction != null,
+                        "_processAction should be not null while ForEachMethod not exited.");
                     _inner.Remove(itemToProcess);
                     Debug.Assert(_processed != null, "_processed should be not null while ForEachMethod not exited.");
                     _processed.Add(itemToProcess);

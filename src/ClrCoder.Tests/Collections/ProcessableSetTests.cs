@@ -27,9 +27,11 @@ namespace ClrCoder.Tests.Collections
         [Test]
         public void StressTest()
         {
-            var originalList = Enumerable.Range(0, 10000).Select(x => new Dummy()).ToList();
+            List<Dummy> originalList = Enumerable.Range(0, 10000).Select(x => new Dummy()).ToList();
             var rnd = new Random(0);
-            var checkHashSet = new HashSet<Dummy>(rnd.RandomUniqueSet(0, originalList.Count, originalList.Count/2).Select(x=>originalList[x]));
+            var checkHashSet =
+                new HashSet<Dummy>(
+                    rnd.RandomUniqueSet(0, originalList.Count, originalList.Count / 2).Select(x => originalList[x]));
             var setToTest = new ProcessableSet<Dummy>();
             foreach (Dummy dummy in checkHashSet)
             {
@@ -42,7 +44,7 @@ namespace ClrCoder.Tests.Collections
                         if (rnd.NextDouble() < 0.3)
                         {
                             int itemIndex = rnd.Next(0, originalList.Count);
-                            var testItem = originalList[itemIndex];
+                            Dummy testItem = originalList[itemIndex];
                             bool goodResult;
                             bool testResult;
                             if (rnd.NextBool())
@@ -58,8 +60,8 @@ namespace ClrCoder.Tests.Collections
                                 testResult.Should().Be(goodResult, "Remove operation wrong.");
                                 if (testResult)
                                 {
-                                    //Forgetting that processed, if it was removed.
-                                    testItem.ProcessedCount = 0; 
+                                    // Forgetting that processed, if it was removed.
+                                    testItem.ProcessedCount = 0;
                                 }
                             }
                         }

@@ -28,10 +28,10 @@ namespace ClrCoder.Tests
             var str = "tst";
             var testSize = 10000000;
 
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < testSize; i++)
             {
-                var tstStr = GetStringByAnonymousFunc(str);
+                string tstStr = GetStringByAnonymousFunc(str);
                 if (tstStr.Length != 3)
                 {
                     break;
@@ -52,11 +52,34 @@ namespace ClrCoder.Tests
             var testSize = 10000000;
             TestContext.Out.WriteLine(GetExpressionName(() => str));
 
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < testSize; i++)
             {
-                var name = GetExpressionName(() => str);
+                string name = GetExpressionName(() => str);
                 if (name.Length != 3)
+                {
+                    break;
+                }
+            }
+
+            stopwatch.Stop();
+            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
+        }
+
+        /// <summary>
+        /// Tests benchmark of the <see cref="Thread.ManagedThreadId"/> method.
+        /// </summary>
+        /// <remarks>~400 millions per second.</remarks>
+        [Test]
+        public void GetThreadId()
+        {
+            var testSize = 10000000;
+            int original = Thread.CurrentThread.ManagedThreadId;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            for (var i = 0; i < testSize; i++)
+            {
+                if (original != Thread.CurrentThread.ManagedThreadId)
                 {
                     break;
                 }
@@ -75,11 +98,11 @@ namespace ClrCoder.Tests
             var str = "tst";
             var testSize = 10000;
 
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < testSize; i++)
             {
                 Expression<Func<string>> labmda = () => str;
-                var tstStr = labmda.Compile()();
+                string tstStr = labmda.Compile()();
                 if (tstStr.Length != 3)
                 {
                     break;
@@ -100,35 +123,12 @@ namespace ClrCoder.Tests
             var obj = new object();
 
             var testSize = 10000000;
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (var i = 0; i < testSize; i++)
             {
                 if (new object().GetHashCode() == 42)
                 {
                     i++;
-                }
-            }
-
-            stopwatch.Stop();
-            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
-        }
-
-        /// <summary>
-        /// Tests benchmark of the <see cref="Thread.ManagedThreadId"/> method.
-        /// </summary>
-        /// <remarks>~400 millions per second.</remarks>
-        [Test]
-        public void GetThreadId()
-        {
-            var testSize = 10000000;
-            var original = Thread.CurrentThread.ManagedThreadId;
-            var stopwatch = Stopwatch.StartNew();
-
-            for (var i = 0; i < testSize; i++)
-            {
-                if (original != Thread.CurrentThread.ManagedThreadId)
-                {
-                    break;
                 }
             }
 

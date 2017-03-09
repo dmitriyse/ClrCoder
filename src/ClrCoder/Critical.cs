@@ -5,13 +5,13 @@
 
 namespace ClrCoder
 {
-    using System;
 #if DEBUG
+    using System;
     using System.Diagnostics;
-#endif
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
+#endif
 
     /// <summary>
     /// Utilities for handling critical application problems.
@@ -54,8 +54,7 @@ namespace ClrCoder
         [AssertionMethod]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Assert(
-            [AssertionCondition(AssertionConditionType.IS_TRUE)]
-            bool condition,
+            [AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition,
             string message,
             string detailMessage = null,
             [CallerFilePath] string fileName = null,

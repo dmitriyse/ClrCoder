@@ -17,8 +17,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using MoreLinq;
 
-    using NodaTime.TimeZones;
-
     using ObjectModel;
 
     using Threading;
@@ -135,7 +133,6 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       ExportToParentFilter = cfgContract.ExportToParentFilter,
                                       ImportFilter = cfgContract.ImportFilter
                                   };
-
                     }
 
                     // TODO: Write test on this feature.
@@ -144,7 +141,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                         var basicIdentificationConfig = nodeConfig as IIxBasicIdentificationConfig;
                         if (basicIdentificationConfig.ContractType != null)
                         {
-                            cfg.Identifier = new IxIdentifier(basicIdentificationConfig.ContractType, basicIdentificationConfig.Name);
+                            cfg.Identifier = new IxIdentifier(
+                                basicIdentificationConfig.ContractType,
+                                basicIdentificationConfig.Name);
                         }
                     }
 
@@ -240,7 +239,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         }
 
                         // TODO: Add tests for this feature
-                        var requireAttributes = constructorInfo.GetCustomAttributes<RequireAttribute>().ToList();
+                        List<RequireAttribute> requireAttributes =
+                            constructorInfo.GetCustomAttributes<RequireAttribute>().ToList();
                         foreach (RequireAttribute requireAttribute in requireAttributes)
                         {
                             if (!dependencies.Add(new IxIdentifier(requireAttribute.Type)))
@@ -270,7 +270,6 @@ namespace ClrCoder.ComponentModel.IndirectX
                                             Critical.Assert(
                                                 instanceObj != null,
                                                 "Constructor call through reflection should not return null.");
-
 
                                             lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
                                             {

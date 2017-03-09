@@ -77,11 +77,11 @@ namespace ClrCoder.Tests.Threading
         [Test]
         public async Task WithAsyncDetectionTest()
         {
-            bool isTaskDelayAsync = false;
-            await Task.Delay(100).WithSyncDetection(isSync=>isTaskDelayAsync = isSync);
+            var isTaskDelayAsync = false;
+            await Task.Delay(100).WithSyncDetection(isSync => isTaskDelayAsync = isSync);
             isTaskDelayAsync.Should().BeFalse();
 
-            bool isCompleteTaskWaitAsync = false;
+            var isCompleteTaskWaitAsync = false;
             await Task.CompletedTask.WithSyncDetection(isSync => isCompleteTaskWaitAsync = isSync);
             isCompleteTaskWaitAsync.Should().BeTrue();
         }

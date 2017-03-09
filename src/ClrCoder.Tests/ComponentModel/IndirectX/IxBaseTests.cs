@@ -28,7 +28,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task EmptyHostCycle()
         {
             await (await new IxHostBuilder()
-                .Build())
+                       .Build())
                 .AsyncUsing(host => Task.CompletedTask);
         }
 
@@ -40,7 +40,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task Host_should_be_resolved_by_interface()
         {
             await (await new IxHostBuilder()
-                .Build())
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {
@@ -59,16 +59,17 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         public async Task Self_registered_should_be_resolved()
         {
             await (await new IxHostBuilder()
-                .Configure(
-                    rootNodes =>
-                        rootNodes
-                            .Add<Dummy>(
-                                factory: new IxClassInstanceBuilderConfig<Dummy>(),
-                                nodes:
-                                nodes =>
-                                    nodes.Add<string>(factory: new IxExistingInstanceFactoryConfig<string>("Test me!")))
-                )
-                .Build())
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<Dummy>(
+                                       factory: new IxClassInstanceBuilderConfig<Dummy>(),
+                                       nodes:
+                                       nodes =>
+                                           nodes.Add<string>(
+                                               factory: new IxExistingInstanceFactoryConfig<string>("Test me!")))
+                       )
+                       .Build())
                 .AsyncUsing(
                     async host =>
                         {

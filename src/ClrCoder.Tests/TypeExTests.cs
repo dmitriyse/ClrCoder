@@ -5,6 +5,8 @@
 
 namespace ClrCoder.Tests
 {
+    using System;
+
     using FluentAssertions;
 
     using NUnit.Framework;
@@ -23,8 +25,8 @@ namespace ClrCoder.Tests
         [Test]
         public void CreateConstructorDelegateClass()
         {
-            var objConstructor = TypeEx<object>.CreateConstructorDelegate();
-            var obj = objConstructor.Invoke();
+            Func<object> objConstructor = TypeEx<object>.CreateConstructorDelegate();
+            object obj = objConstructor.Invoke();
 
             obj.Should().NotBeNull();
         }

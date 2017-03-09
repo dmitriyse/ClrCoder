@@ -213,7 +213,7 @@ namespace ClrCoder.DomainModel.Impl.InMemory
                     }
                     else
                     {
-                        var clone = kvp.Value.Clone();
+                        TEntity clone = kvp.Value.Clone();
                         _localData.Add(
                             kvp.Key,
                             new InMemoryStorageRepositoryEntry<TKey, TEntity>(clone)

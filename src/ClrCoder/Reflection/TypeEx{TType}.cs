@@ -27,9 +27,9 @@ namespace ClrCoder.Reflection
         /// <returns>Type constructor delegate.</returns>
         public static Func<TType> CreateConstructorDelegate()
         {
-            var type = typeof(TType);
+            Type type = typeof(TType);
 
-            var ci =
+            ConstructorInfo ci =
                 type.GetTypeInfo()
                     .DeclaredConstructors.Where(x => !x.GetParameters().Any() && !x.IsStatic)
                     .OrderBy(x => x.IsPublic ? 0 : 1)
@@ -39,7 +39,7 @@ namespace ClrCoder.Reflection
                 throw new InvalidOperationException("Type does not have parameterless instance constructor.");
             }
 
-            var body = Expression.New(ci);
+            NewExpression body = Expression.New(ci);
             return Expression.Lambda<Func<TType>>(body).Compile();
         }
     }

@@ -39,7 +39,7 @@ namespace ClrCoder.Threading
         /// <returns>Lock token, use <see cref="IDisposable.Dispose"/> to release lock.</returns>
         public ILockToken Lock(T key)
         {
-            var tokenIndex = key.GetHashCode() & 0xFFF;
+            int tokenIndex = key.GetHashCode() & 0xFFF;
             Monitor.Enter(this._tokens[tokenIndex]);
             return this._tokens[tokenIndex];
         }

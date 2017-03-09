@@ -61,7 +61,7 @@ namespace ClrCoder
                                            TypeNameHandling = serializer.TypeNameHandling
                                        };
 
-            foreach (var converter in serializer.Converters)
+            foreach (JsonConverter converter in serializer.Converters)
             {
                 clonedSerializer.Converters.Add(converter);
             }

@@ -16,8 +16,6 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Annotations;
-
     using DomainModel.InMemory;
 
     using JetBrains.Annotations;
@@ -71,7 +69,6 @@ namespace ClrCoder.DomainModel.Impl.InMemory
 
             persistence.UnitOfWorkOpened += UnitOfWorkOpened;
         }
-
 
         /// <inheritdoc/>
         [CanBeNull]

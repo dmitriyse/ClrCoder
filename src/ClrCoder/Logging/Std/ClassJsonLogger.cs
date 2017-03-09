@@ -39,7 +39,7 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            var logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
 
             logEntry.DotNetType = TypeName;
 

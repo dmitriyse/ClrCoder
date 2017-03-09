@@ -43,14 +43,14 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public void OnCompleted([NotNull]Action continuation)
+        public void OnCompleted([NotNull] Action continuation)
         {
             // ReSharper disable once ImpureMethodCallOnReadonlyValueField
             _awaiter.OnCompleted(continuation);
         }
 
         /// <inheritdoc/>
-        public void UnsafeOnCompleted([NotNull]Action continuation)
+        public void UnsafeOnCompleted([NotNull] Action continuation)
         {
             // ReSharper disable once ImpureMethodCallOnReadonlyValueField
             _awaiter.UnsafeOnCompleted(continuation);

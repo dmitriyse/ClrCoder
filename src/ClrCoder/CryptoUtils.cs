@@ -38,7 +38,7 @@ namespace ClrCoder
                 _md5Variables = new Md5HashTheadVariables();
             }
 
-            var strBytes = EncodingEx.UnicodeNoBom.GetBytes(str);
+            byte[] strBytes = EncodingEx.UnicodeNoBom.GetBytes(str);
             return new Guid(_md5Variables.Md5.ComputeHash(strBytes));
         }
 

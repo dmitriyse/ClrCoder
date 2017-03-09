@@ -11,7 +11,8 @@ namespace ClrCoder.DomainModel
     public interface IPersistenceImpl
     {
         /// <summary>
-        /// Opens Unit of Work. TODO: Add debug information on UoW open, when Persistence on Disposing should check that all UoW finalized.
+        /// Opens Unit of Work. TODO: Add debug information on UoW open, when Persistence on Disposing should check that all UoW
+        /// finalized.
         /// </summary>
         /// <returns>New Unit of work.</returns>
         IUnitOfWorkImpl OpenUnitOfWork();

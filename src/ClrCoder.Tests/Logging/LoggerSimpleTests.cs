@@ -44,7 +44,7 @@ namespace ClrCoder.Tests.Logging
                                                               { "Prop", "Str value" }
                                                           }
                                   };
-            var serializedLogEntry = JsonConvert.SerializeObject(
+            string serializedLogEntry = JsonConvert.SerializeObject(
                 tstLogEntry,
                 Formatting.Indented,
                 LoggerUtils.LogEntriesSerializerSettings);

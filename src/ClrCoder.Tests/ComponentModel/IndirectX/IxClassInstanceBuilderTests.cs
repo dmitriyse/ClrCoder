@@ -170,9 +170,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                 consumerImpl.Should().NotBeNull();
                                 consumerImpl.Dummy.Should().NotBeNull();
                             }
+
                             using (IxLock<IDummyContract> impl = await host.Resolver.Get<IDummyContract>())
                             {
-                                var i = impl.Target;
+                                IDummyContract i = impl.Target;
                                 i.Should().NotBeNull();
                             }
                         });
@@ -221,19 +222,25 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         }
 
         [ProvideConfig]
-        private class DummyImplementationConfig: IxStdProviderConfig, IIxStdProviderConfig, IIxBasicIdentificationConfig
+        private class DummyImplementationConfig : IxStdProviderConfig,
+                                                  IIxStdProviderConfig,
+                                                  IIxBasicIdentificationConfig
         {
             Type IIxBasicIdentificationConfig.ContractType { get; } = typeof(IDummyContract);
 
-            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } = new IxClassInstanceBuilderConfig<DummyImplementation>();
+            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } =
+                new IxClassInstanceBuilderConfig<DummyImplementation>();
         }
 
         [ProvideConfig]
-        private class DummyContractConsumerConfig: IxStdProviderConfig, IIxStdProviderConfig, IIxBasicIdentificationConfig
+        private class DummyContractConsumerConfig : IxStdProviderConfig,
+                                                    IIxStdProviderConfig,
+                                                    IIxBasicIdentificationConfig
         {
-            Type IIxBasicIdentificationConfig.ContractType { get; }= typeof(IDummyConsumer);
+            Type IIxBasicIdentificationConfig.ContractType { get; } = typeof(IDummyConsumer);
 
-            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } = new IxClassInstanceBuilderConfig<DummyContractConsumer>();
+            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } =
+                new IxClassInstanceBuilderConfig<DummyContractConsumer>();
         }
 
         private class DummyContractConsumer : IDummyConsumer

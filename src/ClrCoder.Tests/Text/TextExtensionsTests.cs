@@ -33,7 +33,7 @@ namespace ClrCoder.Tests.Text
         [TestCase("\r\r\na\r\n\r", "\r\n\r\na\r\n\r\n")]
         public void NormalizeLineEndingsTest(string str, string normalizedStr)
         {
-            var platformDependentNormalizedStr = normalizedStr.Replace("\r\n", Environment.NewLine);
+            string platformDependentNormalizedStr = normalizedStr.Replace("\r\n", Environment.NewLine);
             str.NormalizeLineEndings().Should().Be(platformDependentNormalizedStr);
         }
 
@@ -64,7 +64,7 @@ namespace ClrCoder.Tests.Text
             CodeTimer.WarmUp();
 
             var sb = new StringBuilder();
-            var length = (1024 * 1024) / sizeof(char);
+            int length = (1024 * 1024) / sizeof(char);
             string[] words =
                 {
                     "Dummy", "\r", "\n", "\r\n", " ", "hello", "world", "this", "is", "text", "!",
@@ -77,10 +77,10 @@ namespace ClrCoder.Tests.Text
                 sb.Append(rnd.From(words));
             }
 
-            var oneMbString = sb.ToString();
+            string oneMbString = sb.ToString();
 
-            var timer = CodeTimer.Start();
-            var normalizedString = oneMbString.NormalizeLineEndings();
+            CodeTimer timer = CodeTimer.Start();
+            string normalizedString = oneMbString.NormalizeLineEndings();
             if (normalizedString.Length > 10)
             {
                 TestContext.Out.WriteLine("String normalization speed = {0:F2} Mb/s", 1.0 / timer.Time);

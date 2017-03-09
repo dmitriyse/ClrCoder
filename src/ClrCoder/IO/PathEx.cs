@@ -37,14 +37,14 @@ namespace ClrCoder.IO
                 return posixPath;
             }
 
-            var trimmedPath = posixPath.Trim();
+            string trimmedPath = posixPath.Trim();
             string resultPath;
 
             if (trimmedPath.StartsWith("/"))
             {
                 trimmedPath = trimmedPath.TrimStart('/');
 
-                var rootPath = Path.GetPathRoot(Path.GetFullPath(Directory.GetCurrentDirectory()));
+                string rootPath = Path.GetPathRoot(Path.GetFullPath(Directory.GetCurrentDirectory()));
 
                 resultPath = rootPath + trimmedPath.Replace("/", "\\");
             }

@@ -10,7 +10,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <summary>
     /// Allows to provide config.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class| AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class ProvideConfigAttribute : Attribute
     {
     }
