@@ -184,7 +184,7 @@ namespace ClrCoder.Validation
                 // ReSharper disable once ObjectCreationAsStatement
                 var uriObj = new Uri(uri, UriKind.Absolute);
 
-                if (uriObj.Scheme != "http" || uriObj.Scheme != "https")
+                if (uriObj.Scheme != "http" && uriObj.Scheme != "https")
                 {
                     throw new ArgumentException($"{name} should use http/https", name);
                 }
