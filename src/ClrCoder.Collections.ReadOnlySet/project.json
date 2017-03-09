@@ -1,4 +1,16 @@
 ﻿{
+
+  "packOptions": {
+    "summary": "IReadOnlySet implementaion with helpers to inject into current BCL.",
+    "projectUrl": "https://github.com/dmitriyse/ClrCoder/wiki/IReadOnlySet-and-injection-helpers",
+    "owners": [ "Dmitriy.se" ],
+    "releaseNotes": "Implements missing IReadOnlySet contract, along with:\nIReadableSet - full, but not contravariant version of IReadOnlySet\nHashSetEx - extended HashSet with new contracts implementation\nReadOnlyExtensions + wrappers - that helps to inject IReadOnlySet on current BCL.",
+    "licenseUrl": "https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Collections.ReadOnlySet/LICENSE.md",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/dmitriyse/ClrCoder"
+    }
+  },
   "version": "0.2.0-*",
 
   "dependencies": {
