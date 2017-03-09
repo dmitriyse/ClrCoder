@@ -1,7 +1,6 @@
 {
   "version": "0.1.1-*",
   "dependencies": {
-    "JetBrains.Annotations": "10.1.4",
     "NodaTime": "2.0.0-alpha20160707",
     "NodaTime.Serialization.JsonNet": "2.0.0-alpha20160707",
     "Newtonsoft.Json": "9.0.1",
@@ -14,7 +13,7 @@
     "System.Diagnostics.StackTrace": "4.0.1",
     "System.Collections.Immutable": "1.2.0",
     "System.Drawing.Primitives": "4.0.0",
-    "ClrCoder.Polyfill": "0.1.1-*"
+    "ClrCoder.Collections.Rich": "0.2.0-*"
   },
 
   "frameworks": {
@@ -33,7 +32,7 @@
     },
     "net46": {
       "dependencies": {
-      
+        "JetBrains.Annotations": "10.1.5"
       }
     }
   }

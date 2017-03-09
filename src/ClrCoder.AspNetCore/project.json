@@ -2,7 +2,6 @@
   "version": "0.1.1-*",
   "dependencies": {
     "ClrCoder": "0.1.1-*",
-    "JetBrains.Annotations": "10.1.4",
     "Microsoft.AspNetCore.Hosting.Abstractions": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0"
   },
