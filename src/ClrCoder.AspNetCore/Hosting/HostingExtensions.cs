@@ -23,6 +23,7 @@ namespace ClrCoder.AspNetCore.Hosting
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.ObjectPool;
     using Microsoft.Extensions.Options;
+    using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
     using Newtonsoft.Json;
 
@@ -130,22 +131,22 @@ namespace ClrCoder.AspNetCore.Hosting
             builder.ConfigureServices(
                 x =>
                     {
-                        x.AddMvcCore()
-                        .AddApplicationPart(typeof(TController).GetTypeInfo().Assembly)
-                        .ConfigureApplicationPartManager(
-                            m =>
-                                {
-                                    var controllerProviders =
-                                        m.FeatureProviders.Where(f => f is ControllerFeatureProvider).ToArray();
-                                    foreach (var controllerProvider in controllerProviders)
+                        x.AddMvc()
+                            .AddApplicationPart(typeof(TController).GetTypeInfo().Assembly)
+                            .ConfigureApplicationPartManager(
+                                m =>
                                     {
-                                        m.FeatureProviders.Remove(controllerProvider);
-                                    }
+                                        IApplicationFeatureProvider[] controllerProviders =
+                                            m.FeatureProviders.Where(f => f is ControllerFeatureProvider).ToArray();
+                                        foreach (IApplicationFeatureProvider controllerProvider in controllerProviders)
+                                        {
+                                            m.FeatureProviders.Remove(controllerProvider);
+                                        }
 
-                                    m.FeatureProviders.Add(
-                                        new SingleControllerProvider(
-                                            new HashSet<TypeInfo> { typeof(TController).GetTypeInfo() }));
-                                });
+                                        m.FeatureProviders.Add(
+                                            new SingleControllerProvider(
+                                                new HashSet<TypeInfo> { typeof(TController).GetTypeInfo() }));
+                                    });
                     });
             return builder;
         }

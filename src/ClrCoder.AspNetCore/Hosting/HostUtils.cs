@@ -43,6 +43,7 @@ namespace ClrCoder.AspNetCore.Hosting
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseOnlyController<TController>()
+                .ConfigureServices(services => services.AddMvc())
                 .Configure(
                     app => { app.UseMvc(); });
 
