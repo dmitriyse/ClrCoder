@@ -66,7 +66,14 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             Host = host;
             ParentNode = parentNode;
-            Identifier = config.Identifier;
+
+            if (config.Identifier == null)
+            {
+                // ReSharper disable once NotResolvedInText
+                throw new ArgumentNullException("config.Identifier");
+            }
+
+            Identifier = (IxIdentifier)config.Identifier;
             InstanceFactory = instanceFactory;
             ExportFilter = exportFilter;
             ExportToParentFilter = exportToParentFilter;

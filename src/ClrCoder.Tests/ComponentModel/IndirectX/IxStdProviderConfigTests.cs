@@ -56,7 +56,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [ProvideConfig]
         private class DummyConfig : IxStdProviderConfig, IIxStdProviderConfig
         {
-            IxIdentifier IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(Dummy), Name);
+            IxIdentifier? IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(Dummy), Name);
 
             IIxInstanceBuilderConfig IIxStdProviderConfig.Factory
                 => new IxClassInstanceBuilderConfig<Dummy>();

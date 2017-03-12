@@ -21,5 +21,13 @@ namespace System.Collections.Generic
     /// <typeparam name="T">The type of the elements in the collection.</typeparam>
     public interface ICollectionEx<T> : ICollection<T>, IReadOnlyCollection<T>
     {
+        /// <summary>
+        /// Gets the number of elements in the collection.
+        /// </summary>
+        /// <returns>The number of elements in the collection.</returns>
+        /// <remarks>
+        /// Both base contracts have this property, so we need to define another one to avoid "ambiguous error".
+        /// </remarks>
+        new int Count { get; }
     }
 }

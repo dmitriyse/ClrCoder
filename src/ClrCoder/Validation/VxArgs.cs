@@ -78,13 +78,25 @@ namespace ClrCoder.Validation
         }
 
         /// <summary>
+        /// Validates that the specified value not equals to the default value.
+        /// </summary>
+        /// <typeparam name="T">The type of the value to validate.</typeparam>
+        /// <param name="value">Value to validate.</param>
+        /// <param name="name">Argument <c>name</c>.</param>
+        public static void NotDefault<T>(T value, [InvokerParameterName] string name)
+            where T : struct
+        {
+            throw new ArgumentException(nameof(name), $"{name} cannot be equal to the default value.");
+        }
+
+        /// <summary>
         /// Validates that <c>collection</c> is not empty. Also validates items not <c>null</c> in debug mode.
         /// </summary>
         /// <typeparam name="T">Type of <c>collection</c> item.</typeparam>
         /// <param name="collection">Collection to validate.</param>
         /// <param name="name">Name of an argument.</param>
         [Pure]
-        public static void NotEmpty<T>(ICollection<T> collection, string name)
+        public static void NotEmpty<T>(ICollectionEx<T> collection, string name)
         {
             if (collection == null)
             {
@@ -145,6 +157,23 @@ namespace ClrCoder.Validation
         }
 
         /// <summary>
+        /// Validates that passed parameter value is not <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the value to validate.</typeparam>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="errorName">The parameter name.</param>
+        /// <exception cref="ArgumentNullException">Argument is null.</exception>
+        [ContractAnnotation("value:null=>halt")]
+        public static void NotNull<T>([CanBeNull] T value, string errorName)
+            where T : class
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(errorName));
+            }
+        }
+
+        /// <summary>
         /// Validates that Width and Height are both non zero positive.
         /// </summary>
         /// <param name="size">Size to validate.</param>
@@ -168,6 +197,18 @@ namespace ClrCoder.Validation
             {
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non-zero positive");
             }
+        }
+
+        /// <summary>
+        /// Validates that the specified value fits into TypeChoice. Validation success for <see langword="null"/> value.
+        /// </summary>
+        /// <typeparam name="T">The type of the value to validate.</typeparam>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="name">The parameter name.</param>
+        /// <returns>Fluent syntax to choice validation.</returns>
+        public static VxValidateTypeChoice<T> TypeChoice<T>([CanBeNull] T value, [InvokerParameterName] string name)
+        {
+            return new VxValidateTypeChoice<T>(value, name);
         }
 
         /// <summary>

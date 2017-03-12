@@ -136,7 +136,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     }
 
                     // TODO: Write test on this feature.
-                    if (cfgContract.Identifier == default(IxIdentifier) && nodeConfig is IIxBasicIdentificationConfig)
+                    if (cfgContract.Identifier == null && nodeConfig is IIxBasicIdentificationConfig)
                     {
                         var basicIdentificationConfig = nodeConfig as IIxBasicIdentificationConfig;
                         if (basicIdentificationConfig.ContractType != null)
@@ -375,7 +375,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                   };
                     }
 
-                    if (cfg.Identifier == default(IxIdentifier))
+                    if (cfg.Identifier == null)
                     {
                         cfg.Identifier = new IxIdentifier(typeof(IxScope));
                     }

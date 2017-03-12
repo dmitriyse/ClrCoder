@@ -18,7 +18,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <summary>
         /// Identifier in the parent scope.
         /// </summary>
-        IxIdentifier Identifier { get; }
+        IxIdentifier? Identifier { get; }
 
         /// <summary>
         /// Import filter. Controls which registrations of parent node are visible for current node.

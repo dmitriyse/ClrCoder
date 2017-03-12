@@ -15,7 +15,7 @@ namespace ClrCoder.AspNetCore
     [ProvideConfig]
     public class WebHostDeploymentConfig : IxStdProviderConfig, IIxStdProviderConfig
     {
-        IxIdentifier IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(IWebAppComponent), Name);
+        IxIdentifier? IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(IWebAppComponent), Name);
 
         IIxInstanceBuilderConfig IIxStdProviderConfig.Factory => new IxClassInstanceBuilderConfig<WebHostDeployment>();
 
