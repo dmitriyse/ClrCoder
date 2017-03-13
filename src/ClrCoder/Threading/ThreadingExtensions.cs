@@ -156,6 +156,27 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Overrides null task to awaitable task with default value.
+        /// </summary>
+        /// <typeparam name="T">The type of the task result.</typeparam>
+        /// <param name="task">Task that can be null.</param>
+        /// <returns>Always not null awaitable task.</returns>
+        public static Task<T> GetOrDefault<T>([CanBeNull] this Task<T> task)
+        {
+            return task ?? Task.FromResult(default(T));
+        }
+
+        /// <summary>
+        /// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
+        /// </summary>
+        /// <param name="task">Task that can be null.</param>
+        /// <returns>Always not null awaitable task.</returns>
+        public static Task GetOrDefault([CanBeNull] this Task task)
+        {
+            return task ?? Task.CompletedTask;
+        }
+
+        /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
         /// <typeparam name="TResult">Type of task.</typeparam>
