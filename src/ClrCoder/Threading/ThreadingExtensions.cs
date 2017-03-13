@@ -61,7 +61,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
                 throw;
             }
@@ -97,7 +97,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
 
                 throw;
@@ -134,7 +134,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
 
                 throw;

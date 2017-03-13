@@ -17,6 +17,7 @@ namespace ClrCoder.Annotations
         AttributeTargets.Class
         | AttributeTargets.Interface
         | AttributeTargets.Field
+        | AttributeTargets.Property
         | AttributeTargets.ReturnValue
         | AttributeTargets.Parameter)]
     public class NotEmptyAttribute : Attribute

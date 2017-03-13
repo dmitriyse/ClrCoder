@@ -12,7 +12,7 @@ namespace ClrCoder.DomainModel
     /// <summary>
     /// Unit of work abstraction.
     /// </summary>
-    public interface IUnitOfWork : IExceptionalAsyncDisposable
+    public interface IUnitOfWork : IAbortableAsyncDisposable
     {
         /// <summary>
         /// Use <c>this</c> method only if you want to access some entities after db commit.
