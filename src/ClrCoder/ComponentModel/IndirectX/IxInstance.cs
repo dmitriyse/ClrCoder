@@ -252,7 +252,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                     }
                 }
 
-                await SelfDispose();
+                // Here we possibly deinitializing half-initialized instance.
+                if (_object != null)
+                {
+                    // Only fully-initialized instance should be self-disposed.
+                    await SelfDispose();
+                }
 
                 UpdateSelfDisposeCompleteSuspendState();
 

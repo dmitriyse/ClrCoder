@@ -17,6 +17,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         object Object { get; set; }
 
+        [CanBeNull]
         IIxInstance ParentInstance { get; }
 
         IIxResolver Resolver { get; set; }
