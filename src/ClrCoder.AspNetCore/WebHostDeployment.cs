@@ -5,26 +5,39 @@
 
 namespace ClrCoder.AspNetCore
 {
-    using System;
+    using JetBrains.Annotations;
 
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
+
+    using Validation;
 
     /// <summary>
     /// Helps to controls WebHost urls.
     /// </summary>
+    [PublicAPI]
     public class WebHostDeployment : IWebAppComponent
     {
-        private WebHostDeployment(IWebHostBuilder webHostBuilder, WebHostDeploymentConfig config)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebHostDeployment"/> class.
+        /// </summary>
+        /// <param name="webHostBuilder">Web host builder to inject to.</param>
+        /// <param name="appConfig">Application configuration root.</param>
+        /// <param name="config">Deployment configuration.</param>
+        public WebHostDeployment(
+            IWebHostBuilder webHostBuilder,
+            IConfigurationRoot appConfig,
+            WebHostDeploymentConfig config)
         {
+            VxArgs.NotNull(webHostBuilder, nameof(webHostBuilder));
+            VxArgs.NotNull(appConfig, nameof(appConfig));
+            VxArgs.NotNull(config, nameof(config));
+
             string urls = null;
 
-            if (config.UrlsEnvironmentVariableName != null)
+            if (config.UrlsConfigKey != null)
             {
-                string urlsFromEnv = Environment.GetEnvironmentVariable(config.UrlsEnvironmentVariableName);
-                if (!string.IsNullOrWhiteSpace(urlsFromEnv))
-                {
-                    urls = urlsFromEnv.Trim();
-                }
+                urls = appConfig.GetValue<string>(config.UrlsConfigKey);
             }
 
             if (urls == null && config.DefaultUrls != null)

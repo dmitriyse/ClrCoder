@@ -23,7 +23,7 @@ namespace ClrCoder.AspNetCore
         /// Environment variable that can be used to <c>override</c> urls.
         /// </summary>
         [CanBeNull]
-        public string UrlsEnvironmentVariableName { get; set; }
+        public string UrlsConfigKey { get; set; }
 
         /// <summary>
         /// Default urls that should be used, when urls are not specified by any other means.
