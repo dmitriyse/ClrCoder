@@ -10,6 +10,7 @@ namespace ClrCoder.AspNetCore.Hosting
     using System;
     using System.IO;
     using System.Net;
+    using System.Threading.Tasks;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
@@ -32,7 +33,7 @@ namespace ClrCoder.AspNetCore.Hosting
         public static IWebHost HostController<TController>(
             string urls,
             Func<IWebHostBuilder, IWebHostBuilder> hostBuilderAction = null,
-            Action<Exception> exceptionHandler = null)
+            Func<Exception, Task> exceptionHandler = null)
         {
             if (urls == null)
             {
@@ -68,9 +69,11 @@ namespace ClrCoder.AspNetCore.Hosting
                                                                         var errorFeature = context
                                                                             .Features
                                                                             .Get<IExceptionHandlerFeature>();
+                                                                        
+                                                                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                                                                         if (errorFeature != null)
                                                                         {
-                                                                            exceptionHandler(errorFeature.Error);
+                                                                            await exceptionHandler(errorFeature.Error);
                                                                         }
                                                                     }
                                                                 }

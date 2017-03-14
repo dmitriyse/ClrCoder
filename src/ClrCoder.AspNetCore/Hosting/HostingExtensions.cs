@@ -5,25 +5,30 @@
 
 namespace ClrCoder.AspNetCore.Hosting
 {
-    using System.Linq;
     using JetBrains.Annotations;
 
 #if NET46 || NETSTANDARD1_6
     using System;
     using System.Buffers;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
     using System.Reflection;
+    using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
 
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ApplicationParts;
     using Microsoft.AspNetCore.Mvc.Controllers;
     using Microsoft.AspNetCore.Mvc.Formatters;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.ObjectPool;
     using Microsoft.Extensions.Options;
-    using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
     using Newtonsoft.Json;
 
@@ -149,6 +154,40 @@ namespace ClrCoder.AspNetCore.Hosting
                                     });
                     });
             return builder;
+        }
+
+        /// <summary>
+        /// Subscribes handler delegate on pipeline exceptions.
+        /// </summary>
+        /// <param name="app">Application builder.</param>
+        /// <param name="exceptionHandler">Exception handler delegate.</param>
+        /// <returns>Application builder fluent syntax continuation.</returns>
+        public static IApplicationBuilder UseDelegateExceptionHandler(
+            this IApplicationBuilder app,
+            Func<Exception, Task> exceptionHandler)
+        {
+            app.UseExceptionHandler(
+                new ExceptionHandlerOptions
+                    {
+                        ExceptionHandler =
+                            async context =>
+                                {
+                                    if (context.Response.StatusCode
+                                        == (int)HttpStatusCode.InternalServerError)
+                                    {
+                                        var errorFeature = context
+                                            .Features
+                                            .Get<IExceptionHandlerFeature>();
+
+                                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                                        if (errorFeature != null)
+                                        {
+                                            await exceptionHandler(errorFeature.Error);
+                                        }
+                                    }
+                                }
+                    });
+            return app;
         }
 
         private class SingleControllerProvider : ControllerFeatureProvider
