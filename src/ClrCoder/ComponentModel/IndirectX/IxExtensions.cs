@@ -51,7 +51,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// visible in parent node.
         /// </param>
         /// <param name="exportFilter">Export to children filter. Controls which registrations of <c>this</c> node.</param>
-        /// <param name="factory">Instance builder config. (Class constructor, existing instance, etc.).</param>
+        /// <param name="instanceBuilder">Instance builder config. (Class constructor, existing instance, etc.).</param>
         /// <param name="multiplicity">Multiplicity config. (Singleton, pool, <c>factory</c> etc.).</param>
         /// <param name="disposeHandler">Overrides dispose operation.</param>
         /// <param name="nodes">Action that build nested <c>nodes</c>.</param>
@@ -63,14 +63,14 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig importFilter = null,
             IIxVisibilityFilterConfig exportToParentFilter = null,
             IIxVisibilityFilterConfig exportFilter = null,
-            IIxInstanceBuilderConfig factory = null,
+            IIxInstanceBuilderConfig instanceBuilder = null,
             IIxMultiplicityConfig multiplicity = null,
             IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
         {
             var depNode = new IxStdProviderConfig
                               {
-                                  Factory = factory,
+                                  InstanceBuilder = instanceBuilder,
                                   Identifier = new IxIdentifier(typeof(TContract), name),
                                   ScopeBinding = scopeBinding,
                                   Multiplicity = multiplicity,

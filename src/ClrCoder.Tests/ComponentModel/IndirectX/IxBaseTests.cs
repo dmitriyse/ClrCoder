@@ -63,11 +63,11 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                            rootNodes =>
                                rootNodes
                                    .Add<Dummy>(
-                                       factory: new IxClassInstanceBuilderConfig<Dummy>(),
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<Dummy>(),
                                        nodes:
                                        nodes =>
                                            nodes.Add<string>(
-                                               factory: new IxExistingInstanceFactoryConfig<string>("Test me!")))
+                                               instanceBuilder: new IxExistingInstanceFactoryConfig<string>("Test me!")))
                        )
                        .Build())
                 .AsyncUsing(

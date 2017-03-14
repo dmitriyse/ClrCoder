@@ -106,7 +106,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    nodes: nodes =>
                                        {
                                            nodes.Add<DummyObject>(
-                                               factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               instanceBuilder: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                                                disposeHandler: obj => Task.CompletedTask);
                                        }))
                        .Build())
@@ -154,7 +154,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    nodes: nodes =>
                                        {
                                            nodes.Add<DummyObject>(
-                                               factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               instanceBuilder: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                                                disposeHandler: obj => Task.CompletedTask);
                                        }))
                        .Build())

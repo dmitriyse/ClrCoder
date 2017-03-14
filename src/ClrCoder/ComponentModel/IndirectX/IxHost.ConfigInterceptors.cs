@@ -126,7 +126,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                   {
                                       ScopeBinding = cfgContract.ScopeBinding,
                                       Identifier = cfgContract.Identifier,
-                                      Factory = cfgContract.Factory,
+                                      InstanceBuilder = cfgContract.InstanceBuilder,
                                       Multiplicity = cfgContract.Multiplicity,
                                       DisposeHandler = cfgContract.DisposeHandler,
                                       ExportFilter = cfgContract.ExportFilter,
@@ -154,7 +154,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         configProviderConfig = new IxStdProviderConfig
                                                    {
                                                        Identifier = new IxIdentifier(nodeConfig.GetType()),
-                                                       Factory = new IxExistingInstanceFactoryConfig<object>(nodeConfig),
+                                                       InstanceBuilder = new IxExistingInstanceFactoryConfig<object>(nodeConfig),
                                                    };
                     }
 
@@ -313,12 +313,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(nodeConfig, parentNode);
                     }
 
-                    if (cfg.Factory == null)
+                    if (cfg.InstanceBuilder == null)
                     {
                         throw new InvalidOperationException("Instance factory should be configured.");
                     }
 
-                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.Factory);
+                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.InstanceBuilder);
 
                     if (cfg.DisposeHandler == null)
                     {

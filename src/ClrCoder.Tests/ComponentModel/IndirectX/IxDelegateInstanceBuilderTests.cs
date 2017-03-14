@@ -34,10 +34,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                            rootNodes =>
                                rootNodes
                                    .Add<Dummy>(
-                                       factory:
+                                       instanceBuilder:
                                        new IxClassInstanceBuilderConfig<Dummy>())
                                    .Add<AnotherDummy>(
-                                       factory:
+                                       instanceBuilder:
                                        IxDelegateInstanceBuilderConfig.New<Dummy, AnotherDummy>(
                                            async dummy =>
                                                {
@@ -69,10 +69,10 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                            rootNodes =>
                                rootNodes
                                    .Add<Dummy>(
-                                       factory:
+                                       instanceBuilder:
                                        new IxClassInstanceBuilderConfig<Dummy>())
                                    .Add<AnotherDummy>(
-                                       factory:
+                                       instanceBuilder:
                                        IxDelegateInstanceBuilderConfig.New<Dummy, AnotherDummy>(
                                            async dummy => new AnotherDummy(dummy))))
                        .Build())

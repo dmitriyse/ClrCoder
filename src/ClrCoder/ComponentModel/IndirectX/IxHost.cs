@@ -84,7 +84,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 new IxStdProviderConfig
                     {
                         Identifier = new IxIdentifier(typeof(IIxHost)),
-                        Factory = new IxExistingInstanceFactoryConfig<IIxHost>(this),
+                        InstanceBuilder = new IxExistingInstanceFactoryConfig<IIxHost>(this),
                         DisposeHandler = obj => Task.CompletedTask
                     });
 

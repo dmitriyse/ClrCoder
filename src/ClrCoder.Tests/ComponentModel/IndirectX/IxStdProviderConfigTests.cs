@@ -58,7 +58,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             IxIdentifier? IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(Dummy), Name);
 
-            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory
+            IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder
                 => new IxClassInstanceBuilderConfig<Dummy>();
         }
     }

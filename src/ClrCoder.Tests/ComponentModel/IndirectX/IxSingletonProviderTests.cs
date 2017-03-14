@@ -32,7 +32,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                        .Configure(
                            n => n
                                .Add<Dummy>(
-                                   factory: new IxClassInstanceBuilderConfig<Dummy>(),
+                                   instanceBuilder: new IxClassInstanceBuilderConfig<Dummy>(),
                                    exportToParentFilter:
                                    new IxStdVisibilityFilterConfig
                                        {
@@ -46,7 +46,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    nodes:
                                    n1 => n1
                                        .Add<DummyChild>(
-                                           factory: new IxClassInstanceBuilderConfig<DummyChild>())))
+                                           instanceBuilder: new IxClassInstanceBuilderConfig<DummyChild>())))
                        .Build())
                 .AsyncUsing(
                     async host =>
