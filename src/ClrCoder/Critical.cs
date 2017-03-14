@@ -6,12 +6,12 @@
 namespace ClrCoder
 {
 #if DEBUG
-    using System;
     using System.Diagnostics;
+#endif
+    using System;
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
-#endif
 
     /// <summary>
     /// Utilities for handling critical application problems.
