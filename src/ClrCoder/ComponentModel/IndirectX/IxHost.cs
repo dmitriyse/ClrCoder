@@ -29,7 +29,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             // TODO: Load priorities from configs.
             InstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
-            InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 100);
+            InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 200);
+            InstanceFactoryBuilder.Add(DelegateInstanceBuilder, 300);
 
             VisibilityFilterBuilder.Add(StdVisibilityFilterBuilder, 100);
 
