@@ -10,7 +10,8 @@
     "netstandard1.3": {
       "imports": ["dnxcore50", "portable40-net40+sl5+win8+wp8+wpa81"],
       "dependencies": {
-        "NETStandard.Library": "1.6.0"
+        "NETStandard.Library": "1.6.0",
+        "System.ComponentModel.Annotations": "4.1.0"
       }
     },
     "netstandard1.6": {
@@ -22,7 +23,8 @@
         "Microsoft.Extensions.ObjectPool": "1.0.0",
         "Microsoft.Extensions.Options": "1.0.0",
         "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.0",
-        "Microsoft.AspNetCore.Hosting": "1.0.0"
+        "Microsoft.AspNetCore.Hosting": "1.0.0",
+        "System.ComponentModel.Annotations": "4.1.0"
       }
     },
     "net46": {
