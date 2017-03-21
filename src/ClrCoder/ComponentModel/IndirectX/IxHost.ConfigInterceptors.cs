@@ -237,7 +237,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     var cfg = nodeConfig as IxScopeConfig;
                     var cfgContract = (IIxScopeConfig)nodeConfig;
-                    if (cfg == null)
+                    if (cfg == null || cfg.GetType() != typeof(IxScopeConfig))
                     {
                         cfg = new IxScopeConfig
                                   {
@@ -245,8 +245,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       ExportFilter = cfgContract.ExportFilter,
                                       ExportToParentFilter = cfgContract.ExportToParentFilter,
                                       ImportFilter = cfgContract.ImportFilter,
-                                      IsInstanceless = cfgContract.IsInstanceless
+                                      IsInstanceless = cfgContract.IsInstanceless,
                                   };
+
+                        foreach (var node in cfgContract.Nodes)
+                        {
+                            cfg.Nodes.Add(node);
+                        }
                     }
 
                     if (cfg.Identifier == null)
