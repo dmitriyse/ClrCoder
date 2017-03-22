@@ -7,15 +7,11 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
     using System.Threading.Tasks;
 
-    using Attributes;
-
     using JetBrains.Annotations;
-
-    using MoreLinq;
 
     using ObjectModel;
 
@@ -154,7 +150,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         configProviderConfig = new IxStdProviderConfig
                                                    {
                                                        Identifier = new IxIdentifier(nodeConfig.GetType()),
-                                                       InstanceBuilder = new IxExistingInstanceFactoryConfig<object>(nodeConfig),
+                                                       InstanceBuilder =
+                                                           new IxExistingInstanceFactoryConfig<object>(nodeConfig),
                                                    };
                     }
 
@@ -215,6 +212,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence",
+            Justification = "Reviewed. Suppression is OK here.")]
         private ProviderNodeBuilderDelegate ScopeBuilder(ProviderNodeBuilderDelegate next)
         {
             return (nodeConfig, parentNode) =>
@@ -237,7 +236,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     var cfg = nodeConfig as IxScopeConfig;
                     var cfgContract = (IIxScopeConfig)nodeConfig;
-                    if (cfg == null || cfg.GetType() != typeof(IxScopeConfig))
+                    if (cfg == null
+                        || cfg.GetType() != typeof(IxScopeConfig) && cfg.GetType() != typeof(IxHostConfig))
                     {
                         cfg = new IxScopeConfig
                                   {
@@ -248,7 +248,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       IsInstanceless = cfgContract.IsInstanceless,
                                   };
 
-                        foreach (var node in cfgContract.Nodes)
+                        foreach (IIxProviderNodeConfig node in cfgContract.Nodes)
                         {
                             cfg.Nodes.Add(node);
                         }

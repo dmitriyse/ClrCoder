@@ -58,6 +58,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                     singleton = new IxScopeInstance(this, parentInstance);
 
                     parentInstance.SetData(this, singleton);
+
+                    // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
+                    // ReSharper disable once ObjectCreationAsStatement
+                    new IxInstanceMasterLock(parentInstance, singleton);
+
                 }
                 else
                 {

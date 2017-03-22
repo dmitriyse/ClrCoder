@@ -5,7 +5,9 @@
 
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;
@@ -21,6 +23,32 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     [TestFixture]
     public class IxScopeTests
     {
+        private interface IDummyConfigUser
+        {
+        }
+
+        /// <summary>
+        /// Derived scope should be resolved.
+        /// </summary>
+        /// <returns>Async execution TPL Task.</returns>
+        [Test]
+        public async Task DerivedScopeTest()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes.Add(new DummyScopeConfig()))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                        {
+                            using (IxLock<IDummyConfigUser> dummy = await host.Resolver.Get<IDummyConfigUser>())
+                            {
+                                dummy.Target.Should().NotBeNull();
+                            }
+                        });
+        }
+
         /// <summary>
         /// Registered scope should be resolved.
         /// </summary>
@@ -106,7 +134,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    nodes: nodes =>
                                        {
                                            nodes.Add<DummyObject>(
-                                               instanceBuilder: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               instanceBuilder:
+                                               new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                                                disposeHandler: obj => Task.CompletedTask);
                                        }))
                        .Build())
@@ -154,7 +183,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    nodes: nodes =>
                                        {
                                            nodes.Add<DummyObject>(
-                                               instanceBuilder: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                               instanceBuilder:
+                                               new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                                                disposeHandler: obj => Task.CompletedTask);
                                        }))
                        .Build())
@@ -168,8 +198,52 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                         });
         }
 
+        private class DummyConfigUser : IDummyConfigUser
+        {
+            public DummyConfigUser(DummyScopeConfig config)
+            {
+                Config = config;
+            }
+
+            public DummyScopeConfig Config { get; }
+        }
+
         private class DummyObject
         {
+        }
+
+        private class DummyScopeConfig : IxScopeConfig, IIxProviderNodeConfig
+        {
+            ICollection<IIxProviderNodeConfig> IIxProviderNodeConfig.Nodes =>
+                new List<IIxProviderNodeConfig>
+                    {
+                        new IxStdProviderConfig
+                            {
+                                Identifier = new IxIdentifier(typeof(DummyConfigUser)),
+                                InstanceBuilder = new IxClassInstanceBuilderConfig<DummyConfigUser>()
+                            },
+                        new IxStdProviderConfig
+                            {
+                                Identifier = new IxIdentifier(typeof(IDummyConfigUser)),
+                                InstanceBuilder =
+                                    IxDelegateInstanceBuilderConfig.New(
+                                        async (DummyConfigUser user) => (IDummyConfigUser)user)
+                            },
+                        new IxStdProviderConfig
+                            {
+                                Identifier = new IxIdentifier(typeof(DummyScopeConfig)),
+                                InstanceBuilder = new IxExistingInstanceFactoryConfig<DummyScopeConfig>(this)
+                            }
+                    };
+
+            IIxVisibilityFilterConfig IIxProviderNodeConfig.ExportToParentFilter =>
+                new IxStdVisibilityFilterConfig
+                    {
+                        WhiteList = new HashSetEx<IxIdentifier>
+                                        {
+                                            new IxIdentifier(typeof(IDummyConfigUser)),
+                                        }
+                    };
         }
     }
 }
