@@ -36,14 +36,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Instance = instance;
             }
 
-            IxProviderNode IIxInstance.ProviderNode
-            {
-                get
-                {
-                    throw new InvalidOperationException(
-                        "IIxResolver is too virtual instance and does not have provider node.");
-                }
-            }
+            IxProviderNode IIxInstance.ProviderNode => Host._rootScope;
 
             object IIxInstance.Object
             {
@@ -135,8 +128,10 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             void IIxInstance.AddLock(IIxInstanceLock instanceLock)
             {
-                throw new NotSupportedException(
-                    "This is completely virtual object and should cannot be locked/unlocked.");
+                ////throw new NotSupportedException(
+                ////    "This is completely virtual object and should cannot be locked/unlocked.");
+                
+                // Do nothing.
             }
 
             void IIxInstance.AddOwnedLock(IIxInstanceLock instanceLock)
@@ -152,8 +147,10 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             void IIxInstance.RemoveLock(IIxInstanceLock instanceLock)
             {
-                throw new NotSupportedException(
-                    "This is completely virtual object and cannot be locked/unlocked.");
+                ////throw new NotSupportedException(
+                ////    "This is completely virtual object and cannot be locked/unlocked.");
+                
+                // Do nothing. 
             }
 
             void IIxInstance.RemoveOwnedLock(IIxInstanceLock instanceLock)
