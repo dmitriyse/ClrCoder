@@ -8,6 +8,8 @@ namespace ClrCoder.AspNetCore.Validation
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Net;
+    using System.Text.RegularExpressions;
 
     using JetBrains.Annotations;
 
@@ -35,14 +37,13 @@ namespace ClrCoder.AspNetCore.Validation
             try
             {
                 var uriObj = new Uri(uri, UriKind.Absolute);
-
                 if (uriObj.Scheme != "http" && uriObj.Scheme != "https")
                 {
                     return new ValidationResult(
                         $"Uri should use http/https. Your Uri: {(string)obj}",
                         new List<string> { validationContext.MemberName });
                 }
-
+               
                 return ValidationResult.Success;
             }
             catch (UriFormatException ex)
