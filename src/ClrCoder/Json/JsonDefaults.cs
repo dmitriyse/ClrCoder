@@ -74,6 +74,8 @@ namespace ClrCoder
                 // Forcing all statuses to be transfered as a string.
                 settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
 
+                settings.MissingMemberHandling = MissingMemberHandling.Error;
+
                 return settings;
             }
         }
