@@ -5,12 +5,12 @@
 
 namespace ClrCoder.AspNetCore
 {
+    using ClrCoder.Validation;
+
     using JetBrains.Annotations;
 
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
-
-    using Validation;
 
     /// <summary>
     /// Helps to controls WebHost urls.
