@@ -8,14 +8,13 @@ namespace ClrCoder.AspNetCore.Validation
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Net;
-    using System.Text.RegularExpressions;
 
     using JetBrains.Annotations;
 
     /// <summary>
     /// Validates that Url is valid and have http or https scheme.
     /// </summary>
+    [PublicAPI]
     public class HttpUriAttribute : ValidationAttribute
     {
         /// <inheritdoc/>
@@ -30,7 +29,7 @@ namespace ClrCoder.AspNetCore.Validation
             if (string.IsNullOrWhiteSpace(uri))
             {
                 return new ValidationResult(
-                    "Uri cannot be null or contains only spaces.",
+                    "Uri cannot be null or contains only white-spaces charters.",
                     new List<string> { validationContext.MemberName });
             }
 
@@ -40,16 +39,16 @@ namespace ClrCoder.AspNetCore.Validation
                 if (uriObj.Scheme != "http" && uriObj.Scheme != "https")
                 {
                     return new ValidationResult(
-                        $"Uri should use http/https. Your Uri: {(string)obj}",
+                        $"Only http or https schemas are allowed. Your Uri: {(string)obj}",
                         new List<string> { validationContext.MemberName });
                 }
-               
+
                 return ValidationResult.Success;
             }
             catch (UriFormatException ex)
             {
                 return new ValidationResult(
-                    ex.Message + $"\n Your Uri: {(string)obj}",
+                    ex.Message + $" Your Uri: {(string)obj}",
                     new List<string> { validationContext.MemberName });
             }
         }
