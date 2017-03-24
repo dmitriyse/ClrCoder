@@ -29,7 +29,7 @@ namespace ClrCoder.IO
         /// <param name="targetStream">Target stream.</param>
         /// <param name="maxWriteAmount">Maximal allwed amount to write.</param>
         /// <exception cref="IOException">Maximal allowed write reached.</exception>
-        public static void CopyTo(this Stream stream, Stream targetStream, int maxWriteAmount)
+        public static void CopyToWithLimit(this Stream stream, Stream targetStream, long maxWriteAmount)
         {
             VxArgs.NotNull(stream, nameof(stream));
             VxArgs.NotNull(targetStream, nameof(targetStream));
@@ -51,7 +51,7 @@ namespace ClrCoder.IO
         /// <param name="maxWriteAmount">Maximal allwed amount to write.</param>
         /// <returns>Async execution TPL task.</returns>
         /// <exception cref="IOException">Maximal allowed write reached.</exception>
-        public static async Task CopyToAsync(this Stream stream, Stream targetStream, int maxWriteAmount)
+        public static async Task CopyToWithLimitAsync(this Stream stream, Stream targetStream, long maxWriteAmount)
         {
             VxArgs.NotNull(stream, nameof(stream));
             VxArgs.NotNull(targetStream, nameof(targetStream));
@@ -109,11 +109,11 @@ namespace ClrCoder.IO
         {
             private readonly Stream _inner;
 
-            private readonly int _maxWriteAmount;
+            private readonly long _maxWriteAmount;
 
             private int _written;
 
-            public LimitWriteStream(Stream inner, int maxWriteAmount)
+            public LimitWriteStream(Stream inner, long maxWriteAmount)
             {
                 _inner = inner;
                 _maxWriteAmount = maxWriteAmount;
