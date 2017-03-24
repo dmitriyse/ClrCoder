@@ -7,9 +7,12 @@ namespace ClrCoder.IO
 {
     using System;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
+
+    using Validation;
 
     //// ReSharper disable once InconsistentNaming
 
@@ -19,6 +22,49 @@ namespace ClrCoder.IO
     [PublicAPI]
     public static class IOExtensions
     {
+        /// <summary>
+        /// Copies data from stream to stream with limit on maximal written data.
+        /// </summary>
+        /// <param name="stream">Source stream.</param>
+        /// <param name="targetStream">Target stream.</param>
+        /// <param name="maxWriteAmount">Maximal allwed amount to write.</param>
+        /// <exception cref="IOException">Maximal allowed write reached.</exception>
+        public static void CopyTo(this Stream stream, Stream targetStream, int maxWriteAmount)
+        {
+            VxArgs.NotNull(stream, nameof(stream));
+            VxArgs.NotNull(targetStream, nameof(targetStream));
+            if (maxWriteAmount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxWriteAmount),
+                    "Maximal write amount should be positive.");
+            }
+
+            stream.CopyTo(new LimitWriteStream(targetStream, maxWriteAmount));
+        }
+
+        /// <summary>
+        /// Copies data from stream to stream with limit on maximal written data.
+        /// </summary>
+        /// <param name="stream">Source stream.</param>
+        /// <param name="targetStream">Target stream.</param>
+        /// <param name="maxWriteAmount">Maximal allwed amount to write.</param>
+        /// <returns>Async execution TPL task.</returns>
+        /// <exception cref="IOException">Maximal allowed write reached.</exception>
+        public static async Task CopyToAsync(this Stream stream, Stream targetStream, int maxWriteAmount)
+        {
+            VxArgs.NotNull(stream, nameof(stream));
+            VxArgs.NotNull(targetStream, nameof(targetStream));
+            if (maxWriteAmount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxWriteAmount),
+                    "Maximal write amount should be positive.");
+            }
+
+            await stream.CopyToAsync(new LimitWriteStream(targetStream, maxWriteAmount));
+        }
+
         /// <summary>
         /// Gets length of a <c>stream</c> if it is supported.
         /// </summary>
@@ -57,6 +103,112 @@ namespace ClrCoder.IO
 
             await stream.CopyToAsync(bufferStream);
             return bufferStream.ToArray();
+        }
+
+        private class LimitWriteStream : Stream
+        {
+            private readonly Stream _inner;
+
+            private readonly int _maxWriteAmount;
+
+            private int _written;
+
+            public LimitWriteStream(Stream inner, int maxWriteAmount)
+            {
+                _inner = inner;
+                _maxWriteAmount = maxWriteAmount;
+            }
+
+            public override bool CanRead
+            {
+                get
+                {
+                    return _inner.CanRead;
+                }
+            }
+
+            public override bool CanSeek
+            {
+                get
+                {
+                    return _inner.CanSeek;
+                }
+            }
+
+            public override bool CanWrite
+            {
+                get
+                {
+                    return _inner.CanWrite;
+                }
+            }
+
+            public override long Length
+            {
+                get
+                {
+                    return _inner.Length;
+                }
+            }
+
+            public override long Position
+            {
+                get
+                {
+                    return _inner.Position;
+                }
+
+                set
+                {
+                    _inner.Position = value;
+                }
+            }
+
+            public override void Flush()
+            {
+                _inner.Flush();
+            }
+
+            public override int Read([NotNull] byte[] buffer, int offset, int count)
+            {
+                return _inner.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                return _inner.Seek(offset, origin);
+            }
+
+            public override void SetLength(long value)
+            {
+                _inner.SetLength(value);
+            }
+
+            public override void Write([NotNull] byte[] buffer, int offset, int count)
+            {
+                if (Volatile.Read(ref _written) >= _maxWriteAmount)
+                {
+                    throw new IOException("Maximal allowed write reached.");
+                }
+
+                _inner.Write(buffer, offset, count);
+                Interlocked.Add(ref _written, count);
+            }
+
+            public override async Task WriteAsync(
+                [NotNull] byte[] buffer,
+                int offset,
+                int count,
+                CancellationToken cancellationToken)
+            {
+                if (Volatile.Read(ref _written) >= _maxWriteAmount)
+                {
+                    throw new IOException("Maximal allowed write reached.");
+                }
+
+                await _inner.WriteAsync(buffer, offset, count, cancellationToken);
+                Interlocked.Add(ref _written, count);
+            }
         }
     }
 }
