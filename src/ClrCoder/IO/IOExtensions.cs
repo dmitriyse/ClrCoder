@@ -111,7 +111,7 @@ namespace ClrCoder.IO
 
             private readonly long _maxWriteAmount;
 
-            private int _written;
+            private long _written;
 
             public LimitWriteStream(Stream inner, long maxWriteAmount)
             {
