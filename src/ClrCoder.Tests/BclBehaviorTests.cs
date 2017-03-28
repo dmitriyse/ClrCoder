@@ -257,5 +257,24 @@ namespace ClrCoder.Tests
         {
             Trace.Assert(false, "break on me");
         }
+
+        /// <summary>
+        /// Tests behavior for urls where specified default port for scheme. For example http://localhost:80.
+        /// </summary>
+        [Test]
+        public void UriDefaultPortNumbersTest()
+        {
+            var uriExplicit = new Uri("http://localhost:80", UriKind.Absolute);
+            var uriImplicit = new Uri("http://localhost", UriKind.Absolute);
+            
+            uriExplicit.Equals(uriImplicit).Should().BeTrue();
+            uriExplicit.AbsoluteUri.Equals(uriImplicit.AbsoluteUri).Should().BeTrue();
+            TestContext.WriteLine(uriExplicit);
+
+            var uriWrongPort1 = new Uri("http://localhost:443", UriKind.Absolute);
+            var uriWrongPort2 = new Uri("https://localhost:80", UriKind.Absolute);
+            uriWrongPort1.AbsoluteUri.Should().Be("http://localhost:443/");
+            uriWrongPort2.AbsoluteUri.Should().Be("https://localhost:80/");
+        }
     }
 }

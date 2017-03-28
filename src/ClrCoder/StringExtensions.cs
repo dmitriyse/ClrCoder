@@ -6,6 +6,7 @@
 namespace ClrCoder
 {
     using System;
+    using System.Text;
 
     using JetBrains.Annotations;
 
@@ -15,6 +16,23 @@ namespace ClrCoder
     [PublicAPI]
     public static class StringExtensions
     {
+        /// <summary>
+        /// Replaces first charter to lower case.
+        /// </summary>
+        /// <param name="str">Original string.</param>
+        /// <returns>String with first char lowered.</returns>
+        public static string ToCamelCase(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                return str;
+            }
+
+            var strBuilder = new StringBuilder(str);
+            strBuilder[0] = char.ToLowerInvariant(strBuilder[0]);
+            return strBuilder.ToString();
+        }
+
         //// TODO: Write exceptions description.
 
         /// <summary>
