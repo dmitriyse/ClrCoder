@@ -41,7 +41,8 @@ namespace ClrCoder.Testing
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
-        public NUnitJsonLogger(IAsyncHandler asyncHandler)
+        /// <param name="context">Test execution context, temporary required to workaround NUnit bug.</param>
+        public NUnitJsonLogger(IAsyncHandler asyncHandler, TestExecutionContext context = null)
         {
             if (asyncHandler == null)
             {
@@ -55,7 +56,7 @@ namespace ClrCoder.Testing
 
             AsyncHandler = asyncHandler;
 
-            _testExecutionContext = TestExecutionContext.CurrentContext;
+            _testExecutionContext = context ?? TestExecutionContext.CurrentContext;
 
             _localZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         }
