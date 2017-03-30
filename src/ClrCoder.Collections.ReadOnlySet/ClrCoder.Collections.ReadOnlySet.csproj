@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>ClrCoder.Collections.ReadOnlySet</AssemblyName>
+    <PackageId>ClrCoder.Collections.ReadOnlySet</PackageId>
+    <PackageReleaseNotes>Implements missing IReadOnlySet contract, along with:
+IReadableSet - full, but not contravariant version of IReadOnlySet
+HashSetEx - extended HashSet with new contracts implementation
+ReadOnlyExtensions + wrappers - that helps to inject IReadOnlySet on current BCL.</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/dmitriyse/ClrCoder/wiki/IReadOnlySet-and-injection-helpers</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Collections.ReadOnlySet/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections" Version="4.0.11" />
+  </ItemGroup>
+
+</Project>

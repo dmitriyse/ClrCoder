@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>0.2.0</VersionPrefix>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>ClrCoder.Collections.Rich</AssemblyName>
+    <PackageId>ClrCoder.Collections.Rich</PackageId>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClrCoder.Collections\ClrCoder.Collections.csproj" />
+    <ProjectReference Include="..\ClrCoder.Runtime.Immutability\ClrCoder.Runtime.Immutability.csproj" />
+  </ItemGroup>
+
+</Project>
