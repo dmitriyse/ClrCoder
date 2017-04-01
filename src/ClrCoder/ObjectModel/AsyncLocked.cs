@@ -18,8 +18,6 @@ namespace ClrCoder.ObjectModel
     {
         private readonly Func<Task> _disposeAction;
 
-        private readonly T _stream;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncLocked{T}"/> class.
         /// </summary>
