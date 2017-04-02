@@ -62,11 +62,11 @@
   </ItemGroup>
 
   <ItemGroup>
-  <NUnitProject Include="$(ProjectDir) $(TargetFramework)">
-    <InProject>false</InProject>
-  </NUnitProject>
+    <NUnitProject Include="$(ProjectDir) $(TargetFramework)">
+      <InProject>false</InProject>
+    </NUnitProject>
   </ItemGroup>
-  <Target Name="RegisterNUnit" AfterTargets="AfterBuild">
+  <Target Name="RegisterNUnit" AfterTargets="AfterCompile" Condition="'$(SolutionDir)' != '*Undefined*'">
     <WriteLinesToFile File="$(SolutionDir)\nunit-list.txt" Lines="@(NUnitProject)" Overwrite="false" />
   </Target>
 </Project>
