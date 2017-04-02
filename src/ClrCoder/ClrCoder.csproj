@@ -1,8 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+  </PropertyGroup>
+
+  <!--Fix for the bug https://github.com/dotnet/sdk/issues/826-->
+  <PropertyGroup Condition="'IsWindows'=='true'">
+    <TargetFrameworks>netstandard1.3;netstandard1.6;net46</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'IsWindows'!='true'">
+    <TargetFrameworks>netstandard1.3;netstandard1.6</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup>
     <VersionPrefix>0.1.1</VersionPrefix>
-    <TargetFrameworks>netstandard1.3;netstandard1.6;net46</TargetFrameworks>
     <AssemblyName>ClrCoder</AssemblyName>
     <PackageId>ClrCoder</PackageId>
     <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.3' ">$(PackageTargetFallback);dnxcore50;portable40-net40+sl5+win8+wp8+wpa81</PackageTargetFallback>
