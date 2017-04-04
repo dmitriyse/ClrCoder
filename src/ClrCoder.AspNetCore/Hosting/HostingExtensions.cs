@@ -16,8 +16,6 @@ namespace ClrCoder.AspNetCore.Hosting
     using System.Reflection;
     using System.Threading.Tasks;
 
-    using JetBrains.Annotations;
-
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;

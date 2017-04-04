@@ -8,12 +8,13 @@ namespace ClrCoder.Testing
     using System;
     using System.Linq;
 
+    using Json;
+
     using Logging;
     using Logging.Std;
 
     using NodaTime;
 
-    using NUnit.Framework;
     using NUnit.Framework.Internal;
 
     using Runtime.Serialization;
@@ -42,13 +43,12 @@ namespace ClrCoder.Testing
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
         /// <param name="context">Test execution context, temporary required to workaround NUnit bug.</param>
-        public NUnitJsonLogger(IAsyncHandler asyncHandler, TestExecutionContext context = null)
+        /// <param name="serializerSource">The serializer source.</param>
+        public NUnitJsonLogger(
+            IAsyncHandler asyncHandler,
+            TestExecutionContext context = null,
+            IJsonSerializerSource serializerSource = null)
         {
-            if (asyncHandler == null)
-            {
-                throw new ArgumentNullException(nameof(asyncHandler));
-            }
-
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
@@ -58,6 +58,8 @@ namespace ClrCoder.Testing
 
             _testExecutionContext = context ?? TestExecutionContext.CurrentContext;
 
+            SerializerSource = serializerSource ?? StdJsonLogging.DefaultSerializerSource;
+
             _localZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         }
 
@@ -65,9 +67,12 @@ namespace ClrCoder.Testing
         public IAsyncHandler AsyncHandler { get; }
 
         /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
+
+        /// <inheritdoc/>
         public void Log(object entry)
         {
-            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = StdJsonLogging.NormalizeToLogEntry(entry, SerializerSource);
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 

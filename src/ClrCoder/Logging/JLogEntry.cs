@@ -11,7 +11,6 @@ namespace ClrCoder.Logging
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     //// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
 
@@ -22,18 +21,18 @@ namespace ClrCoder.Logging
     public class JLogEntry
     {
         /// <summary>
-        /// Extension data contains nen specified in class properties.
+        /// Extension data, dictionary contains non specified properties in a derived type.
         /// </summary>
         [JsonExtensionData]
         [CanBeNull]
-        public virtual Dictionary<string, JToken> ExtensionData { get; set; }
+        public virtual IDictionary<string, object> ExtensionData { get; set; }
 
         /// <summary>
         /// Sets extension data property.
         /// </summary>
         /// <param name="key">Extension data property name.</param>
         /// <param name="value">Extension data value.</param>
-        public void SetExtensionData([NotNull] string key, [CanBeNull] JToken value)
+        public virtual void SetExtensionData([NotNull] string key, [CanBeNull] object value)
         {
             if (key == null)
             {
@@ -42,7 +41,7 @@ namespace ClrCoder.Logging
 
             if (ExtensionData == null)
             {
-                ExtensionData = new Dictionary<string, JToken>();
+                ExtensionData = new Dictionary<string, object>();
             }
 
             ExtensionData[key] = value;

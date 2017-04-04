@@ -5,6 +5,8 @@
 
 namespace ClrCoder.Tests.AspNetCore.Hosting
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
 #if NET46 || NETCOREAPP1_1
     using System.Threading.Tasks;
 
@@ -38,17 +40,8 @@ namespace ClrCoder.Tests.AspNetCore.Hosting
             using (IWebHost host = HostUtils.HostController<RightController>(baseUrl))
             {
                 (await new Url(baseUrl).AppendPathSegment("/tst").GetAsync().ReceiveString())
-                    .Should().Be("RightController");
-            }
-        }
-
-        [Route("/tst")]
-        private class WrongController
-        {
-            [HttpGet]
-            public async Task<string> Get()
-            {
-                return "WrongController";
+                    .Should()
+                    .Be("RightController");
             }
         }
 
@@ -61,8 +54,17 @@ namespace ClrCoder.Tests.AspNetCore.Hosting
                 return "RightController";
             }
         }
-    }
 
+        [Route("/tst")]
+        private class WrongController
+        {
+            [HttpGet]
+            public async Task<string> Get()
+            {
+                return "WrongController";
+            }
+        }
+    }
 
 #endif
 }

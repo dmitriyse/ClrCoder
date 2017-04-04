@@ -9,6 +9,7 @@ namespace ClrCoder.Tests.Logic
     using System.Linq;
     using System.Text;
 
+    using ClrCoder.Json;
     using ClrCoder.Logic;
 
     using FluentAssertions;
@@ -31,7 +32,7 @@ namespace ClrCoder.Tests.Logic
         {
             var original =
                 new Interval<double>(Math.PI, 10);
-            string serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSettings);
+            string serialized = JsonConvert.SerializeObject(original, JsonDefaults.JsonConfigSerializerSource.Settings);
             TestContext.WriteLine(serialized);
 
             var deserialized = JsonConvert.DeserializeObject<Interval<double>>(serialized);

@@ -7,7 +7,7 @@ namespace ClrCoder.Logging.Std
 {
     using System;
 
-    using JetBrains.Annotations;
+    using Json;
 
     using NodaTime;
 
@@ -18,20 +18,21 @@ namespace ClrCoder.Logging.Std
     /// </summary>
     public class TextJsonLogger : IJsonLogger
     {
-        [NotNull]
         private readonly Action<string> _writeAction;
 
-        [NotNull]
         private readonly DateTimeZone _localZone;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsoleJsonLogger"/> class.
+        /// Initializes a new instance of the <see cref="TextJsonLogger"/> class.
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
         /// <param name="writeAction">Action that performs entry write operation.</param>
-        public TextJsonLogger([NotNull] IAsyncHandler asyncHandler, [NotNull] Action<string> writeAction)
+        /// <param name="serializerSource">The serializer source.</param>
+        public TextJsonLogger(
+            IAsyncHandler asyncHandler,
+            Action<string> writeAction,
+            IJsonSerializerSource serializerSource = null)
         {
-            _writeAction = writeAction;
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
@@ -42,7 +43,11 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(writeAction));
             }
 
+            _writeAction = writeAction;
             AsyncHandler = asyncHandler;
+            SerializerSource = serializerSource
+                               ?? new JsonSerializerSource(
+                                   () => StdJsonLogging.DefaultSerializerSource.CreateSettings());
 
             _localZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         }
@@ -51,9 +56,12 @@ namespace ClrCoder.Logging.Std
         public IAsyncHandler AsyncHandler { get; }
 
         /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
+
+        /// <inheritdoc/>
         public void Log(object entry)
         {
-            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = StdJsonLogging.NormalizeToLogEntry(entry, SerializerSource);
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 

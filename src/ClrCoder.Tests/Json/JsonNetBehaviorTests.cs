@@ -9,6 +9,7 @@ namespace ClrCoder.Tests.Json
     using System.Linq;
 
     using ClrCoder.Collections;
+    using ClrCoder.Json;
 
     using FluentAssertions;
 
@@ -28,7 +29,9 @@ namespace ClrCoder.Tests.Json
         [Test]
         public void ConstructorInitializationTest()
         {
-            JsonConvert.DeserializeObject<C1>("{\"prop1\":\"MyTest\"}", JsonConfig.SerializerSettings)
+            JsonConvert.DeserializeObject<C1>(
+                    "{\"prop1\":\"MyTest\"}",
+                    JsonDefaults.JsonConfigSerializerSource.Settings)
                 .Prop1.Should()
                 .Be("MyTest");
         }
@@ -48,7 +51,9 @@ namespace ClrCoder.Tests.Json
         [Test]
         public void SafeListDeserializationTest()
         {
-            JsonConvert.DeserializeObject<C2>("{\"items\":[\"MyTest\"]}", JsonConfig.SerializerSettings)
+            JsonConvert.DeserializeObject<C2>(
+                    "{\"items\":[\"MyTest\"]}",
+                    JsonDefaults.JsonConfigSerializerSource.Settings)
                 .Items.First()
                 .Should()
                 .Be("MyTest");

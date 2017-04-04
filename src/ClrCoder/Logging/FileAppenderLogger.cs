@@ -10,6 +10,10 @@ namespace ClrCoder.Logging
 
     using JetBrains.Annotations;
 
+    using Json;
+
+    using Std;
+
     using Text;
 
     using Threading;
@@ -27,8 +31,13 @@ namespace ClrCoder.Logging
         /// </summary>
         /// <param name="fileName">File name to append log entries to.</param>
         /// <param name="asyncHandler">Asynchronous handler for logs processing.</param>
-        public FileAppenderLogger([NotNull] string fileName, [NotNull] IAsyncHandler asyncHandler)
+        /// <param name="serializerSource">The serializer source.</param>
+        public FileAppenderLogger(
+            string fileName,
+            IAsyncHandler asyncHandler,
+            IJsonSerializerSource serializerSource = null)
         {
+            // ReSharper disable JoinNullCheckWithUsage
             if (fileName == null)
             {
                 throw new ArgumentNullException(nameof(fileName));
@@ -39,12 +48,17 @@ namespace ClrCoder.Logging
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
 
+            // ReSharper restore JoinNullCheckWithUsage
             _fileName = fileName;
             AsyncHandler = asyncHandler;
+            SerializerSource = serializerSource ?? StdJsonLogging.DefaultSerializerSource;
         }
 
         /// <inheritdoc/>
         public IAsyncHandler AsyncHandler { get; }
+
+        /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
 
         /// <inheritdoc/>
         public void Log(object entry)

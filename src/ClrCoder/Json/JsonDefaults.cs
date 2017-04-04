@@ -3,8 +3,12 @@
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace ClrCoder
+namespace ClrCoder.Json
 {
+    using System;
+
+    using Annotations;
+
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
@@ -14,26 +18,17 @@ namespace ClrCoder
     using NodaTime;
     using NodaTime.Serialization.JsonNet;
 
+    using Validation;
+
     /// <summary>
     /// Default Json.Net serializer settings for different cases.
     /// </summary>
     [PublicAPI]
     public static class JsonDefaults
     {
-        /// <summary>
-        /// Default settings for Json configuration files. Always recreates settings instance.
-        /// </summary>
-        /// <remarks>
-        /// This settings represents convention. Every change should be commented with motivation.
-        /// </remarks>
-        public static JsonSerializerSettings JsonConfigSerializerSettings
-        {
-            get
+        private static readonly Func<JsonSerializerSettings> CreateBaseSettingsFunc = () =>
             {
                 var settings = new JsonSerializerSettings();
-
-                // Using human readable form.
-                settings.Formatting = Formatting.Indented;
 
                 // Using standard javascript naming convention.
                 settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
@@ -47,36 +42,83 @@ namespace ClrCoder
                 settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
 
                 return settings;
-            }
-        }
+            };
+
+        private static IJsonSerializerSource _baseSerializerSource = new JsonSerializerSource(CreateBaseSettingsFunc);
+
+        private static IJsonSerializerSource _jsonConfigSerializerSource = new JsonSerializerSource(
+            () =>
+                {
+                    JsonSerializerSettings settings = _baseSerializerSource.CreateSettings();
+
+                    // Using human readable formatting.
+                    settings.Formatting = Formatting.Indented;
+
+                    return settings;
+                });
+
+        private static IJsonSerializerSource _restRpcSerializerSource = new JsonSerializerSource(
+            () =>
+                {
+                    JsonSerializerSettings settings = _baseSerializerSource.CreateSettings();
+
+                    settings.MissingMemberHandling = MissingMemberHandling.Error;
+
+                    return settings;
+                });
 
         /// <summary>
-        /// Default settings for REST JSON RPC. Always recreates settings instance.
+        /// Creates base settings. This member is different from <see cref="JsonConvert.DefaultSettings"/>.
         /// </summary>
         /// <remarks>
         /// This settings represents convention. Every change should be commented with motivation.
         /// </remarks>
-        public static JsonSerializerSettings JsonRestRpcSerializerSettings
+        [NotNull]
+        [ThreadUnsafe]
+        public static IJsonSerializerSource BaseSerializerSource
         {
-            get
+            get => _baseSerializerSource;
+            set
             {
-                var settings = new JsonSerializerSettings();
+                JsonConvert.DefaultSettings();
+                VxArgs.NotNull(value, nameof(value));
+                _baseSerializerSource = value;
+            }
+        }
 
-                // Using standard javascript naming convention.
-                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+        /// <summary>
+        /// Creates default settings for Json configuration files.
+        /// </summary>
+        /// <remarks>
+        /// This settings represents convention. Every change should be commented with motivation.
+        /// </remarks>
+        [NotNull]
+        [ThreadUnsafe]
+        public static IJsonSerializerSource JsonConfigSerializerSource
+        {
+            get => _jsonConfigSerializerSource;
+            set
+            {
+                VxArgs.NotNull(value, nameof(value));
+                _jsonConfigSerializerSource = value;
+            }
+        }
 
-                // Ignoring non specified properties from output, for traffic optimization.
-                settings.NullValueHandling = NullValueHandling.Ignore;
-
-                // Using IANA tokens for time zones for better compatibility with all world (non only ms-*).
-                settings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-
-                // Forcing all statuses to be transfered as a string.
-                settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
-
-                settings.MissingMemberHandling = MissingMemberHandling.Error;
-
-                return settings;
+        /// <summary>
+        /// Default serializer source for the REST JSON RPC.
+        /// </summary>
+        /// <remarks>
+        /// This settings represents convention. Every change should be commented with motivation.
+        /// </remarks>
+        [NotNull]
+        [ThreadUnsafe]
+        public static IJsonSerializerSource RestRpcSerializerSource
+        {
+            get => _restRpcSerializerSource;
+            set
+            {
+                VxArgs.NotNull(value, nameof(value));
+                _restRpcSerializerSource = value;
             }
         }
     }

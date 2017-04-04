@@ -9,6 +9,8 @@ namespace ClrCoder.Logging.Std
 
     using JetBrains.Annotations;
 
+    using Json;
+
     using Threading;
 
     /// <summary>
@@ -25,10 +27,14 @@ namespace ClrCoder.Logging.Std
         public SerializerJsonLogger([NotNull] IJsonLogger innerLogger)
         {
             _innerLogger = innerLogger;
+            SerializerSource = innerLogger.SerializerSource;
         }
 
         /// <inheritdoc/>
         public IAsyncHandler AsyncHandler => _innerLogger.AsyncHandler;
+
+        /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
 
         /// <inheritdoc/>
         public void Log(object entry)
@@ -38,7 +44,7 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            string serializedEntry = LoggerUtils.NormalizeToString(entry);
+            string serializedEntry = StdJsonLogging.NormalizeToString(entry, SerializerSource);
             _innerLogger.Log(serializedEntry);
         }
     }

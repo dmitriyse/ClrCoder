@@ -13,7 +13,6 @@ namespace ClrCoder.Tests.Logging
     using FluentAssertions;
 
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     using NodaTime;
 
@@ -39,7 +38,7 @@ namespace ClrCoder.Tests.Logging
                                       Severity = LogSeverity.Critical,
                                       Instant = Instant.FromUtc(2017, 1, 1, 2, 3),
                                       DotNetType = "SomeType",
-                                      ExtensionData = new Dictionary<string, JToken>
+                                      ExtensionData = new Dictionary<string, object>
                                                           {
                                                               { "Prop", "Str value" }
                                                           }
@@ -47,11 +46,11 @@ namespace ClrCoder.Tests.Logging
             string serializedLogEntry = JsonConvert.SerializeObject(
                 tstLogEntry,
                 Formatting.Indented,
-                LoggerUtils.LogEntriesSerializerSettings);
+                StdJsonLogging.DefaultSerializerSource.Settings);
             TestContext.WriteLine(serializedLogEntry);
             var deserializedLogEntry = JsonConvert.DeserializeObject<LogEntry>(
                 serializedLogEntry,
-                LoggerUtils.LogEntriesSerializerSettings);
+                StdJsonLogging.DefaultSerializerSource.Settings);
 
             deserializedLogEntry.ShouldBeEquivalentTo(tstLogEntry);
         }

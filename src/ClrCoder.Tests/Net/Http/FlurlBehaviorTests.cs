@@ -5,6 +5,8 @@
 
 namespace ClrCoder.Tests.Net.Http
 {
+    using ClrCoder.Json;
+
     using Flurl;
 
     using Newtonsoft.Json;
@@ -26,7 +28,7 @@ namespace ClrCoder.Tests.Net.Http
         {
             string result = JsonConvert.SerializeObject(
                 new Url("http://test.com"),
-                JsonDefaults.JsonConfigSerializerSettings);
+                JsonDefaults.JsonConfigSerializerSource.Settings);
             TestContext.WriteLine(result);
         }
     }

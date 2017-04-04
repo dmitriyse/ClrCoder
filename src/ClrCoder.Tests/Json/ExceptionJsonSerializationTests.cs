@@ -10,6 +10,8 @@ namespace ClrCoder.Tests.Json
     using System.IO;
     using System.Threading.Tasks;
 
+    using ClrCoder.Json;
+
     using Newtonsoft.Json;
 
     using NUnit.Framework;
@@ -50,7 +52,7 @@ namespace ClrCoder.Tests.Json
 
             Debug.Assert(aggregateError != null, "aggregateError != null");
             var dto = exceptionDumper.Dump<ExceptionDto>(aggregateError);
-            TestContext.WriteLine(JsonConvert.SerializeObject(dto, JsonConfig.SerializerSettings));
+            TestContext.WriteLine(JsonConvert.SerializeObject(dto, JsonDefaults.JsonConfigSerializerSource.Settings));
         }
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace ClrCoder.Tests.Json
 
             var exceptionDumper = new JsonExceptionDumper();
             var dto = exceptionDumper.Dump<ExceptionDto>(simpleError);
-            TestContext.WriteLine(JsonConvert.SerializeObject(dto, JsonConfig.SerializerSettings));
+            TestContext.WriteLine(JsonConvert.SerializeObject(dto, JsonDefaults.JsonConfigSerializerSource.Settings));
         }
     }
 }

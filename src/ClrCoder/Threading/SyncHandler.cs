@@ -6,7 +6,6 @@
 namespace ClrCoder.Threading
 {
     using System;
-    using System.Threading;
 
     using JetBrains.Annotations;
 
@@ -29,8 +28,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -48,8 +46,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -67,8 +64,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -90,8 +86,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -114,8 +109,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -139,8 +133,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
         }
 
@@ -165,9 +158,13 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                ThreadPool.QueueUserWorkItem(
-                    state => { throw ex; });
+                HandleException(ex);
             }
+        }
+
+        private void HandleException(Exception ex)
+        {
+            AppDomainEx.RaiseNonTerminatingUnhandledException(ex);
         }
     }
 }

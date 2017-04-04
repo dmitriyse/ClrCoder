@@ -8,7 +8,9 @@ namespace ClrCoder.Logging.Std
     using System;
     using System.Linq;
 
-    using JetBrains.Annotations;
+    using Json;
+
+    using Newtonsoft.Json;
 
     using NodaTime;
 
@@ -21,21 +23,23 @@ namespace ClrCoder.Logging.Std
     /// </summary>
     public class ConsoleJsonLogger : IJsonLogger
     {
-        [NotNull]
         private readonly DateTimeZone _localZone;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleJsonLogger"/> class.
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
-        public ConsoleJsonLogger([NotNull] IAsyncHandler asyncHandler)
+        /// <param name="serializerSource">Logging serializer. Used to convert objects to strings and to JObject.</param>
+        public ConsoleJsonLogger(IAsyncHandler asyncHandler, IJsonSerializerSource serializerSource = null)
         {
-            AsyncHandler = asyncHandler;
-
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
+
+            AsyncHandler = asyncHandler;
+
+            SerializerSource = serializerSource ?? StdJsonLogging.DefaultSerializerSource;
 
             _localZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         }
@@ -44,9 +48,15 @@ namespace ClrCoder.Logging.Std
         public IAsyncHandler AsyncHandler { get; }
 
         /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
+
+        /// <inheritdoc/>
+        public JsonSerializer Serializer { get; }
+
+        /// <inheritdoc/>
         public void Log(object entry)
         {
-            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = StdJsonLogging.NormalizeToLogEntry(entry, SerializerSource);
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
             ConsoleColor colorBackup = Console.ForegroundColor;

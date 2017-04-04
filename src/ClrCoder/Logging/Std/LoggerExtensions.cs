@@ -45,7 +45,7 @@ namespace ClrCoder.Logging.Std
                     {
                         try
                         {
-                            JObject jsonData = JObject.FromObject(data, LoggerUtils.LogEntriesSerializer);
+                            JObject jsonData = JObject.FromObject(data, builder.SerializerSource.Serializer);
                             foreach (JProperty jProperty in jsonData.Properties())
                             {
                                 e.SetExtensionData(jProperty.Name, jProperty.Value);
@@ -154,7 +154,8 @@ namespace ClrCoder.Logging.Std
                                     {
                                         e.Message = msg;
                                         return e;
-                                    }));
+                                    },
+                                logger.SerializerSource));
 
                         var entry = new LogEntry
                                         {
@@ -199,7 +200,8 @@ namespace ClrCoder.Logging.Std
                                     {
                                         e.Message = msg;
                                         return e;
-                                    }),
+                                    },
+                                logger.SerializerSource),
                             arg1);
 
                         var entry = new LogEntry
@@ -247,7 +249,8 @@ namespace ClrCoder.Logging.Std
                                     {
                                         e.Message = msg;
                                         return e;
-                                    }),
+                                    },
+                                logger.SerializerSource),
                             a1,
                             a2);
 
@@ -299,7 +302,8 @@ namespace ClrCoder.Logging.Std
                                     {
                                         e.Message = msg;
                                         return e;
-                                    }),
+                                    },
+                                logger.SerializerSource),
                             a1,
                             a2,
                             a3);

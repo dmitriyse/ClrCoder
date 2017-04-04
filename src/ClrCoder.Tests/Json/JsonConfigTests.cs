@@ -5,7 +5,11 @@
 
 namespace ClrCoder.Tests.Json
 {
+    using System;
     using System.IO;
+    using System.Threading.Tasks;
+
+    using ClrCoder.Json;
 
     using FluentAssertions;
 
@@ -17,17 +21,17 @@ namespace ClrCoder.Tests.Json
     [TestFixture]
     public class JsonConfigTests
     {
-#if !PCL
-
         /// <summary>
         /// Config file load test.
         /// </summary>
+        /// <returns>Async execution TPL task.</returns>
         [Test]
-        public void LoadConfigTest()
+        public async Task LoadConfigTest()
         {
-            var fileName = "test.cfg.json";
+            string fileName = Path.Combine(AppContext.BaseDirectory, "test.cfg.json");
             File.WriteAllText(fileName, "{\"test\":\"data\"}");
-            var testConfig = JsonConfig.Load<TestConfig>(fileName);
+            TestConfig testConfig =
+                await JsonDefaults.JsonConfigSerializerSource.Serializer.DeserializeFile<TestConfig>(fileName);
             testConfig.Test.Should().Be("data");
         }
 
@@ -35,6 +39,5 @@ namespace ClrCoder.Tests.Json
         {
             public string Test { get; set; }
         }
-#endif
     }
 }

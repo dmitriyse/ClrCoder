@@ -5,7 +5,11 @@
 
 namespace ClrCoder.Logging
 {
+    using System;
+
     using JetBrains.Annotations;
+
+    using Json;
 
     using Threading;
 
@@ -20,6 +24,13 @@ namespace ClrCoder.Logging
         /// </summary>
         [NotNull]
         IAsyncHandler AsyncHandler { get; }
+
+        /// <summary>
+        /// Json serializer source.
+        /// </summary>
+        [NotNull]
+        [ReferenceImmutable]
+        IJsonSerializerSource SerializerSource { get; }
 
         /// <summary>
         /// Object that represents log <c>entry</c>.

@@ -335,6 +335,11 @@ namespace ClrCoder.Threading
             }
         }
 
+        private void HandleException(Exception ex)
+        {
+            AppDomainEx.RaiseNonTerminatingUnhandledException(ex);
+        }
+
         private Exception ReThrowOperationCanceled(OperationCanceledException ex)
         {
             return new InvalidOperationException("Worker disposed or disposing.");
@@ -363,7 +368,7 @@ namespace ClrCoder.Threading
                 }
                 catch (Exception ex)
                 {
-                    ThreadPool.QueueUserWorkItem(h => { throw ex; });
+                    HandleException(ex);
                 }
             }
         }

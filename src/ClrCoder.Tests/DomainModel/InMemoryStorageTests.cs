@@ -25,6 +25,8 @@ namespace ClrCoder.Tests.DomainModel
 
     using ObjectModel;
 
+    using Testing;
+
     /// <summary>
     /// Tests related to the
     /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/>
@@ -63,44 +65,48 @@ namespace ClrCoder.Tests.DomainModel
                             DummyEntityKey firstKey = null;
                             DummyEntityKey secondKey = null;
 
-                            await p.OpenUnitOfWork().AsyncUsing(
-                                uow =>
-                                    {
-                                        var repository = uow.GetRepository<IDummyEntityRepository>();
-                                        firstKey = repository.CreateNew("First").Key;
-                                    });
+                            await p.OpenUnitOfWork()
+                                .AsyncUsing(
+                                    uow =>
+                                        {
+                                            var repository = uow.GetRepository<IDummyEntityRepository>();
+                                            firstKey = repository.CreateNew("First").Key;
+                                        });
 
-                            await p.OpenUnitOfWork().AsyncUsing(
-                                uow =>
-                                    {
-                                        var repository = uow.GetRepository<IDummyEntityRepository>();
-                                        string firstName = repository.GetEntity(firstKey)?.Name;
-                                        firstName.Should().Be("First");
-                                        secondKey = repository.CreateNew("Second").Key;
-                                    });
+                            await p.OpenUnitOfWork()
+                                .AsyncUsing(
+                                    uow =>
+                                        {
+                                            var repository = uow.GetRepository<IDummyEntityRepository>();
+                                            string firstName = repository.GetEntity(firstKey)?.Name;
+                                            firstName.Should().Be("First");
+                                            secondKey = repository.CreateNew("Second").Key;
+                                        });
 
-                            await p.OpenUnitOfWork().AsyncUsing(
-                                uow =>
-                                    {
-                                        var repository = uow.GetRepository<IDummyEntityRepository>();
-                                        Dictionary<DummyEntityKey, DummyEntity> allDummies =
-                                            repository.SelectAll().ToDictionary(x => x.Key);
-                                        allDummies.Count.Should().Be(2);
-                                        allDummies.Should().ContainKey(firstKey);
-                                        allDummies.Should().ContainKey(secondKey);
-                                        repository.Remove(secondKey);
-                                    });
+                            await p.OpenUnitOfWork()
+                                .AsyncUsing(
+                                    uow =>
+                                        {
+                                            var repository = uow.GetRepository<IDummyEntityRepository>();
+                                            Dictionary<DummyEntityKey, DummyEntity> allDummies =
+                                                repository.SelectAll().ToDictionary(x => x.Key);
+                                            allDummies.Count.Should().Be(2);
+                                            allDummies.Should().ContainKey(firstKey);
+                                            allDummies.Should().ContainKey(secondKey);
+                                            repository.Remove(secondKey);
+                                        });
 
-                            await p.OpenUnitOfWork().AsyncUsing(
-                                uow =>
-                                    {
-                                        var repository = uow.GetRepository<IDummyEntityRepository>();
-                                        Dictionary<DummyEntityKey, DummyEntity> allDummies =
-                                            repository.SelectAll().ToDictionary(x => x.Key);
-                                        allDummies.Count.Should().Be(1);
-                                        allDummies.Should().ContainKey(firstKey);
-                                        repository.GetEntity(secondKey).Should().BeNull();
-                                    });
+                            await p.OpenUnitOfWork()
+                                .AsyncUsing(
+                                    uow =>
+                                        {
+                                            var repository = uow.GetRepository<IDummyEntityRepository>();
+                                            Dictionary<DummyEntityKey, DummyEntity> allDummies =
+                                                repository.SelectAll().ToDictionary(x => x.Key);
+                                            allDummies.Count.Should().Be(1);
+                                            allDummies.Should().ContainKey(firstKey);
+                                            repository.GetEntity(secondKey).Should().BeNull();
+                                        });
                         });
         }
 

@@ -5,10 +5,10 @@
 
   <!--Fix for the bug https://github.com/dotnet/sdk/issues/826-->
   <PropertyGroup Condition="'IsWindows'=='true'">
-    <TargetFrameworks>netcoreapp1.0;netcoreapp1.1;net46</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0;net46</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition="'IsWindows'!='true'">
-    <TargetFrameworks>netcoreapp1.0;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,20 +32,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClrCoder.Testing\ClrCoder.Testing.csproj" />
     <ProjectReference Include="..\ClrCoder\ClrCoder.csproj" />
     <ProjectReference Include="..\ClrCoder.AspNetCore\ClrCoder.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="4.18.0" />
-    <PackageReference Include="Flurl.Http" Version="1.0.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="10.1.5" />
-    <PackageReference Include="NodaTime" Version="2.0.0-alpha20160707" />
-    <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.0.0-alpha20160707" />
+    <PackageReference Include="FluentAssertions" Version="4.19.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
     <PackageReference Include="NUnit" Version="3.6.1" />
     <PackageReference Include="NUnitLite" Version="3.6.1" />
-    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
-    <PackageReference Include="System.Threading.Thread" Version="4.0.0" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
   </ItemGroup>

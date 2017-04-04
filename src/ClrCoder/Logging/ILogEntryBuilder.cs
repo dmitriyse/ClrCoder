@@ -5,13 +5,24 @@
 
 namespace ClrCoder.Logging
 {
+    using System;
+
     using JetBrains.Annotations;
+
+    using Json;
 
     /// <summary>
     /// Log entry fluent syntax building block.
     /// </summary>
     public interface ILogEntryBuilder
     {
+        /// <summary>
+        /// Serializer source.
+        /// </summary>
+        [ReferenceImmutable]
+        [NotNull]
+        IJsonSerializerSource SerializerSource { get; }
+
         /// <summary>
         /// Builds log <c>entry</c>.
         /// </summary>

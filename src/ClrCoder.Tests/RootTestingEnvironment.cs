@@ -7,6 +7,8 @@ namespace ClrCoder.Tests
 {
     using NUnit.Framework;
 
+    using Testing;
+
     /// <summary>
     /// Prepares environment for all tests.
     /// </summary>

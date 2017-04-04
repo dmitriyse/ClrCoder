@@ -6,6 +6,9 @@
 namespace ClrCoder
 {
     using System;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -18,55 +21,31 @@ namespace ClrCoder
     public static class JsonExtensions
     {
         /// <summary>
-        /// Clones <see cref="JsonSerializer"/>.
+        /// Deserializes file content to the type <typeparamref name="T"/> with the specifie deserializer.
         /// </summary>
-        /// <param name="serializer">Original <c>serializer</c>.</param>
-        /// <returns>Cloned serializer.</returns>
-        [NotNull]
-        public static JsonSerializer Clone([NotNull] this JsonSerializer serializer)
+        /// <typeparam name="T">The target type.</typeparam>
+        /// <param name="serializer">The json serializer.</param>
+        /// <param name="fileName">The file name to deserialize from.</param>
+        /// <param name="encoding">The encoding.</param>
+        /// <returns>Deserialized data.</returns>
+        public static async ValueTask<T> DeserializeFile<T>(this JsonSerializer serializer, string fileName, Encoding encoding = null)
         {
-            if (serializer == null)
+            // TODO: Replace to RecyclableMemoeryStream.
+            MemoryStream memStream = new MemoryStream();
+            using (var fileStream = new FileStream(fileName, FileMode.Open))
             {
-                throw new ArgumentNullException(nameof(serializer));
+                await fileStream.CopyToAsync(memStream);
             }
 
-            var clonedSerializer = new JsonSerializer
-                                       {
-                                           Binder = serializer.Binder,
-                                           CheckAdditionalContent = serializer.CheckAdditionalContent,
-                                           ConstructorHandling = serializer.ConstructorHandling,
-                                           Context = serializer.Context,
-                                           ContractResolver = serializer.ContractResolver,
-                                           Culture = serializer.Culture,
-                                           DateFormatHandling = serializer.DateFormatHandling,
-                                           DateFormatString = serializer.DateFormatString,
-                                           DateParseHandling = serializer.DateParseHandling,
-                                           DateTimeZoneHandling = serializer.DateTimeZoneHandling,
-                                           DefaultValueHandling = serializer.DefaultValueHandling,
-                                           EqualityComparer = serializer.EqualityComparer,
-                                           FloatFormatHandling = serializer.FloatFormatHandling,
-                                           FloatParseHandling = serializer.FloatParseHandling,
-                                           Formatting = serializer.Formatting,
-                                           MaxDepth = serializer.MaxDepth,
-                                           MetadataPropertyHandling = serializer.MetadataPropertyHandling,
-                                           MissingMemberHandling = serializer.MissingMemberHandling,
-                                           NullValueHandling = serializer.NullValueHandling,
-                                           ObjectCreationHandling = serializer.ObjectCreationHandling,
-                                           PreserveReferencesHandling = serializer.PreserveReferencesHandling,
-                                           ReferenceLoopHandling = serializer.ReferenceLoopHandling,
-                                           ReferenceResolver = serializer.ReferenceResolver,
-                                           StringEscapeHandling = serializer.StringEscapeHandling,
-                                           TraceWriter = serializer.TraceWriter,
-                                           TypeNameAssemblyFormat = serializer.TypeNameAssemblyFormat,
-                                           TypeNameHandling = serializer.TypeNameHandling
-                                       };
+            memStream.Position = 0;
 
-            foreach (JsonConverter converter in serializer.Converters)
+            using (var sr = encoding != null ? new StreamReader(memStream, encoding) : new StreamReader(memStream))
             {
-                clonedSerializer.Converters.Add(converter);
+                using (var jsonReader = new JsonTextReader(sr))
+                {
+                    return serializer.Deserialize<T>(jsonReader);
+                }
             }
-
-            return clonedSerializer;
         }
     }
 }

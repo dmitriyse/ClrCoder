@@ -6,6 +6,8 @@
     <AssemblyName>ClrCoder.Collections.Rich</AssemblyName>
     <PackageId>ClrCoder.Collections.Rich</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <RootNamespace>System</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

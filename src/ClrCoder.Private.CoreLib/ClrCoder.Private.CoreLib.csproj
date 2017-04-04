@@ -9,10 +9,12 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <RootNamespace>System</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="10.1.5" />
+    <PackageReference Include="JetBrains.Annotations" Version="10.1.4" />
     <PackageReference Include="System.Collections" Version="4.0.11" />
   </ItemGroup>
 

@@ -7,7 +7,11 @@ namespace ClrCoder.Logging.Std
 {
     using System;
 
+    using Json;
+
     using Threading;
+
+    using Validation;
 
     /// <summary>
     /// Logger that adds class information to messages.
@@ -25,11 +29,16 @@ namespace ClrCoder.Logging.Std
         /// <param name="innerLogger">Next logger in chain.</param>
         public ClassJsonLogger(IJsonLogger innerLogger)
         {
+            VxArgs.NotNull(innerLogger, nameof(innerLogger));
             _innerLogger = innerLogger;
+            SerializerSource = innerLogger.SerializerSource;
         }
 
         /// <inheritdoc/>
         public IAsyncHandler AsyncHandler => _innerLogger.AsyncHandler;
+
+        /// <inheritdoc/>
+        public IJsonSerializerSource SerializerSource { get; }
 
         /// <inheritdoc/>
         public void Log(object entry)
@@ -39,7 +48,7 @@ namespace ClrCoder.Logging.Std
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            LogEntry logEntry = LoggerUtils.NormalizeToLogEntry(entry);
+            LogEntry logEntry = StdJsonLogging.NormalizeToLogEntry(entry, SerializerSource);
 
             logEntry.DotNetType = TypeName;
 
