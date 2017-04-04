@@ -58,7 +58,8 @@ namespace ClrCoder.Logging.Std
                                 throw;
                             }
 
-                            e.SetExtensionData("DataSerializationError", ex.Message);
+                            // TODO: Dump exception.
+                            e.SetExtensionData("DataSerializationError", ex.ToString());
                         }
 
                         return e;

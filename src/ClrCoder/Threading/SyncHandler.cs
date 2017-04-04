@@ -162,6 +162,32 @@ namespace ClrCoder.Threading
             }
         }
 
+        /// <inheritdoc/>
+        public void RunAsync<T1, T2, T3, T4, T5, T6, T7>(
+            Action<T1, T2, T3, T4, T5, T6, T7> action,
+            [CanBeNull] T1 arg1,
+            [CanBeNull] T2 arg2,
+            [CanBeNull] T3 arg3,
+            [CanBeNull] T4 arg4,
+            [CanBeNull] T5 arg5,
+            [CanBeNull] T6 arg6,
+            [CanBeNull] T7 arg7)
+        {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            try
+            {
+                action(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
+        }
+
         private void HandleException(Exception ex)
         {
             AppDomainEx.RaiseNonTerminatingUnhandledException(ex);
