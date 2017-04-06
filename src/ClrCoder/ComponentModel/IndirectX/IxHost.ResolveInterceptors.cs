@@ -241,10 +241,27 @@ namespace ClrCoder.ComponentModel.IndirectX
                                    {
                                        // While we have temporary lock, we needs to put permanent lock.
                                        IIxInstanceLock resolvedInstanceTempLock =
-                                           await provider.GetInstance(parentInstance, c, frame);
+                                           await provider.GetInstance(parentInstance, identifier, c, frame);
 
                                        return resolvedInstanceTempLock;
                                    });
+                };
+        }
+
+        private ResolveDelegate ResolveContextResolveInterceptor(ResolveDelegate next)
+        {
+            return async (originInstance, identifier, context, frame) =>
+                {
+                    IIxInstanceLock instance =
+                        await _argumentProvider.GetInstance(_rootScopeInstance, identifier, context, frame);
+
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if (instance == null)
+                    {
+                        return await next(originInstance, identifier, context, frame);
+                    }
+
+                    return instance;
                 };
         }
     }

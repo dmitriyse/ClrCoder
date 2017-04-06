@@ -13,21 +13,25 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     public interface IIxInstance : IAsyncDisposable
     {
+        [NotNull]
         IxProviderNode ProviderNode { get; }
 
         [CanBeNull]
         IIxInstance ParentInstance { get; }
 
+        [CanBeNull]
         IIxResolver Resolver { get; set; }
 
         /// <summary>
         /// Object instantiation task.
         /// </summary>
+        [NotNull]
         Task ObjectCreationTask { get; }
 
         /// <summary>
         /// Gets resolved object.
         /// </summary>
+        [NotNull]
         object Object { get; }
 
         void AddLock(IIxInstanceLock instanceLock);

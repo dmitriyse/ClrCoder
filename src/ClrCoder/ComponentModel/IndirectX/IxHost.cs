@@ -28,6 +28,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public IxHost()
         {
+            _argumentProvider = new IxArgumentProvider(this);
+
             // TODO: Load priorities from configs.
             InstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
             InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 200);
@@ -48,6 +50,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
             ResolveHandler.Add(SelfToChildrenResolver, 200);
             ResolveHandler.Add(StdResolveInterceptor, 300);
+            ResolveHandler.Add(ResolveContextResolveInterceptor, 400);
         }
 
         /// <summary>
@@ -187,6 +190,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Resolver = resolver;
             }
         }
+
+        private readonly IxArgumentProvider _argumentProvider;
 
         private async Task<IIxInstanceLock> Resolve(
             IIxInstance originInstance,

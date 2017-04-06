@@ -40,6 +40,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public override Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
+            IxIdentifier identifier,
             IxHost.IxResolveContext context,
             [CanBeNull] IxResolveFrame frame)
         {

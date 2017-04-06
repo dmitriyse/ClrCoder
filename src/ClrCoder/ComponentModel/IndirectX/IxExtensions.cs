@@ -156,6 +156,34 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <summary>
+        /// Gets locks on the required <c>object</c> from the specified <c>resolver</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of target <c>object</c>.</typeparam>
+        /// <typeparam name="TArg1">The type of the argument for current resolve operation.</typeparam>
+        /// <param name="resolver">Resolver that should be used.</param>
+        /// <param name="name">Name of registration.</param>
+        /// <param name="arg1">The argument for current resolve operation.</param>
+        /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
+        public static async Task<IxLock<T>> Get<T, TArg1>(
+            this IIxResolver resolver,
+            [CanBeNull] string name,
+            TArg1 arg1)
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            return new IxLock<T>(
+                await resolver.Resolve(
+                    new IxIdentifier(typeof(T), name),
+                    new Dictionary<IxIdentifier, object>
+                        {
+                            { new IxIdentifier(typeof(TArg1)), arg1 }
+                        }));
+        }
+
+        /// <summary>
         /// Resolves instance just to instantiate it.
         /// </summary>
         /// <remarks>

@@ -21,9 +21,6 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             private readonly IIxInstance _originInstance;
 
-            [CanBeNull]
-            private readonly IxResolveContext _parentContext;
-
             private readonly IxResolveContext _rootContext;
 
             [CanBeNull]
@@ -36,9 +33,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 Arguments = arguments;
                 _originInstance = originInstance;
-                _parentContext = parentContext;
+                ParentContext = parentContext;
                 _rootContext = parentContext?._rootContext ?? this;
             }
+
+            [CanBeNull]
+            public IxResolveContext ParentContext { get; }
 
             [NotNull]
             public IReadOnlyDictionary<IxIdentifier, object> Arguments { get; }
