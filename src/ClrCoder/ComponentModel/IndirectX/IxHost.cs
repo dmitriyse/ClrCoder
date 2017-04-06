@@ -38,6 +38,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             ProviderNodeBuilder.Add(StdProviderConfigDefaultsSetter, 100);
             ProviderNodeBuilder.Add(ScopeBuilder, 200);
             ProviderNodeBuilder.Add(SingletonProviderBuilder, 300);
+            ProviderNodeBuilder.Add(PerResolveProviderBuilder, 400);
 
             ScopeBinderBuilder.Add(RegistrationScopeBinderBuilder, 100);
 
@@ -171,7 +172,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             exportRegistrationsToChildren(_rootScope);
 
             _rootScopeInstance = _rootScope.GetRootInstance();
-            var resolveContext = new IxResolveContext(null, new Dictionary<IxIdentifier, object>());
+            var resolveContext = new IxResolveContext(_rootScopeInstance, null, new Dictionary<IxIdentifier, object>());
             using (IIxInstanceLock rootResolverLock = await Resolve(
                                                           _rootScopeInstance,
                                                           new IxIdentifier(typeof(IIxResolver)),

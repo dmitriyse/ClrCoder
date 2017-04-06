@@ -155,7 +155,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                     };
 
                                 action.ShouldThrow<IxResolveTargetNotFound>()
-                                    .Which.Identifier.Should().Be(new IxIdentifier(typeof(DummyObject)));
+                                    .Which.Identifier.Should()
+                                    .Be(new IxIdentifier(typeof(DummyObject)));
                             }
                             catch (Exception ex)
                             {

@@ -29,21 +29,21 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         [Test]
         public async Task ExceptionInDelegateTest()
         {
-            var testTask = (await new IxHostBuilder()
-                       .Configure(
-                           rootNodes =>
-                               rootNodes
-                                   .Add<Dummy>(
-                                       instanceBuilder:
-                                       new IxClassInstanceBuilderConfig<Dummy>())
-                                   .Add<AnotherDummy>(
-                                       instanceBuilder:
-                                       IxDelegateInstanceBuilderConfig.New<Dummy, AnotherDummy>(
-                                           async dummy =>
-                                               {
-                                                   throw new InvalidOperationException("My Error");
-                                               })))
-                       .Build())
+            Task testTask = (await new IxHostBuilder()
+                                 .Configure(
+                                     rootNodes =>
+                                         rootNodes
+                                             .Add<Dummy>(
+                                                 instanceBuilder:
+                                                 new IxClassInstanceBuilderConfig<Dummy>())
+                                             .Add<AnotherDummy>(
+                                                 instanceBuilder:
+                                                 IxDelegateInstanceBuilderConfig.New<Dummy, AnotherDummy>(
+                                                     async dummy =>
+                                                         {
+                                                             throw new InvalidOperationException("My Error");
+                                                         })))
+                                 .Build())
                 .AsyncUsing(
                     async host =>
                         {

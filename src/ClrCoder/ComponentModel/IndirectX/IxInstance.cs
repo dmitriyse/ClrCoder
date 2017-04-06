@@ -357,12 +357,15 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// removed.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
-        protected abstract Task SelfDispose();
+        protected virtual Task SelfDispose()
+        {
+            return ProviderNode.DisposeHandler(Object);
+        }
 
         /// <summary>
         /// Initializes object creation task.
         /// </summary>
-        /// <param name="objectCreateTask"></param>
+        /// <param name="objectCreateTask">The object creation task.</param>
         protected void SetObjectCreationTask(Task<object> objectCreateTask)
         {
             // If everything fine this method will be called from one thread and only once.

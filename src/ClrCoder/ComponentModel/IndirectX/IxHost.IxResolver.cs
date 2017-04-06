@@ -138,6 +138,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 IReadOnlyDictionary<IxIdentifier, object> arguments = null)
             {
                 var context = new IxResolveContext(
+                    OwnerInstance,
                     ParentContext,
                     arguments ?? new Dictionary<IxIdentifier, object>());
 

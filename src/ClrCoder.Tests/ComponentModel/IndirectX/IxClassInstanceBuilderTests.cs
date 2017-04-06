@@ -38,7 +38,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                    .Add<SimplestDummy>(
                                        instanceBuilder: new IxClassInstanceBuilderConfig<SimplestDummy>())
                                    .Add<WithSimplestDependencyDummy>(
-                                       instanceBuilder: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
+                                       instanceBuilder: new
+                                           IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
                        .Build())
                 .AsyncUsing(
                     async host =>
@@ -115,8 +116,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                 n.Add<MultiConstructorsDummy>(
                                     instanceBuilder:
                                     new IxClassInstanceBuilderConfig<MultiConstructorsDummy>()))
-                        .
-                        Build();
+                        .Build();
                 };
 
             action.ShouldThrow<IxConfigurationException>().Which.Message.Should().Contain("more than one");

@@ -376,6 +376,90 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        private ProviderNodeBuilderDelegate PerResolveProviderBuilder(ProviderNodeBuilderDelegate next)
+        {
+            return (nodeConfig, parentNode) =>
+                {
+                    if (nodeConfig.GetType() != typeof(IxStdProviderConfig))
+                    {
+                        return next(nodeConfig, parentNode);
+                    }
+
+                    if (parentNode == null)
+                    {
+                        throw new InvalidOperationException("Instance provider cannot be used as root scope.");
+                    }
+
+                    var cfg = (IxStdProviderConfig)nodeConfig;
+
+                    if (cfg.Multiplicity == null)
+                    {
+                        // TODO: Replace to configuration validation exception.
+                        throw new InvalidOperationException("Multiplicity should be specified.");
+                    }
+
+                    if (!(cfg.Multiplicity is IxPerResolveMultiplicityConfig))
+                    {
+                        return next(nodeConfig, parentNode);
+                    }
+
+                    if (cfg.InstanceBuilder == null)
+                    {
+                        throw new InvalidOperationException("Instance factory should be configured.");
+                    }
+
+                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.InstanceBuilder);
+
+                    if (cfg.DisposeHandler == null)
+                    {
+                        cfg.DisposeHandler = DisposeHandlerBuilder.Delegate(instanceFactory.InstanceBaseType);
+                    }
+
+                    if (cfg.ExportFilter == null)
+                    {
+                        throw new InvalidOperationException("Export filter should be defined for provider node.");
+                    }
+
+                    if (cfg.ExportToParentFilter == null)
+                    {
+                        throw new InvalidOperationException(
+                            "Export to parent filter should be defined for provider node.");
+                    }
+
+                    if (cfg.ImportFilter == null)
+                    {
+                        throw new InvalidOperationException("Import filter should be defined for provider node.");
+                    }
+
+                    IxVisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
+                    IxVisibilityFilter exportToParent = VisibilityFilterBuilder.Delegate(cfg.ExportToParentFilter);
+                    IxVisibilityFilter importFilter = VisibilityFilterBuilder.Delegate(cfg.ImportFilter);
+
+                    if (cfg.ScopeBinding == null)
+                    {
+                        throw new InvalidOperationException("Scope binding should be specified.");
+                    }
+
+                    if (cfg.DisposeHandler == null)
+                    {
+                        throw new InvalidOperationException("Dispose handler should be specified.");
+                    }
+
+                    IxScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
+
+                    return new IxPerResolveProvider(
+                        this,
+                        parentNode,
+                        cfg,
+                        instanceFactory,
+                        exportFilter,
+                        exportToParent,
+                        importFilter,
+                        scopeBinder,
+                        cfg.DisposeHandler);
+                };
+        }
+
         private VisibilityFilterBuilderDelegate StdVisibilityFilterBuilder(
             VisibilityFilterBuilderDelegate next)
         {
