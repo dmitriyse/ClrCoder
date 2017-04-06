@@ -17,40 +17,44 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <content><see cref="IxResolver"/> implementation.</content>
     public partial class IxHost
     {
-        private class IxResolver : IIxResolver
+        internal class IxResolver : IIxResolver, IIxInstance
         {
-            public IxResolver(IxHost host, IIxInstance instance, [CanBeNull] IxResolveContext context)
+            public IxResolver(
+                IxHost host,
+                IIxInstance ownerInstance,
+                [CanBeNull] IxResolveContext parentContext,
+                [CanBeNull] IxResolveFrame parentFrame)
             {
                 if (host == null)
                 {
                     throw new ArgumentNullException(nameof(host));
                 }
 
-                if (instance == null)
+                if (ownerInstance == null)
                 {
-                    throw new ArgumentNullException(nameof(instance));
+                    throw new ArgumentNullException(nameof(ownerInstance));
                 }
 
-                Context = context;
+                if (parentFrame != null)
+                {
+                    if (parentContext == null)
+                    {
+                        throw new ArgumentNullException();
+                    }
+                }
+
                 Host = host;
-                Instance = instance;
+                OwnerInstance = ownerInstance;
+                ParentFrame = parentFrame;
+                ParentContext = parentContext;
             }
 
             IxProviderNode IIxInstance.ProviderNode => Host._rootScope;
 
-            object IIxInstance.Object
-            {
-                get
-                {
-                    return this;
-                }
+            Task IIxInstance.ObjectCreationTask => throw new NotSupportedException(
+                                                       "This is virtual instance and always created.");
 
-                set
-                {
-                    throw new InvalidOperationException(
-                        "IIxResolver should never pass as instance to Resolve routines.");
-                }
-            }
+            public object Object => this;
 
             IIxInstance IIxInstance.ParentInstance
             {
@@ -62,75 +66,45 @@ namespace ClrCoder.ComponentModel.IndirectX
                             "Inspecting instance parent should be performed under InstanceTreeLock.");
                     }
 
-                    return Instance;
+                    return OwnerInstance;
                 }
             }
 
             IIxResolver IIxInstance.Resolver
             {
-                get
-                {
-                    throw new InvalidOperationException("This is too virtual instance and cannot have nested resolver.");
-                }
+                get => throw new InvalidOperationException(
+                           "This is too virtual instance and cannot have nested resolver.");
 
-                set
-                {
-                    throw new InvalidOperationException("This is too virtual instance and cannot have nested resolver.");
-                }
+                set => throw new InvalidOperationException(
+                           "This is too virtual instance and cannot have nested resolver.");
             }
 
-            object IIxInstance.DataSyncRoot
-            {
-                get
-                {
-                    throw new NotSupportedException("This object not intendet to have children and children data.");
-                }
-            }
+            ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.OwnedLocks => throw new NotSupportedException(
+            ////                                                                   "This is too virtual.");
 
-            IReadOnlyCollection<IIxInstanceLock> IIxInstance.OwnedLocks
-            {
-                get
-                {
-                    throw new NotSupportedException("This is too virtual.");
-                }
-            }
+            ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks => throw new NotSupportedException(
+            ////                                                              "This is too virtual.");
+            Task IAsyncDisposable.DisposeTask => throw new NotSupportedException("Too virtual for dispose.");
 
-            IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks
-            {
-                get
-                {
-                    throw new NotSupportedException("This is too virtual.");
-                }
-            }
+            public Task<object> ObjectTask { get; }
 
-            Task IAsyncDisposable.DisposeTask
-            {
-                get
-                {
-                    throw new NotSupportedException("Too virtual for dispose.");
-                }
-            }
-
+            [Obsolete("Try remove me")]
             public IxHost Host { get; }
 
-            public bool IsDisposing
-            {
-                get
-                {
-                    throw new NotSupportedException("Lifetime methods cannot be used for this virtual object.");
-                }
-            }
-
-            public IIxInstance Instance { get; }
+            [NotNull]
+            public IIxInstance OwnerInstance { get; }
 
             [CanBeNull]
-            public IxResolveContext Context { get; }
+            public IxResolveFrame ParentFrame { get; private set; }
+
+            [CanBeNull]
+            public IxResolveContext ParentContext { get; private set; }
 
             void IIxInstance.AddLock(IIxInstanceLock instanceLock)
             {
                 ////throw new NotSupportedException(
                 ////    "This is completely virtual object and should cannot be locked/unlocked.");
-                
+
                 // Do nothing.
             }
 
@@ -149,7 +123,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 ////throw new NotSupportedException(
                 ////    "This is completely virtual object and cannot be locked/unlocked.");
-                
+
                 // Do nothing. 
             }
 
@@ -159,12 +133,17 @@ namespace ClrCoder.ComponentModel.IndirectX
                     "This is completely virtual object and cannot own locks.");
             }
 
-            public async Task<IIxInstanceLock> Resolve(IxIdentifier identifier)
+            public async Task<IIxInstanceLock> Resolve(
+                IxIdentifier identifier,
+                IReadOnlyDictionary<IxIdentifier, object> arguments = null)
             {
-                var context = new IxResolveContext(Context);
-                using (new IxInstanceTempLock(Instance))
+                var context = new IxResolveContext(
+                    ParentContext,
+                    arguments ?? new Dictionary<IxIdentifier, object>());
+
+                using (new IxInstanceTempLock(OwnerInstance))
                 {
-                    return await Host.Resolve(Instance, identifier, context);
+                    return await Host.Resolve(OwnerInstance, identifier, context, ParentFrame);
                 }
             }
 
@@ -176,6 +155,12 @@ namespace ClrCoder.ComponentModel.IndirectX
             public void StartDispose()
             {
                 throw new NotSupportedException("This method is too virtual to dispose it.");
+            }
+
+            public void ClearParentResolveContext()
+            {
+                ParentFrame = null;
+                ParentContext = null;
             }
         }
     }

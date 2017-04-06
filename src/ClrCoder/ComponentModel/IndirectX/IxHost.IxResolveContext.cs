@@ -5,13 +5,16 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using System;
     using System.Collections.Generic;
 
     using JetBrains.Annotations;
 
+    /// <content>Resolve context implementation.</content>
     public partial class IxHost
     {
+        /// <summary>
+        /// Resolve context.
+        /// </summary>
         public class IxResolveContext
         {
             [CanBeNull]
@@ -19,59 +22,17 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             private readonly IxResolveContext _rootContext;
 
-            private HashSet<ValueTuple<IIxInstance, IxIdentifier>> _activeResolves;
-
-            private bool _isFailed;
-
-            public IxResolveContext([CanBeNull] IxResolveContext parentContext)
+            public IxResolveContext(
+                [CanBeNull] IxResolveContext parentContext,
+                IReadOnlyDictionary<IxIdentifier, object> arguments)
             {
+                Arguments = arguments;
                 _parentContext = parentContext;
                 _rootContext = parentContext ?? this;
-                if (_parentContext == null)
-                {
-                    _activeResolves = new HashSet<ValueTuple<IIxInstance, IxIdentifier>>();
-                }
-                else
-                {
-                    _activeResolves = _parentContext._activeResolves;
-                }
             }
 
-            public bool IsFailed => _rootContext._isFailed;
-
-            public void RegisterResolveFinished(IIxInstance instance, IxIdentifier identifier)
-            {
-                if (instance == null)
-                {
-                    throw new ArgumentNullException(nameof(instance));
-                }
-
-                lock (_activeResolves)
-                {
-                    _activeResolves.Remove(new ValueTuple<IIxInstance, IxIdentifier>(instance, identifier));
-                }
-            }
-
-            public void RegisterResolveStart(IIxInstance instance, IxIdentifier identifier)
-            {
-                if (instance == null)
-                {
-                    throw new ArgumentNullException(nameof(instance));
-                }
-
-                lock (_activeResolves)
-                {
-                    if (!_activeResolves.Add(new ValueTuple<IIxInstance, IxIdentifier>(instance, identifier)))
-                    {
-                        throw new InvalidOperationException("Dependency cycle found in resolve operation.");
-                    }
-                }
-            }
-
-            public void SetFailed()
-            {
-                _rootContext._isFailed = true;
-            }
+            [NotNull]
+            public IReadOnlyDictionary<IxIdentifier, object> Arguments { get; }
         }
     }
 }

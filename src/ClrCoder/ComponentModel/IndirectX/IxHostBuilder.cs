@@ -45,7 +45,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="nodes">Action that configures node.</param>
         /// <returns>Host configuration fluent syntax continuation.</returns>
         public IIxHostBuilder Configure(
-            [CanBeNull] Func<IIxBuilder<ICollection<IIxProviderNodeConfig>>, IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes =
+            [CanBeNull]
+            Func<IIxBuilder<ICollection<IIxProviderNodeConfig>>, IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes =
                 null)
         {
             nodes?.Invoke(

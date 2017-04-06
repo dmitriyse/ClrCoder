@@ -10,12 +10,14 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Linq;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
     using ObjectModel;
 
     public partial class IxHost
     {
         public InterceptableDelegate<ResolveDelegate> ResolveHandler = new InterceptableDelegate<ResolveDelegate>(
-            (originInstance, identifier, context) =>
+            (originInstance, identifier, context, frame) =>
                 {
                     throw new IxResolveTargetNotFound(
                         $"No any rule found to resolve {identifier.Type}|{identifier.Name} dependency.",
@@ -25,7 +27,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         public delegate Task<IIxInstanceLock> ResolveDelegate(
             IIxInstance originInstance,
             IxIdentifier identifier,
-            IxResolveContext context);
+            IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame);
 
         /// <summary>
         /// Resolves list of <c>dependencies</c> from the specified origin. TODO: Implement <c>this</c> method with parallel
@@ -35,12 +38,14 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="originInstance">Origin instance. Where <c>dependencies</c> are queried.</param>
         /// <param name="dependencies">List of dependency identifiers.</param>
         /// <param name="context">Resolve <c>context</c>.</param>
+        /// <param name="frame">The resolve sequence frame.</param>
         /// <param name="targetOperation">Operation that should be performed with resolved <c>dependencies</c>.</param>
         /// <returns>Result of target opration.</returns>
         public async Task<TResult> ResolveList<TResult>(
             IIxInstance originInstance,
             HashSet<IxIdentifier> dependencies,
             IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame,
             Func<Dictionary<IxIdentifier, IIxInstance>, Task<TResult>> targetOperation)
         {
             if (originInstance == null)
@@ -76,12 +81,21 @@ namespace ClrCoder.ComponentModel.IndirectX
                         }
 
                         // ReSharper disable once AccessToDisposedClosure
-                        using (IIxInstanceLock instanceLock = await Resolve(originInstance, enumerator.Current, context)
+                        IxIdentifier identifier = enumerator.Current;
+
+                        using (IIxInstanceLock instanceLock =
+                            await Resolve(originInstance, identifier, context, frame)
                         )
                         {
-                            // ReSharper disable once AccessToDisposedClosure
-                            result.Add(enumerator.Current, instanceLock.Target);
-                            return await resolveItem();
+                            result.Add(identifier, instanceLock.Target);
+                            TResult resultItem = await resolveItem();
+
+                            if (identifier.Type == typeof(IIxResolver))
+                            {
+                                (instanceLock.Target as IxResolver)?.ClearParentResolveContext();
+                            }
+
+                            return resultItem;
                         }
                     };
 
@@ -93,6 +107,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxInstance originInstance,
             IxResolvePath resolvePath,
             IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame,
             IxResolveBoundDelegate resolveBound)
         {
             IIxInstance curInstance = originInstance;
@@ -126,7 +141,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         using (IIxInstanceLock instanceLock = await Resolve(
                                                                   parentInstance,
                                                                   resolvePath.Path[index].Identifier,
-                                                                  context))
+                                                                  context,
+                                                                  frame))
                         {
                             return await resolvePathElements(instanceLock.Target, index + 1);
                         }
@@ -141,11 +157,11 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private ResolveDelegate ResolverResolveInterceptor(ResolveDelegate next)
         {
-            return async (originInstance, identifier, context) =>
+            return async (originInstance, identifier, context, frame) =>
                 {
                     if (identifier.Type != typeof(IIxResolver))
                     {
-                        return await next(originInstance, identifier, context);
+                        return await next(originInstance, identifier, context, frame);
                     }
 
                     if (identifier.Name != null)
@@ -159,18 +175,18 @@ namespace ClrCoder.ComponentModel.IndirectX
                         {
                             if (originInstance.Resolver == null)
                             {
-                                originInstance.Resolver = new IxResolver(this, originInstance, context);
+                                originInstance.Resolver = new IxResolver(this, originInstance, context, frame);
                             }
                         }
                     }
 
-                    return new IxInstanceNoLock(originInstance.Resolver);
+                    return new IxInstanceNoLock((IxResolver)originInstance.Resolver);
                 };
         }
 
         private ResolveDelegate SelfToChildrenResolver(ResolveDelegate next)
         {
-            return async (originInstance, identifier, context) =>
+            return async (originInstance, identifier, context, frame) =>
                 {
                     if (identifier.Name == null)
                     {
@@ -202,29 +218,30 @@ namespace ClrCoder.ComponentModel.IndirectX
                         }
                     }
 
-                    return await next(originInstance, identifier, context);
+                    return await next(originInstance, identifier, context, frame);
                 };
         }
 
         private ResolveDelegate StdResolveInterceptor(ResolveDelegate next)
         {
-            return async (originInstance, identifier, context) =>
+            return async (originInstance, identifier, context, frame) =>
                 {
                     IxResolvePath resolvePath;
                     if (!originInstance.ProviderNode.VisibleNodes.TryGetValue(identifier, out resolvePath))
                     {
-                        return await next(originInstance, identifier, context);
+                        return await next(originInstance, identifier, context, frame);
                     }
 
                     return await resolvePath.Target.ScopeBinder(
                                originInstance,
                                resolvePath,
                                context,
+                               frame,
                                async (parentInstance, provider, c) =>
                                    {
                                        // While we have temporary lock, we needs to put permanent lock.
                                        IIxInstanceLock resolvedInstanceTempLock =
-                                           await provider.GetInstance(parentInstance, c);
+                                           await provider.GetInstance(parentInstance, c, frame);
 
                                        return resolvedInstanceTempLock;
                                    });

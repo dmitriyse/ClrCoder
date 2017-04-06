@@ -42,34 +42,31 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public override async Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
-            IxHost.IxResolveContext context)
+            IxHost.IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame)
         {
             if (parentInstance == null)
             {
                 throw new ArgumentNullException(nameof(parentInstance));
             }
 
-            lock (parentInstance.DataSyncRoot)
+            lock (Host.InstanceTreeSyncRoot)
             {
+                IIxInstanceLock scopeLock;
                 IxScopeInstance singleton;
                 object data = parentInstance.GetData(this);
                 if (data == null)
                 {
-                    singleton = new IxScopeInstance(this, parentInstance);
-
+                    singleton = new IxScopeInstance(this, parentInstance, out scopeLock);
                     parentInstance.SetData(this, singleton);
-
-                    // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
-                    // ReSharper disable once ObjectCreationAsStatement
-                    new IxInstanceMasterLock(parentInstance, singleton);
-
                 }
                 else
                 {
                     singleton = (IxScopeInstance)data;
+                    scopeLock = new IxInstanceTempLock(singleton);
                 }
 
-                return new IxInstanceTempLock(singleton);
+                return scopeLock;
             }
         }
 
@@ -82,7 +79,20 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("Only root scope can produce root instance.");
             }
 
-            return _rootInstance ?? (_rootInstance = new IxScopeInstance(this, null));
+            if (_rootInstance == null)
+            {
+                lock (Host.InstanceTreeSyncRoot)
+                {
+                    if (_rootInstance == null)
+                    {
+                        IIxInstanceLock creatorLock;
+                        _rootInstance = new IxScopeInstance(this, null, out creatorLock);
+                        creatorLock.Dispose();
+                    }
+                }
+            }
+
+            return _rootInstance;
         }
     }
 }

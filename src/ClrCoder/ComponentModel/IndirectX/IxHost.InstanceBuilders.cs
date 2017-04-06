@@ -5,6 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -68,19 +69,22 @@ namespace ClrCoder.ComponentModel.IndirectX
                             }
                         }
 
+                        // instance argument here is half-instantiated instance.
                         return new IxInstanceFactory(
-                            (instance, parentInstance, resolveContext) => ResolveList(
+                            (instance, parentInstance, resolveContext, frame) => ResolveList(
                                 instance,
                                 dependencies,
                                 resolveContext,
-                                resolvedDependencies =>
+                                frame,
+                                async resolvedDependencies =>
                                     {
                                         try
                                         {
                                             object[] arguments = constructorInfo.GetParameters()
                                                 .Select(
                                                     x =>
-                                                        resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
+                                                        resolvedDependencies[new IxIdentifier(x.ParameterType)]
+                                                            .Object)
                                                 .ToArray();
 
                                             object instanceObj = constructorInfo.Invoke(arguments);
@@ -91,8 +95,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                             lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
                                             {
-                                                instance.Object = instanceObj;
-
                                                 foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
                                                     in resolvedDependencies)
                                                 {
@@ -101,12 +103,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                 }
                                             }
 
-                                            // Result true or false does not make sence, it's just to avoid of creation parameterless ResolveList method.
-                                            return Task.FromResult(true);
+                                            // Just to avoid multiple functions.
+                                            return instanceObj;
                                         }
-                                        catch (Exception ex)
+                                        catch (TargetInvocationException ex)
                                         {
-                                            return Task.FromException<bool>(ex);
+                                            throw ex.InnerException;
                                         }
                                     }),
                             configTypeInfo.GenericTypeArguments[0]);
@@ -134,11 +136,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         }
 
                         return new IxInstanceFactory(
-                            (instance, parentInstance, resolveContext) =>
-                                {
-                                    instance.Object = instanceObj;
-                                    return Task.CompletedTask;
-                                },
+                            async (instance, parentInstance, resolveContext, frame) => instanceObj,
                             configTypeInfo.GenericTypeArguments[0]);
                     }
 
@@ -184,10 +182,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                     }
 
                     return new IxInstanceFactory(
-                        (instance, parentInstance, resolveContext) => ResolveList(
+                        (instance, parentInstance, resolveContext, frame) => ResolveList(
                             instance,
                             dependencies,
                             resolveContext,
+                            frame,
                             async resolvedDependencies =>
                                 {
                                     object[] arguments = methodInfo.GetParameters()
@@ -196,9 +195,20 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                 resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
                                         .ToArray();
 
-                                    var instanceObjTask =
-                                        (Task)methodInfo.Invoke(delegateInstanceBuilderConfig.Func, arguments);
-                                    await instanceObjTask;
+                                    Task instanceObjTask;
+                                    try
+                                    {
+                                        instanceObjTask = (Task)methodInfo.Invoke(
+                                            delegateInstanceBuilderConfig.Func,
+                                            arguments);
+
+                                        await instanceObjTask;
+                                    }
+                                    catch (TargetInvocationException ex)
+                                    {
+                                        throw ex.InnerException;
+                                    }
+
                                     object instanceObj = instanceObjTask.GetResult();
 
                                     Critical.Assert(
@@ -207,8 +217,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                     lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
                                     {
-                                        instance.Object = instanceObj;
-
                                         foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
                                             in resolvedDependencies)
                                         {
@@ -217,8 +225,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                         }
                                     }
 
-                                    // Result true or false does not make sence, it's just to avoid of creation parameterless ResolveList method.
-                                    return true;
+                                    return instanceObj;
                                 }),
                         methodInfo.ReturnType.GenericTypeArguments[0]);
                 };

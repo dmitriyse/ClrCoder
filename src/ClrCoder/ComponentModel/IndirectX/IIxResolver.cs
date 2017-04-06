@@ -5,18 +5,26 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Resolver API, the only point where hosted <c>object</c> can be instantiated.
     /// </summary>
-    public interface IIxResolver : IIxInstance
+    /// <remarks>
+    /// If you use IIxResolve inside constructor you should wait result also in the constructor.
+    /// For better usage you should avoid using resolver inside the constructor.
+    /// </remarks>
+    public interface IIxResolver
     {
         /// <summary>
         /// Resolves <c>object</c> with the specified type and <c>name</c>.
         /// </summary>
         /// <param name="identifier">Dependency <c>identifier</c>.</param>
+        /// <param name="arguments">Resolve arguments.</param>
         /// <returns>Required <c>object</c>.</returns>
-        Task<IIxInstanceLock> Resolve(IxIdentifier identifier);
+        Task<IIxInstanceLock> Resolve(
+            IxIdentifier identifier,
+            IReadOnlyDictionary<IxIdentifier, object> arguments = null);
     }
 }

@@ -7,6 +7,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -170,20 +171,27 @@ namespace ClrCoder.ComponentModel.IndirectX
             exportRegistrationsToChildren(_rootScope);
 
             _rootScopeInstance = _rootScope.GetRootInstance();
-            var resolveContext = new IxResolveContext(null);
+            var resolveContext = new IxResolveContext(null, new Dictionary<IxIdentifier, object>());
             using (IIxInstanceLock rootResolverLock = await Resolve(
                                                           _rootScopeInstance,
                                                           new IxIdentifier(typeof(IIxResolver)),
-                                                          resolveContext))
+                                                          resolveContext,
+                                                          null))
             {
-                Resolver = (IIxResolver)rootResolverLock.Target.Object;
+                var resolver = (IxResolver)rootResolverLock.Target.Object;
+                Debug.Assert(
+                    resolver.ParentContext == null && resolver.ParentFrame == null,
+                    "After resolve finished, resolver should not be bound to any context.");
+
+                Resolver = resolver;
             }
         }
 
         private async Task<IIxInstanceLock> Resolve(
             IIxInstance originInstance,
             IxIdentifier identifier,
-            IxResolveContext context)
+            IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame)
         {
             if (originInstance == null)
             {
@@ -200,12 +208,11 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("You cannot use resolver from different host.");
             }
 
-            if (context.IsFailed)
-            {
-                throw new InvalidOperationException("You cannot do anything inside failed resolve context.");
-            }
-
-            return await ResolveHandler.Delegate(originInstance, identifier, context);
+            ////if (context.IsFailed)
+            ////{
+            ////    throw new InvalidOperationException("You cannot do anything inside failed resolve context.");
+            ////}
+            return await ResolveHandler.Delegate(originInstance, identifier, context, frame);
         }
 
         /// <inheritdoc/>
@@ -232,12 +239,14 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="originInstance">Instance from which resolve is performed.</param>
     /// <param name="resolvePath">Path to provider node that <c>finally</c> resolves instance.</param>
     /// <param name="context">Resolve <c>context</c>.</param>
+    /// <param name="frame">The resolve frame in the dependency sequence.</param>
     /// <param name="resolveBound">Handler that resolves instance when scope resolved.</param>
     /// <returns>Resolved instance temp <c>lock</c>.</returns>
     public delegate Task<IIxInstanceLock> IxScopeBinderDelegate(
         IIxInstance originInstance,
         IxResolvePath resolvePath,
         IxHost.IxResolveContext context,
+        [CanBeNull] IxResolveFrame frame,
         IxResolveBoundDelegate resolveBound);
 
     /// <summary>

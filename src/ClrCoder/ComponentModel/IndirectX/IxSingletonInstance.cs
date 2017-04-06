@@ -6,7 +6,10 @@
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
+
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Instance controlled by <see cref="IxSingletonProvider"/>.
@@ -18,13 +21,37 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="providerNode">Singleton provider.</param>
         /// <param name="parentInstance">Parent instance.</param>
-        public IxSingletonInstance(IxProviderNode providerNode, IIxInstance parentInstance)
-            : base(providerNode, parentInstance)
+        /// <param name="context">The resolve context.</param>
+        /// <param name="frame">The resolution frame in the resolve sequence.</param>
+        /// <param name="creatorTempLock">First temp lock for the creator of a new instance.</param>
+        public IxSingletonInstance(
+            IxSingletonProvider providerNode,
+            IIxInstance parentInstance,
+            IxHost.IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame,
+            out IIxInstanceLock creatorTempLock)
+            : base(providerNode, parentInstance, out creatorTempLock)
         {
             if (parentInstance == null)
             {
                 throw new ArgumentNullException(nameof(parentInstance));
             }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var newFrame = new IxResolveFrame(frame, this);
+
+            Debug.Assert(ProviderNode.InstanceFactory != null, "IxSingletonProvider always have instance factory.");
+
+            SetObjectCreationTask(
+                ProviderNode.InstanceFactory.Factory(
+                    this,
+                    parentInstance,
+                    context,
+                    newFrame));
         }
 
         /// <inheritdoc/>

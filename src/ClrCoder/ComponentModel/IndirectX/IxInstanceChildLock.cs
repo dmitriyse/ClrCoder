@@ -1,4 +1,4 @@
-﻿// <copyright file="IxInstanceMasterLock.cs" company="ClrCoder project">
+﻿// <copyright file="IxInstanceChildLock.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -7,35 +7,38 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
 
-    public class IxInstanceMasterLock : IIxInstanceLock
+    /// <summary>
+    /// Locks from children to parent. Child is an owner of this lock.
+    /// </summary>
+    public class IxInstanceChildLock : IIxInstanceLock
     {
         private bool _disposed;
 
-        public IxInstanceMasterLock(IIxInstance target, IIxInstance master)
+        public IxInstanceChildLock(IIxInstance parent, IIxInstance child)
         {
-            if (target == null)
+            if (parent == null)
             {
-                throw new ArgumentNullException(nameof(target));
+                throw new ArgumentNullException(nameof(parent));
             }
 
-            if (master == null)
+            if (child == null)
             {
-                throw new ArgumentNullException(nameof(master));
+                throw new ArgumentNullException(nameof(child));
             }
 
-            Target = target;
-            Master = master;
+            Target = parent;
+            Owner = child;
 
             lock (Target.ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 Target.AddLock(this);
-                Master.AddOwnedLock(this);
+                Owner.AddOwnedLock(this);
             }
         }
 
         public IIxInstance Target { get; }
 
-        public IIxInstance Master { get; }
+        public IIxInstance Owner { get; }
 
         public void Dispose()
         {
@@ -54,14 +57,14 @@ namespace ClrCoder.ComponentModel.IndirectX
                 _disposed = true;
 
                 Target.RemoveLock(this);
-                Master.RemoveOwnedLock(this);
+                Owner.RemoveOwnedLock(this);
             }
         }
 
         /// <inheritdoc/>
         public void PulseDispose()
         {
-            Master.StartDispose();
+            Owner.StartDispose();
         }
     }
 }

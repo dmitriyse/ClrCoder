@@ -9,7 +9,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Diagnostics;
     using System.Threading.Tasks;
 
-    using Threading;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Standard singleton provider.
@@ -58,7 +58,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public override async Task<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
-            IxHost.IxResolveContext context)
+            IxHost.IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame)
         {
             if (parentInstance == null)
             {
@@ -70,79 +71,43 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(context));
             }
 
-            Task<IIxInstanceLock> creationTask;
+            IIxInstanceLock creatorLock = null;
+            IxSingletonInstance instance;
+
+            // Re-implement this with more advanced Half-Instantiation with loop detection.
             lock (Host.InstanceTreeSyncRoot)
             {
-                lock (parentInstance.DataSyncRoot)
+                instance = parentInstance.GetData(this) as IxSingletonInstance;
+                if (instance == null)
                 {
-                    object data = parentInstance.GetData(this);
-                    if (data == null)
-                    {
-                        Debug.Assert(InstanceFactory != null, "InstanceFactory != null");
-                        creationTask = CreateInstance(parentInstance, context);
+                    // TODO: Detect cycles.
+                    Debug.Assert(InstanceFactory != null, "InstanceFactory != null");
 
-                        parentInstance.SetData(this, creationTask);
-                    }
-                    else if (data is Task)
-                    {
-                        creationTask = (Task<IIxInstanceLock>)data;
-                    }
-                    else
-                    {
-                        // Object created.
-                        return new IxInstanceTempLock((IIxInstance)data);
-                    }
+                    instance = new IxSingletonInstance(this, parentInstance, context, frame, out creatorLock);
+
+                    parentInstance.SetData(this, instance);
                 }
             }
 
-            IIxInstanceLock result = null;
             try
             {
-                result = await creationTask;
-            }
-            finally
-            {
-                lock (parentInstance.DataSyncRoot)
-                {
-                    parentInstance.SetData(this, result?.Target);
-                }
-            }
-
-            // ReSharper disable once AssignNullToNotNullAttribute
-            // This is resharper wrong nullability detection.
-            return result;
-        }
-
-        private async Task<IIxInstanceLock> CreateInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
-        {
-            var halfInstantiatedInstance = new IxSingletonInstance(this, parentInstance);
-            var result = new IxInstanceTempLock(halfInstantiatedInstance);
-
-            Debug.Assert(InstanceFactory != null, "InstanceFactory != null");
-
-            try
-            {
-                await InstanceFactory.Factory(
-                    halfInstantiatedInstance,
-                    parentInstance,
-                    context);
+                await instance.ObjectCreationTask;
+                return creatorLock ?? new IxInstanceTempLock(instance);
             }
             catch
             {
-                result.Dispose();
-                await halfInstantiatedInstance.AsyncDispose();
+                if (creatorLock != null)
+                {
+                    lock (Host.InstanceTreeSyncRoot)
+                    {
+                        parentInstance.SetData(this, null);
+                    }
+
+                    creatorLock.Dispose();
+                }
+
                 throw;
             }
-
-            Critical.Assert(
-                halfInstantiatedInstance.Object != null,
-                "Factory should initialize Object property of an instance.");
-
-            // Just creating lock, child instance will dispose this lock inside it async-dispose procedure.
-            // ReSharper disable once ObjectCreationAsStatement
-            new IxInstanceMasterLock(parentInstance, halfInstantiatedInstance);
-
-            return result;
         }
     }
 }

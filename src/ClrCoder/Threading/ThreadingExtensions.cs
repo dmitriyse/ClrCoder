@@ -147,6 +147,53 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Ensures that task is started, call <see cref="Task.Start()"/> if the task in the <see cref="TaskStatus.WaitingToRun"/>
+        /// state.
+        /// </summary>
+        /// <param name="task">The task to verify. null is allowed.</param>
+        /// <returns>The same value as the input task.</returns>
+        [CanBeNull]
+        [ContractAnnotation("task:null=>null; task:notnull => notnull")]
+        public static Task EnsureStarted([CanBeNull] this Task task)
+        {
+            if (task == null)
+            {
+                return null;
+            }
+
+            if (task.Status == TaskStatus.WaitingToRun)
+            {
+                task.Start();
+            }
+
+            return task;
+        }
+
+        /// <summary>
+        /// Ensures that task is started, call <see cref="Task.Start()"/> if the task in the <see cref="TaskStatus.WaitingToRun"/>
+        /// state.
+        /// </summary>
+        /// <typeparam name="T">The type of the result produced by the task.</typeparam>
+        /// <param name="task">The task to verify. null is allowed.</param>
+        /// <returns>The same value as the input task.</returns>
+        [CanBeNull]
+        [ContractAnnotation("task:null=>null; task:notnull => notnull")]
+        public static Task<T> EnsureStarted<T>([CanBeNull] this Task<T> task)
+        {
+            if (task == null)
+            {
+                return null;
+            }
+
+            if (task.Status == TaskStatus.WaitingToRun)
+            {
+                task.Start();
+            }
+
+            return task;
+        }
+
+        /// <summary>
         /// Turns CancellationToken into awaitable operation.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to wait on.</param>
@@ -182,6 +229,7 @@ namespace ClrCoder.Threading
         /// </summary>
         /// <param name="task">Task to get result from.</param>
         /// <returns>Result of the task.</returns>
+        [CanBeNull]
         public static object GetResult(this Task task)
         {
             return task.GetType().GetTypeInfo().GetDeclaredProperty("Result")?.GetValue(task);

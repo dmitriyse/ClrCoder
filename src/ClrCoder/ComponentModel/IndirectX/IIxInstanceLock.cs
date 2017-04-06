@@ -7,9 +7,23 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
 
+    using JetBrains.Annotations;
+
+    /// <summary>
+    /// Lock on instance. Prevents instance from disposing.
+    /// </summary>
     public interface IIxInstanceLock : IDisposable
     {
+        /// <summary>
+        /// The instance that is locked by this lock.
+        /// </summary>
+        [NotNull]
         IIxInstance Target { get; }
+
+        /// <summary>
+        /// The owner instance of this lock. Usually when owner disposes it releases this lock.
+        /// </summary>
+        IIxInstance Owner { get; }
 
         /// <summary>
         /// Signals that locked <c>object</c> goes to disposing state.

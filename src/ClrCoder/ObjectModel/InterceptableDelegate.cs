@@ -25,6 +25,7 @@ namespace ClrCoder.ObjectModel
         private readonly Dictionary<Func<TDelegate, TDelegate>, int> _interceptors =
             new Dictionary<Func<TDelegate, TDelegate>, int>();
 
+        [CanBeNull]
         private TDelegate _delegate;
 
         /// <summary>

@@ -21,6 +21,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         public IIxInstance Target { get; }
 
+        public IIxInstance Owner { get; } = null;
+
         /// <inheritdoc/>
         public void Dispose()
         {

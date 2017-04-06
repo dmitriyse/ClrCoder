@@ -177,7 +177,9 @@ namespace ClrCoder.Threading
             }
         }
 
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence",
+        [SuppressMessage(
+            "StyleCop.CSharp.MaintainabilityRules",
+            "SA1408:ConditionalExpressionsMustDeclarePrecedence",
             Justification = "Reviewed. Suppression is OK here.")]
         private async Task AsynDisposeWrapped()
         {
@@ -268,11 +270,7 @@ namespace ClrCoder.Threading
             _isActualDisposeCalled = true;
 
             // When _disposeTask was not asked, we are free to set it to result of DoAsyncDispose wrapper.
-            Task task = AsynDisposeWrapped();
-            if (task.Status == TaskStatus.WaitingToRun)
-            {
-                task.Start();
-            }
+            Task task = AsynDisposeWrapped().EnsureStarted();
 
             if (_disposeTask == null)
             {

@@ -5,7 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -15,21 +15,27 @@ namespace ClrCoder.ComponentModel.IndirectX
     {
         IxProviderNode ProviderNode { get; }
 
-        object Object { get; set; }
-
         [CanBeNull]
         IIxInstance ParentInstance { get; }
 
         IIxResolver Resolver { get; set; }
 
-        object DataSyncRoot { get; }
+        /// <summary>
+        /// Object instantiation task.
+        /// </summary>
+        Task ObjectCreationTask { get; }
 
-        IReadOnlyCollection<IIxInstanceLock> OwnedLocks { get; }
-
-        IReadOnlyCollection<IIxInstanceLock> Locks { get; }
+        /// <summary>
+        /// Gets resolved object.
+        /// </summary>
+        object Object { get; }
 
         void AddLock(IIxInstanceLock instanceLock);
 
+        /// <summary>
+        /// Adds lock, that is owned by this instance. So when instance is disposed, all owned locks also released.
+        /// </summary>
+        /// <param name="instanceLock">The lock that is owned by this instance.</param>
         void AddOwnedLock(IIxInstanceLock instanceLock);
 
         [CanBeNull]

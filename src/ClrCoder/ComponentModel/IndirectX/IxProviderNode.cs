@@ -113,7 +113,10 @@ namespace ClrCoder.ComponentModel.IndirectX
         public Dictionary<IxIdentifier, IxResolvePath> VisibleNodes { get; } =
             new Dictionary<IxIdentifier, IxResolvePath>();
 
-        public abstract Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context);
+        public abstract Task<IIxInstanceLock> GetInstance(
+            IIxInstance parentInstance,
+            IxHost.IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame);
 
         public void RegisterChild(IxProviderNode child)
         {

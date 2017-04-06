@@ -14,34 +14,42 @@ namespace ClrCoder.ComponentModel.IndirectX
     {
         private bool _disposed;
 
-        public IxReferenceLock(IIxInstance target, IIxInstance user)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IxReferenceLock"/> class.
+        /// </summary>
+        /// <param name="target">The instance to lock.</param>
+        /// <param name="owner">The owner of this lock.</param>
+        public IxReferenceLock(IIxInstance target, IIxInstance owner)
         {
             if (target == null)
             {
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (user == null)
+            if (owner == null)
             {
-                throw new ArgumentNullException(nameof(user));
+                throw new ArgumentNullException(nameof(owner));
             }
 
-            Critical.Assert(!ReferenceEquals(target, user), "Cannot create reference from self to self.");
+            Critical.Assert(!ReferenceEquals(target, owner), "Cannot create reference from self to self.");
 
             Target = target;
-            User = user;
+            Owner = owner;
 
             lock (Target.ProviderNode.Host.InstanceTreeSyncRoot)
             {
                 Target.AddLock(this);
-                User.AddOwnedLock(this);
+                Owner.AddOwnedLock(this);
             }
         }
 
+        /// <inheritdoc/>
         public IIxInstance Target { get; }
 
-        public IIxInstance User { get; }
+        /// <inheritdoc/>
+        public IIxInstance Owner { get; }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             if (_disposed)
@@ -59,7 +67,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 _disposed = true;
 
                 Target.RemoveLock(this);
-                User.RemoveOwnedLock(this);
+                Owner.RemoveOwnedLock(this);
             }
         }
 

@@ -19,10 +19,14 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <param name="providerNode">Owner provider.</param>
         /// <param name="parentInstance">Parent instance.</param>
-        public IxScopeInstance(IxProviderNode providerNode, [CanBeNull] IIxInstance parentInstance)
-            : base(providerNode, parentInstance)
+        /// <param name="creatorTempLock">First temp lock for the creator of a new instance.</param>
+        public IxScopeInstance(
+            IxProviderNode providerNode,
+            [CanBeNull] IIxInstance parentInstance,
+            out IIxInstanceLock creatorTempLock)
+            : base(providerNode, parentInstance, out creatorTempLock)
         {
-            Object = providerNode;
+            SetObjectCreationTask(Task.FromResult((object)providerNode));
         }
 
         /// <inheritdoc/>

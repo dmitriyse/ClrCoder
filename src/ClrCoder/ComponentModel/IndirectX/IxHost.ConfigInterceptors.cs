@@ -71,8 +71,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 config =>
                     {
                         throw new NotSupportedException($"Scope binder with type {config.GetType()} is not supported.");
-                    })
-            ;
+                    });
 
         /// <summary>
         /// Interceptors chain that builds dispose handler.
@@ -212,7 +211,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence",
+        [SuppressMessage(
+            "StyleCop.CSharp.MaintainabilityRules",
+            "SA1408:ConditionalExpressionsMustDeclarePrecedence",
             Justification = "Reviewed. Suppression is OK here.")]
         private ProviderNodeBuilderDelegate ScopeBuilder(ProviderNodeBuilderDelegate next)
         {

@@ -16,6 +16,8 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <remarks>
     /// Instance Builder - constructs some how instance, may require dependencies, do some proxying.
     /// Instance Factory - is just async method that performs instantiation using already prepared instance prerequisites.
+    /// (It's not true).
+    /// TODO: Make conception clear.
     /// </remarks>
     public class IxInstanceFactory
     {
@@ -53,9 +55,11 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="instance">Instance that will <c>finally</c> receive created <c>object</c>.</param>
     /// <param name="parentInstance">Parent <c>instance</c>.</param>
     /// <param name="context"><c>Resolve</c> <c>context</c>.</param>
+    /// <param name="frame">The resolve frame in the dependency sequence.</param>
     /// <returns>Async execution task result.</returns>
-    public delegate Task IxInstanceFactoryDelegate(
+    public delegate Task<object> IxInstanceFactoryDelegate(
         IIxInstance instance,
         IIxInstance parentInstance,
-        IxHost.IxResolveContext context);
+        IxHost.IxResolveContext context,
+        [CanBeNull] IxResolveFrame frame);
 }

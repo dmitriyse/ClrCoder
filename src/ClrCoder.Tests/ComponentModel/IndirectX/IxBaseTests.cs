@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
+    using System;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;
@@ -30,6 +31,39 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             await (await new IxHostBuilder()
                        .Build())
                 .AsyncUsing(host => Task.CompletedTask);
+        }
+
+        /// <summary>
+        /// Exception from constructor should rise to resolve consumer.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Exception_from_constructor_should_rise_up_to_resolve()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<DummyWithError>(
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<DummyWithError>()))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                        {
+                            try
+                            {
+                                using (IxLock<DummyWithError> resolvedInstanceLock =
+                                    await host.Resolver.Get<DummyWithError>())
+                                {
+                                    resolvedInstanceLock.Target.Should().NotBeNull();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ex.GetType().Should().Be<Exception>();
+                                ex.Message.Should().Be("The Error!");
+                            }
+                        });
         }
 
         /// <summary>
@@ -67,7 +101,8 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                        nodes:
                                        nodes =>
                                            nodes.Add<string>(
-                                               instanceBuilder: new IxExistingInstanceFactoryConfig<string>("Test me!")))
+                                               instanceBuilder: new IxExistingInstanceFactoryConfig<string>(
+                                                   "Test me!")))
                        )
                        .Build())
                 .AsyncUsing(
@@ -84,6 +119,14 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             public Dummy(string test)
             {
+            }
+        }
+
+        public class DummyWithError
+        {
+            public DummyWithError()
+            {
+                throw new Exception("The Error!");
             }
         }
     }

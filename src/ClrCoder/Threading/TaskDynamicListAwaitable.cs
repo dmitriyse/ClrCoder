@@ -46,11 +46,7 @@ namespace ClrCoder.Threading
         {
             // TODO: Optimize me.
             // Synchronous call to async method can return task in WaitingToRun state.
-            Task waitAllTask = WaitAllDynamically();
-            if (waitAllTask.Status == TaskStatus.WaitingToRun)
-            {
-                waitAllTask.Start();
-            }
+            Task waitAllTask = WaitAllDynamically().EnsureStarted();
 
             return new TaskDynamicListAwaiter(waitAllTask.GetAwaiter());
         }
@@ -62,11 +58,7 @@ namespace ClrCoder.Threading
         /// <returns>TPL task.</returns>
         public Task Wait()
         {
-            Task result = WaitAllDynamically();
-            if (result.Status == TaskStatus.WaitingToRun)
-            {
-                result.Start();
-            }
+            Task result = WaitAllDynamically().EnsureStarted();
 
             return result;
         }

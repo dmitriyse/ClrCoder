@@ -8,10 +8,13 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Transient dependencies should be bound to this transient scope which in turn bound to root scope.
     /// Transient scopes have unlimited multiplicity.
     /// </summary>
+    [Obsolete("Probably this is wrong direction. And will be removed soon.")]
     public class IxTransientScope : IxProviderNode
     {
         public IxTransientScope(
@@ -30,12 +33,15 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportFilter,
                 exportToParentFilter,
                 importFilter,
-                (a, b, c, d) => { throw new NotImplementedException(); },
+                (a, b, c, d, e) => { throw new NotImplementedException(); },
                 obj => Task.CompletedTask)
         {
         }
 
-        public override Task<IIxInstanceLock> GetInstance(IIxInstance parentInstance, IxHost.IxResolveContext context)
+        public override Task<IIxInstanceLock> GetInstance(
+            IIxInstance parentInstance,
+            IxHost.IxResolveContext context,
+            [CanBeNull] IxResolveFrame frame)
         {
             throw new NotImplementedException();
         }

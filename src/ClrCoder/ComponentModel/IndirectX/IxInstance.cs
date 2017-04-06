@@ -25,43 +25,61 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <remarks>Should be implemented as proxy in the future.</remarks>
     public abstract class IxInstance : AsyncDisposableBase, IIxInstance
     {
+        [CanBeNull]
         private readonly IIxInstance _parentInstance;
 
         private readonly ProcessableSet<IIxInstanceLock> _locks;
 
         private readonly ProcessableSet<IIxInstanceLock> _ownedLocks;
 
-        private readonly AwaitableEvent _selfDisposeCompleted;
+        private readonly AwaitableEvent _childrenDisposeCompleted;
 
         [CanBeNull]
         private Dictionary<IxProviderNode, object> _childrenData;
 
         [CanBeNull]
-        private object _object;
+        private Task<object> _objectCreationTask;
+
+        [CanBeNull]
+        private IIxInstanceLock _initTempLock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IxInstance"/> class.
         /// </summary>
+        /// <remarks>
+        /// Instance creates in the "Half-instantiated state".
+        /// </remarks>
         /// <param name="providerNode">Node that produces instance.</param>
         /// <param name="parentInstance">Direct parent instance.</param>
+        /// <param name="creatorTempLock">First temp lock for the creator of a new instance.</param>
         public IxInstance(
             IxProviderNode providerNode,
-            [CanBeNull] IIxInstance parentInstance)
+            [CanBeNull] IIxInstance parentInstance,
+            out IIxInstanceLock creatorTempLock)
             : base(providerNode.Host.InstanceTreeSyncRoot)
         {
             ProviderNode = providerNode;
             _parentInstance = parentInstance;
             _ownedLocks = new ProcessableSet<IIxInstanceLock>();
             _locks = new ProcessableSet<IIxInstanceLock>();
-            _selfDisposeCompleted = new AwaitableEvent();
+            _childrenDisposeCompleted = new AwaitableEvent();
+            if (parentInstance != null)
+            {
+                new IxInstanceChildLock(parentInstance, this);
+            }
+
+            creatorTempLock = new IxInstanceTempLock(this);
+            _initTempLock = creatorTempLock;
         }
 
         /// <inheritdoc/>
         public IxProviderNode ProviderNode { get; }
 
+        //// TODO: Refactor to just task.
+
         /// <inheritdoc/>
         [DebuggerHidden]
-        public object Object
+        public Task ObjectCreationTask
         {
             get
             {
@@ -69,29 +87,27 @@ namespace ClrCoder.ComponentModel.IndirectX
                 // We can skip thread safety check for this method.
 
                 // This should never happened even if schema have errors. Cycle detector should save us.
-                Critical.Assert(_object != null, "You cannot use half initialized dependency.");
+                Critical.Assert(_objectCreationTask != null, "You cannot use not properly initialized object.");
 
-                return _object;
+                return _objectCreationTask;
             }
+        }
 
-            set
+        /// <inheritdoc/>
+        public object Object
+        {
+            get
             {
-                // If everything fine this method will be called from one thread and only once.
-                // We can skip thread safety check for this method.
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                Critical.Assert(_object == null, "Instance already initialized, you cannot init Object property twice.");
-
-                _object = value;
+                Critical.Assert(_objectCreationTask != null, "Object creation task was not initialized.");
+                Critical.Assert(
+                    _objectCreationTask.IsCompleted,
+                    "You cannot get instance object if instantiation is not yet completed.");
+                return _objectCreationTask.Result;
             }
         }
 
         /// <inheritdoc/>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        [CanBeNull]
         public IIxInstance ParentInstance
         {
             get
@@ -109,9 +125,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         /// <inheritdoc/>
         public IIxResolver Resolver { get; set; }
-
-        /// <inheritdoc/>
-        public object DataSyncRoot => ChildrenData;
 
         /// <inheritdoc/>
         public IReadOnlyCollection<IIxInstanceLock> OwnedLocks => _ownedLocks;
@@ -135,6 +148,11 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public void AddLock(IIxInstanceLock instanceLock)
         {
+            if (instanceLock == null)
+            {
+                throw new ArgumentNullException(nameof(instanceLock));
+            }
+
             EnsureTreeLocked();
 
             bool inserted = _locks.Add(instanceLock);
@@ -142,12 +160,17 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             UpdateDisposeSuspendState();
 
-            UpdateSelfDisposeCompleteSuspendState();
+            UpdateChildrenDisposeCompleteSuspendState();
         }
 
         /// <inheritdoc/>
         public void AddOwnedLock(IIxInstanceLock instanceLock)
         {
+            if (instanceLock == null)
+            {
+                throw new ArgumentNullException(nameof(instanceLock));
+            }
+
             EnsureTreeLocked();
             if (!_ownedLocks.Add(instanceLock))
             {
@@ -164,7 +187,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(DataSyncRoot))
+            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
             {
                 Critical.Assert(false, "Data manipulations should be performed under lock.");
             }
@@ -179,7 +202,24 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public void RemoveLock(IIxInstanceLock instanceLock)
         {
+            if (instanceLock == null)
+            {
+                throw new ArgumentNullException(nameof(instanceLock));
+            }
+
             EnsureTreeLocked();
+
+            if (ReferenceEquals(instanceLock, _initTempLock))
+            {
+                Critical.Assert(
+                    _objectCreationTask != null,
+                    "You need to setup instance object factory before releasing creator lock.");
+                Critical.Assert(
+                    _objectCreationTask.IsCompleted,
+                    "Creator lock should be removed only after object instantiation completes.");
+            }
+
+            _initTempLock = null;
 
             // --------- We are under tree lock --------------
             if (!_locks.Remove(instanceLock))
@@ -189,12 +229,17 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             UpdateDisposeSuspendState();
 
-            UpdateSelfDisposeCompleteSuspendState();
+            UpdateChildrenDisposeCompleteSuspendState();
         }
 
         /// <inheritdoc/>
         public void RemoveOwnedLock(IIxInstanceLock instanceLock)
         {
+            if (instanceLock == null)
+            {
+                throw new ArgumentNullException(nameof(instanceLock));
+            }
+
             EnsureTreeLocked();
 
             // --------- We are under tree lock --------------
@@ -212,9 +257,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new ArgumentNullException(nameof(providerNode));
             }
 
-            if (!Monitor.IsEntered(DataSyncRoot))
+            if (!Monitor.IsEntered(ProviderNode.Host.InstanceTreeSyncRoot))
             {
-                Critical.Assert(false, "Data manipulations should be performed under lock.");
+                Critical.Assert(false, "Data manipulations should be performed under tree lock.");
             }
 
             if (data == null)
@@ -241,27 +286,22 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             try
             {
-                // Here we are possibly under lock.
-                lock (ProviderNode.Host.InstanceTreeSyncRoot)
+                if (_locks.Any(x => !(x is IxInstanceChildLock)))
                 {
-                    if (_locks.Any(x => !(x is IxInstanceMasterLock)))
-                    {
-                        Critical.Assert(
-                            false,
-                            "Dependencies schema problem, after instance object disposed no any lock are allowed.");
-                    }
+                    Critical.Assert(
+                        false,
+                        "Dependencies schema problem, after instance object disposed no any lock are allowed.");
                 }
 
-                // Here we possibly deinitializing half-initialized instance.
-                if (_object != null)
+                if (!ObjectCreationTask.IsFaulted)
                 {
                     // Only fully-initialized instance should be self-disposed.
                     await SelfDispose();
                 }
 
-                UpdateSelfDisposeCompleteSuspendState();
-
-                _selfDisposeCompleted.Set();
+                // This call is not required.
+                ////UpdateChildrenDisposeCompleteSuspendState();
+                _childrenDisposeCompleted.Set();
 
                 // Sync or async execution here.
             }
@@ -277,11 +317,9 @@ namespace ClrCoder.ComponentModel.IndirectX
                         // Here other objects can dispose synchronously.
                         OwnedLocks.First().Dispose();
                     }
-
-                    // If some master locks stayed here, we need to init some awaiter.
                 }
 
-                await _selfDisposeCompleted;
+                await _childrenDisposeCompleted;
             }
         }
 
@@ -306,7 +344,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             // ---------------------------------------------------------
             _locks.ForEach(x => x.PulseDispose());
 
-            if (Locks.All(x => x is IxInstanceMasterLock))
+            if (Locks.All(x => x is IxInstanceChildLock))
             {
                 SetDisposeSuspended(false);
             }
@@ -321,27 +359,73 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <returns>Async execution TPL task.</returns>
         protected abstract Task SelfDispose();
 
+        /// <summary>
+        /// Initializes object creation task.
+        /// </summary>
+        /// <param name="objectCreateTask"></param>
+        protected void SetObjectCreationTask(Task<object> objectCreateTask)
+        {
+            // If everything fine this method will be called from one thread and only once.
+            // We can skip thread safety check for this method.
+            if (objectCreateTask == null)
+            {
+                throw new ArgumentNullException(nameof(objectCreateTask));
+            }
+
+            EnsureTreeLocked();
+
+            Critical.Assert(
+                _objectCreationTask == null,
+                "Instance already initialized, you cannot init Object property twice.");
+
+            _objectCreationTask = ObjectFactoryProxy(objectCreateTask).EnsureStarted();
+        }
+
+        private async Task<object> ObjectFactoryProxy(Task<object> objectFactory)
+        {
+            try
+            {
+                return await objectFactory;
+            }
+            finally
+            {
+                // TODO: Re-implement me gracefully without lock.
+                lock (this)
+                {
+                    if (Resolver == null)
+                    {
+                        Resolver = new IxHost.IxResolver(ProviderNode.Host, this, null, null);
+                    }
+                    else
+                    {
+                        var resolver = (IxHost.IxResolver)Resolver;
+                        resolver.ClearParentResolveContext();
+                    }
+                }
+            }
+        }
+
+        private void UpdateChildrenDisposeCompleteSuspendState()
+        {
+            try
+            {
+                _childrenDisposeCompleted.SuspendTrigger(_locks.Any());
+            }
+            catch (InvalidOperationException)
+            {
+                Critical.Assert(false, "Cannot set child lock, full dispose was completed.");
+            }
+        }
+
         private void UpdateDisposeSuspendState()
         {
             try
             {
-                SetDisposeSuspended(!Locks.All(x => x is IxInstanceMasterLock));
+                SetDisposeSuspended(!Locks.All(x => x is IxInstanceChildLock));
             }
             catch (InvalidOperationException)
             {
                 Critical.Assert(false, "Cannot set lock, self dispose was started.");
-            }
-        }
-
-        private void UpdateSelfDisposeCompleteSuspendState()
-        {
-            try
-            {
-                _selfDisposeCompleted.SuspendTrigger(_locks.Any());
-            }
-            catch (InvalidOperationException)
-            {
-                Critical.Assert(false, "Cannot set master lock, self dispose was completed.");
             }
         }
     }
