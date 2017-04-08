@@ -47,7 +47,9 @@ namespace ClrCoder.ComponentModel.IndirectX
             DisposeHandlerBuilder.Add(DisposableDisposeHandlerBuilder, 100);
             DisposeHandlerBuilder.Add(AsyncDisposableDisposeHandlerBuilder, 200);
 
+            ResolveHandler.Add(SelfResolveInterceptor, 80);
             ResolveHandler.Add(ResolverResolveInterceptor, 100);
+            ResolveHandler.Add(DirectCycleResolveInterceptor, 150);
             ResolveHandler.Add(SelfToChildrenResolver, 200);
             ResolveHandler.Add(StdResolveInterceptor, 300);
             ResolveHandler.Add(ResolveContextResolveInterceptor, 400);
@@ -158,11 +160,23 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     foreach (IxProviderNode child in node.Nodes)
                     {
-                        foreach (
-                            KeyValuePair<IxIdentifier, IxResolvePath> kvp in
+                        foreach (KeyValuePair<IxIdentifier, IxResolvePath> kvp in
                             registrationsToExport.Where(x => child.ImportFilter(x.Key)))
                         {
-                            if (!child.VisibleNodes.ContainsKey(kvp.Key))
+                            IxResolvePath resolvePath;
+                            if (child.VisibleNodes.TryGetValue(kvp.Key, out resolvePath))
+                            {
+                                // Skipping self to children.
+                                if (resolvePath.Path.Any())
+                                {
+                                    // Direct cycle resolution replacement.
+                                    if (!resolvePath.Target.ParentReplacementNodes.ContainsKey(kvp.Key))
+                                    {
+                                        resolvePath.Target.ParentReplacementNodes.Add(kvp.Key, kvp.Value);
+                                    }
+                                }
+                            }
+                            else
                             {
                                 child.VisibleNodes.Add(kvp.Key, kvp.Value);
                             }

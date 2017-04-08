@@ -23,7 +23,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// IndirectX controlled instance placeholder <c>base</c> implementation.
     /// </summary>
     /// <remarks>Should be implemented as proxy in the future.</remarks>
-    public abstract class IxInstance : AsyncDisposableBase, IIxInstance
+    public abstract class IxInstance : AsyncDisposableBase, IIxInstance, IIxSelf
     {
         [CanBeNull]
         private readonly IIxInstance _parentInstance;

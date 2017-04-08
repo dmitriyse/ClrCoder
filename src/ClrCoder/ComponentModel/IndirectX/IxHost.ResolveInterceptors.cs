@@ -184,6 +184,24 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        private ResolveDelegate SelfResolveInterceptor(ResolveDelegate next)
+        {
+            return async (originInstance, identifier, context, frame) =>
+                {
+                    if (identifier.Type != typeof(IIxSelf))
+                    {
+                        return await next(originInstance, identifier, context, frame);
+                    }
+
+                    if (identifier.Name != null)
+                    {
+                        throw new InvalidOperationException("IIxSelf cannot be queried with name.");
+                    }
+
+                    return new IxInstanceNoLock(new IxSelfInstance(_rootScope, (IIxSelf)originInstance));
+                };
+        }
+
         private ResolveDelegate SelfToChildrenResolver(ResolveDelegate next)
         {
             return async (originInstance, identifier, context, frame) =>
@@ -245,6 +263,38 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                        return resolvedInstanceTempLock;
                                    });
+                };
+        }
+
+        private ResolveDelegate DirectCycleResolveInterceptor(ResolveDelegate next)
+        {
+            return async (originInstance, identifier, context, frame) =>
+                {
+                    // Direct cycle resolve case.
+                    if (originInstance.ProviderNode.Identifier == identifier)
+                    {
+                        IxResolvePath resolvePath;
+
+                        // Using parent replacement provider, if it exists.
+                        if (originInstance.ProviderNode.ParentReplacementNodes.TryGetValue(identifier, out resolvePath))
+                        {
+                            return await resolvePath.Target.ScopeBinder(
+                                       originInstance,
+                                       resolvePath,
+                                       context,
+                                       frame,
+                                       async (parentInstance, provider, c) =>
+                                           {
+                                               // While we have temporary lock, we needs to put permanent lock.
+                                               IIxInstanceLock resolvedInstanceTempLock =
+                                                   await provider.GetInstance(parentInstance, identifier, c, frame);
+
+                                               return resolvedInstanceTempLock;
+                                           });
+                        }
+                    }
+
+                    return await next(originInstance, identifier, context, frame);
                 };
         }
 

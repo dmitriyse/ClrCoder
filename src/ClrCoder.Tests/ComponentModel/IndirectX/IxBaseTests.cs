@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
+#pragma warning disable 1998
     using System;
     using System.Threading.Tasks;
 
@@ -21,6 +22,42 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
     [TestFixture]
     public class IxBaseTests
     {
+        public interface IDummy
+        {
+            string AboutMe { get; }
+        }
+
+        /// <summary>
+        /// Tests the case, when dependency overrides parent dependency and uses it.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task DependencyOverrideAndUseTest()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<IDummy>(
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<DummyParent>())
+                                   .Add<SomeContainer>(
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<SomeContainer>(),
+                                       nodes:
+                                       nodes =>
+                                           nodes.Add<IDummy>(
+                                               instanceBuilder: new IxClassInstanceBuilderConfig<DummyNested>())))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                        {
+                            using (IxLock<SomeContainer> someContainerLock =
+                                await host.Resolver.Get<SomeContainer>())
+                            {
+                                someContainerLock.Target.Dummy.AboutMe.Should().Be("I am parent; I know");
+                            }
+                        });
+        }
+
         /// <summary>
         /// Init/dispose cycle with zero configuration and resolves.
         /// </summary>
@@ -86,6 +123,50 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         }
 
         /// <summary>
+        /// Tests disposing through IIxSelf.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Self_object_dispose_test()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<DummyDisposable>(
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<DummyDisposable>(),
+                                       multiplicity: new IxPerResolveMultiplicityConfig()))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                        {
+                            var wasCalled = false;
+                            DummyDisposable dummyTmp;
+                            using (IxLock<DummyDisposable> dummyLock =
+                                await host.Resolver.Get<DummyDisposable>())
+                            {
+                                dummyLock.Target.DisposeAction = () => { wasCalled = true; };
+                                dummyLock.Target.DoDispose();
+                                dummyTmp = dummyLock.Target;
+                                wasCalled.Should().BeFalse();
+                            }
+
+                            dummyTmp.DisposeTask.Wait(TimeSpan.FromSeconds(5));
+
+                            wasCalled.Should().BeTrue();
+
+                            wasCalled = false;
+                            using (IxLock<DummyDisposable> dummyLock =
+                                await host.Resolver.Get<DummyDisposable>())
+                            {
+                                dummyLock.Target.DisposeAction = () => { wasCalled = true; };
+                                dummyLock.Target.DoDispose();
+                                wasCalled.Should().BeFalse();
+                            }
+                        });
+        }
+
+        /// <summary>
         /// Dependencies registered directly in some object should be resolved by this object.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
@@ -122,12 +203,61 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
             }
         }
 
+        public class DummyDisposable : AsyncDisposableBase
+        {
+            private readonly IIxSelf _self;
+
+            public DummyDisposable(IIxSelf self)
+            {
+                _self = self;
+            }
+
+            public Action DisposeAction { get; set; }
+
+            public void DoDispose()
+            {
+                _self.StartDispose();
+            }
+
+            protected override async Task AsyncDispose()
+            {
+                DisposeAction?.Invoke();
+            }
+        }
+
+        public class DummyNested : IDummy
+        {
+            private readonly IDummy _parent;
+
+            public DummyNested(IDummy parent)
+            {
+                _parent = parent;
+            }
+
+            public string AboutMe => _parent.AboutMe + "; I know";
+        }
+
+        public class DummyParent : IDummy
+        {
+            public string AboutMe => "I am parent";
+        }
+
         public class DummyWithError
         {
             public DummyWithError()
             {
                 throw new Exception("The Error!");
             }
+        }
+
+        public class SomeContainer
+        {
+            public SomeContainer(IDummy dummy)
+            {
+                Dummy = dummy;
+            }
+
+            public IDummy Dummy { get; }
         }
     }
 }
