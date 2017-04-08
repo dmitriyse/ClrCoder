@@ -5,8 +5,6 @@
 
 namespace ClrCoder.AspNetCore.Hosting
 {
-    using JetBrains.Annotations;
-
 #if NET46 || NETSTANDARD1_6
     using System;
     using System.Buffers;
@@ -16,9 +14,12 @@ namespace ClrCoder.AspNetCore.Hosting
     using System.Reflection;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.ApplicationParts;
     using Microsoft.AspNetCore.Mvc.Controllers;
@@ -188,6 +189,40 @@ namespace ClrCoder.AspNetCore.Hosting
             return app;
         }
 
+        /// <summary>
+        /// Subscribes handler delegate on pipeline exceptions.
+        /// </summary>
+        /// <param name="app">Application builder.</param>
+        /// <param name="exceptionHandler">Exception handler delegate.</param>
+        /// <returns>Application builder fluent syntax continuation.</returns>
+        public static IApplicationBuilder UseDelegateExceptionHandler(
+            this IApplicationBuilder app,
+            Func<HttpContext, Exception, Task> exceptionHandler)
+        {
+            app.UseExceptionHandler(
+                new ExceptionHandlerOptions
+                    {
+                        ExceptionHandler =
+                            async context =>
+                                {
+                                    if (context.Response.StatusCode
+                                        == (int)HttpStatusCode.InternalServerError)
+                                    {
+                                        var errorFeature = context
+                                            .Features
+                                            .Get<IExceptionHandlerFeature>();
+
+                                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                                        if (errorFeature != null)
+                                        {
+                                            await exceptionHandler(context, errorFeature.Error);
+                                        }
+                                    }
+                                }
+                    });
+            return app;
+        }
+
         private class SingleControllerProvider : ControllerFeatureProvider
         {
             private readonly HashSet<TypeInfo> _allowedControllers;
@@ -207,6 +242,7 @@ namespace ClrCoder.AspNetCore.Hosting
                 return _allowedControllers.Contains(typeInfo);
             }
         }
+
 #endif
 #if NET46
 
@@ -245,7 +281,7 @@ namespace ClrCoder.AspNetCore.Hosting
                         using (var sigTerm = new UnixSignal(Signum.SIGTERM))
                         {
                             var signals = new[] { sigInt, sigTerm };
-                            for (;;)
+                            for (;)
                             {
                                 int id = UnixSignal.WaitAny(signals);
 
