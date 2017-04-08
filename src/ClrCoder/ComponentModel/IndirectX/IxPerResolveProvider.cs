@@ -41,6 +41,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             VxArgs.NotNull(parentNode, nameof(parentNode));
             VxArgs.NotNull(instanceFactory, nameof(instanceFactory));
+
+            // Adding self provided as default for children.
+            VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] { }));
         }
 
         /// <inheritdoc/>

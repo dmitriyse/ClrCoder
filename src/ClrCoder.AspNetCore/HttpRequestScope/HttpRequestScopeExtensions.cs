@@ -9,6 +9,7 @@ namespace ClrCoder.AspNetCore
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     public static class HttpRequestScopeExtensions
     {
@@ -21,6 +22,12 @@ namespace ClrCoder.AspNetCore
         {
             builder.UseMiddleware<WebAppHttpScopeBinderMiddleware>(resolver);
             return builder;
+        }
+
+        public static IServiceCollection AddHttpRequestScopeService(this IServiceCollection services)
+        {
+            services.AddScoped(sp => sp.GetService<IHttpContextAccessor>().HttpContext.GetRequestScope());
+            return services;
         }
     }
 }

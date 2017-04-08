@@ -28,6 +28,7 @@ namespace ClrCoder.AspNetCore
         /// <summary>
         /// The http context of the request of this scope.
         /// </summary>
+        [NotNull]
         HttpContext Context { get; }
     }
 }

@@ -63,6 +63,27 @@ namespace ClrCoder
             return new Guid(_md5Variables.Md5.ComputeHash(data));
         }
 
+        /// <summary>
+        /// Calculates MD5 hash for the provided binary data.
+        /// </summary>
+        /// <param name="data">Binary data.</param>
+        /// <returns>MD5 hash stored in the array.</returns>
+        [PublicAPI]
+        public static byte[] Md5HashBytes(this byte[] data)
+        {
+            if (data == null)
+            {
+                return new byte[8];
+            }
+
+            if (_md5Variables == null)
+            {
+                _md5Variables = new Md5HashTheadVariables();
+            }
+
+            return _md5Variables.Md5.ComputeHash(data);
+        }
+
         private class Md5HashTheadVariables
         {
             public Md5HashTheadVariables()
