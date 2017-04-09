@@ -34,13 +34,13 @@ namespace ClrCoder.Logging.Std
         Info = 400,
 
         /// <summary>
-        /// Overkill detailed information required to debug.
-        /// </summary>
-        Debug = 500,
-
-        /// <summary>
         /// Detailed information.
         /// </summary>
-        Trace = 600,
+        Trace = 500,
+
+        /// <summary>
+        /// Overkill detailed information required to debug.
+        /// </summary>
+        Debug = 600,
     }
 }

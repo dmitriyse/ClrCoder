@@ -5,6 +5,8 @@
 
 namespace ClrCoder.AspNetCore.Hosting
 {
+    using JetBrains.Annotations;
+
 #if NET46 || NETSTANDARD1_6
     using System;
     using System.Buffers;
@@ -13,8 +15,6 @@ namespace ClrCoder.AspNetCore.Hosting
     using System.Net;
     using System.Reflection;
     using System.Threading.Tasks;
-
-    using JetBrains.Annotations;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;

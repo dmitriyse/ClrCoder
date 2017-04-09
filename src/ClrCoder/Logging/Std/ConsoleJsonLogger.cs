@@ -76,10 +76,10 @@ namespace ClrCoder.Logging.Std
                     case LogSeverity.Info:
                         Console.ForegroundColor = ConsoleColor.White;
                         break;
-                    case LogSeverity.Debug:
+                    case LogSeverity.Trace:
                         Console.ForegroundColor = ConsoleColor.Gray;
                         break;
-                    case LogSeverity.Trace:
+                    case LogSeverity.Debug:
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                         break;
                     default:
