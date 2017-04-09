@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Cluster
 {
+    using System;
     using System.IO;
 
     using ComponentModel.IndirectX;
@@ -19,6 +20,35 @@ namespace ClrCoder.Cluster
     [PublicAPI]
     public static class ClrCoderClusterModuleExtensions
     {
+        /// <summary>
+        /// Temporary solution for cluster references, until full support will be implemented in the IndirectX.
+        /// </summary>
+        /// <typeparam name="T">The type of the reference target.</typeparam>
+        /// <param name="resolver">The IndirectX resolver.</param>
+        /// <param name="clusterRef">The reference to resolve.</param>
+        /// <returns>Lock on accessor proxy to the reference target.</returns>
+        public static IxLock<T> ClusterGet<T>(this IIxResolver resolver, IClusterRef<T> clusterRef)
+            where T : class
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            if (clusterRef == null)
+            {
+                throw new ArgumentNullException(nameof(clusterRef));
+            }
+
+            var runtimeRef = clusterRef as RuntimeLocalRef<T>;
+            if (runtimeRef == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return new IxLock<T>(runtimeRef.Target);
+        }
+
         /// <summary>
         /// Simple way to register cluster node dependencies.
         /// </summary>

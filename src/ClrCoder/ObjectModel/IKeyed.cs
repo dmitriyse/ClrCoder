@@ -5,18 +5,18 @@
 
 namespace ClrCoder.ObjectModel
 {
-    using System;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Keyed <c>object</c>.
     /// </summary>
     /// <typeparam name="TKey">Type of key.</typeparam>
-    public interface IKeyed<TKey>
-        where TKey : IEquatable<TKey>
+    public interface IKeyed<out TKey>
     {
         /// <summary>
         /// Key value. Used to identify <c>object</c>.
         /// </summary>
+        [NotNull]
         TKey Key { get; }
     }
 }

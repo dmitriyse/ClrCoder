@@ -39,6 +39,19 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="IxLock{T}"/> class.
+        /// </summary>
+        /// <remarks>
+        /// HACK: Remove me please!
+        /// </remarks>
+        /// <param name="target">The lock target.</param>
+        public IxLock(T target)
+        {
+            EnsureNotDefault();
+            _target = target;
+        }
+
+        /// <summary>
         /// Locked <c>object</c>.
         /// </summary>
         public T Target
