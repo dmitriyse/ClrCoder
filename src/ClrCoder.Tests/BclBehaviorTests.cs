@@ -43,6 +43,56 @@ namespace ClrCoder.Tests
         }
 
         /// <summary>
+        /// Determines what will happens when CTS disposes.
+        /// </summary>
+        [Test]
+        public void CancellationTokenSourceDisposeBehavior()
+        {
+            var cts = new CancellationTokenSource();
+            var ct = cts.Token;
+            Func<Task> asyncAction = async () =>
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(1000), ct);
+                };
+
+            Task.Factory.StartNew(
+                () =>
+                    {
+                        Thread.Sleep(100);
+                        cts.Dispose();
+                    });
+
+            asyncAction.ShouldNotThrow();
+        }
+
+        /// <summary>
+        /// Determines what will happens when CTS disposes.
+        /// </summary>
+        [Test]
+        public void DirectCancelLinkedTokenSource()
+        {
+            var cts1 = new CancellationTokenSource();
+            var ct1 = cts1.Token;
+            var cts2 = new CancellationTokenSource();
+            var ct2 = cts2.Token;
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
+            var linkedCt = linkedCts.Token;
+            Func<Task> asyncAction = async () =>
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(1000), linkedCt);
+                };
+
+            Task.Factory.StartNew(
+                () =>
+                    {
+                        Thread.Sleep(100);
+                        linkedCts.Cancel();
+                    });
+
+            asyncAction.ShouldThrow<TaskCanceledException>();
+        }
+
+        /// <summary>
         /// Await behavior test for completed task.
         /// </summary>
         /// <returns>Async execution task.</returns>
@@ -266,7 +316,7 @@ namespace ClrCoder.Tests
         {
             var uriExplicit = new Uri("http://localhost:80", UriKind.Absolute);
             var uriImplicit = new Uri("http://localhost", UriKind.Absolute);
-            
+
             uriExplicit.Equals(uriImplicit).Should().BeTrue();
             uriExplicit.AbsoluteUri.Equals(uriImplicit.AbsoluteUri).Should().BeTrue();
             TestContext.WriteLine(uriExplicit);
