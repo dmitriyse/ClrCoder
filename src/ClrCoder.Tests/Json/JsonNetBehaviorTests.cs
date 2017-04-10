@@ -17,6 +17,8 @@ namespace ClrCoder.Tests.Json
 
     using NUnit.Framework;
 
+    using ObjectModel;
+
     /// <summary>
     /// Tests for check behavior of Newtonsoft.Json.
     /// </summary>
@@ -34,6 +36,32 @@ namespace ClrCoder.Tests.Json
                     JsonDefaults.JsonConfigSerializerSource.Settings)
                 .Prop1.Should()
                 .Be("MyTest");
+        }
+
+        [Test]
+        [Ignore("Currently IKeyedCollection has no any convertor for Json.Net")]
+        public void MaterializedKeyedCollectionTest()
+        {
+            var container = new MyContainer
+                                {
+                                    SomeItems =
+                                        {
+                                            new MyKeyed
+                                                {
+                                                    Key = 1,
+                                                    Tst = "TestMe1"
+                                                },
+                                            new MyKeyed
+                                                {
+                                                    Key = 2,
+                                                    Tst = "TestMe2"
+                                                }
+                                        }
+                                };
+            string str = JsonConvert.SerializeObject(container, Formatting.Indented);
+            TestContext.WriteLine(str);
+            var myObj = JsonConvert.DeserializeObject<MyContainer>(str);
+            myObj.SomeItems.Count.Should().Be(container.SomeItems.Count);
         }
 
         /// <summary>
@@ -106,6 +134,18 @@ namespace ClrCoder.Tests.Json
         private class C4
         {
             public Uri UriProp { get; set; }
+        }
+
+        private class MyContainer
+        {
+            public IKeyedCollection<int, MyKeyed> SomeItems { get; } = new KeyedCollectionEx<int, MyKeyed>();
+        }
+
+        private class MyKeyed : IKeyed<int>
+        {
+            public int Key { get; set; }
+
+            public string Tst { get; set; }
         }
     }
 }

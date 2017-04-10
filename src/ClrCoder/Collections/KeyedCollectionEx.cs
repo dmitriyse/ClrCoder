@@ -5,54 +5,122 @@
 
 namespace ClrCoder.Collections
 {
+    using System;
+    using System.Collections;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
 
     using JetBrains.Annotations;
 
     using ObjectModel;
 
     /// <summary>
-    /// TODO: Reimplement me without inheritance from KeyedCollection.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class KeyedCollectionEx<TKey, TValue> : KeyedCollection<TKey, TValue>, IReadOnlyKeyedCollection<TKey, TValue>
+    public class KeyedCollectionEx<TKey, TValue> : IKeyedCollection<TKey, TValue>
         where TValue : IKeyed<TKey>
     {
+        private Dictionary<TKey, TValue> _inner;
+
         public KeyedCollectionEx()
         {
+            _inner = new DictionaryEx<TKey, TValue>();
         }
 
         public KeyedCollectionEx(IEqualityComparer<TKey> comparer)
-            : base(comparer)
         {
+            _inner = new DictionaryEx<TKey, TValue>(comparer);
         }
 
-        public IEnumerable<TKey> Keys => Dictionary.Keys;
+        public IEnumerable<TKey> Keys => _inner.Keys;
 
-        public IEnumerable<TValue> Values => Dictionary.Values;
+        public IEnumerable<TValue> Values => _inner.Values;
+
+        public int Count => _inner.Count;
+
+        IEnumerator<TValue> IReadOnlyKeyedCollection<TKey, TValue>.GetEnumerator()
+        {
+            return _inner.Values.GetEnumerator();
+        }
+
+        public bool IsReadOnly { get; }
+
+        public IEqualityComparer<TKey> Comparer { get; }
+
+        public TValue this[TKey key] => _inner[key];
+
+        public void Add(TValue item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            _inner.Add(item.Key, item);
+        }
+
+        public void Clear()
+        {
+            _inner.Clear();
+        }
+
+        public bool Contains(TValue item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            TValue existingValue;
+
+            if (TryGetValue(item.Key, out existingValue))
+            {
+                return ReferenceEquals(item, existingValue);
+            }
+
+            return false;
+        }
 
         /// <inheritdoc/>
         public bool ContainsKey([NotNull] TKey key)
         {
-            return Dictionary.ContainsKey(key);
+            return _inner.ContainsKey(key);
+        }
+
+        public void CopyTo(TValue[] array, int arrayIndex)
+        {
+            _inner.Values.CopyTo(array, arrayIndex);
+        }
+
+        IEnumerator<TValue> IKeyedCollection<TKey, TValue>.GetEnumerator()
+        {
+            return _inner.Values.GetEnumerator();
+        }
+
+        IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+        {
+            return _inner.Values.GetEnumerator();
         }
 
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
         {
-            return Dictionary.GetEnumerator();
+            return _inner.GetEnumerator();
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return ((IEnumerable)_inner.Values).GetEnumerator();
+        }
+
+        public bool Remove(TValue item)
+        {
+            return _inner.Remove(item.Key);
         }
 
         /// <inheritdoc/>
         public bool TryGetValue([NotNull] TKey key, out TValue value)
         {
-            return Dictionary.TryGetValue(key, out value);
-        }
-
-        protected override TKey GetKeyForItem(TValue item)
-        {
-            return item.Key;
+            return _inner.TryGetValue(key, out value);
         }
     }
 }

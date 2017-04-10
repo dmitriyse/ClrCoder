@@ -5,7 +5,7 @@
 
 namespace ClrCoder.Collections
 {
-    using System.Diagnostics.CodeAnalysis;
+    using System.Collections.Generic;
 
     using ObjectModel;
 
@@ -14,9 +14,11 @@ namespace ClrCoder.Collections
     /// </summary>
     /// <typeparam name="TKey">The type of the items key.</typeparam>
     /// <typeparam name="TValue">The type of the collection item.</typeparam>
-    [SuppressMessage("ReSharper", "PossibleInterfaceMemberAmbiguity", Justification = "Reviewed, ok.")]
-    public interface IKeyedCollection<TKey, TValue> : IReadOnlyKeyedCollection<TKey, TValue>
+    public interface IKeyedCollection<TKey, TValue> : IReadOnlyKeyedCollection<TKey, TValue>, ICollectionEx<TValue>
         where TValue : IKeyed<TKey>
     {
+        new int Count { get; }
+
+        new IEnumerator<TValue> GetEnumerator();
     }
 }

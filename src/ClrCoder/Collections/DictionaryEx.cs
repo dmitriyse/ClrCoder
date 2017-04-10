@@ -17,5 +17,13 @@ namespace ClrCoder.Collections
     /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     public class DictionaryEx<TKey, TValue> : Dictionary<TKey, TValue>
     {
+        public DictionaryEx()
+        {
+        }
+
+        public DictionaryEx(IEqualityComparer<TKey> comparer)
+            : base(comparer)
+        {
+        }
     }
 }

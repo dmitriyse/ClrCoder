@@ -10,5 +10,8 @@ namespace ClrCoder.Collections
     public interface IReadOnlyKeyedCollection<TKey, TItem> : IReadOnlyDictionaryEx<TKey, TItem>,
                                                              IReadOnlyCollection<TItem>
     {
+        new int Count { get; }
+
+        new IEnumerator<TItem> GetEnumerator();
     }
 }
