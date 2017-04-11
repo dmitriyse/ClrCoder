@@ -64,7 +64,9 @@ namespace ClrCoder.DomainModel
     /// Proxy for Unit of Work with 1 repository.
     /// </summary>
     /// <typeparam name="TR1">Type of repository 1.</typeparam>
-    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass",
+    [SuppressMessage(
+        "StyleCop.CSharp.MaintainabilityRules",
+        "SA1402:FileMayOnlyContainASingleClass",
         Justification = "Reviewed. Suppression is OK here.")]
     public class UnitOfWorkProxy<TR1> : UnitOfWorkProxy, IUnitOfWork<TR1>
         where TR1 : class, IRepository
@@ -135,5 +137,40 @@ namespace ClrCoder.DomainModel
 
         /// <inheritdoc/>
         public TR3 R3 => Impl.GetRepository<TR3>();
+    }
+
+    /// <summary>
+    /// Proxy for Unit of Work with 3 repositories.
+    /// </summary>
+    /// <typeparam name="TR1">Type of repository 1.</typeparam>
+    /// <typeparam name="TR2">Type of repository 2.</typeparam>
+    /// <typeparam name="TR3">Type of repository 3.</typeparam>
+    /// <typeparam name="TR4">Type of repository 4.</typeparam>
+    public class UnitOfWorkProxy<TR1, TR2, TR3, TR4> : UnitOfWorkProxy, IUnitOfWork<TR1, TR2, TR3, TR4>
+        where TR1 : class, IRepository
+        where TR2 : class, IRepository
+        where TR3 : class, IRepository
+        where TR4 : class, IRepository
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkProxy{TR1, TR2, TR3, TR4}"/> class.
+        /// </summary>
+        /// <param name="impl">Unit of work implementation.</param>
+        internal UnitOfWorkProxy(IUnitOfWorkImpl impl)
+            : base(impl)
+        {
+        }
+
+        /// <inheritdoc/>
+        public TR1 R1 => Impl.GetRepository<TR1>();
+
+        /// <inheritdoc/>
+        public TR2 R2 => Impl.GetRepository<TR2>();
+
+        /// <inheritdoc/>
+        public TR3 R3 => Impl.GetRepository<TR3>();
+
+        /// <inheritdoc/>
+        public TR4 R4 => Impl.GetRepository<TR4>();
     }
 }

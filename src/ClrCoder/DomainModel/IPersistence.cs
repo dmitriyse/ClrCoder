@@ -52,4 +52,24 @@ namespace ClrCoder.DomainModel
         /// <returns>New unit of work.</returns>
         IUnitOfWork<TR1, TR2, TR3> OpenUnitOfWork();
     }
+
+    /// <summary>
+    /// Provides persistence with 3 repositories.
+    /// </summary>
+    /// <typeparam name="TR1">Type of repository 1.</typeparam>
+    /// <typeparam name="TR2">Type of repository 2.</typeparam>
+    /// <typeparam name="TR3">Type of repository 3.</typeparam>
+    /// <typeparam name="TR4">Type of repository 4.</typeparam>
+    public interface IPersistence<out TR1, out TR2, out TR3, out TR4>
+        where TR1 : class, IRepository
+        where TR2 : class, IRepository
+        where TR3 : class, IRepository
+        where TR4 : class, IRepository
+    {
+        /// <summary>
+        /// Opens new unit of work.
+        /// </summary>
+        /// <returns>New unit of work.</returns>
+        IUnitOfWork<TR1, TR2, TR3, TR4> OpenUnitOfWork();
+    }
 }
