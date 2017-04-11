@@ -125,6 +125,17 @@ namespace ClrCoder.Logging.Std
                     });
         }
 
+        /// <summary>
+        /// Creates logger proxy for the provided scope id.
+        /// </summary>
+        /// <param name="logger">The parent logger.</param>
+        /// <param name="scopeId">Scope identifier.</param>
+        /// <returns>The scoped logger.</returns>
+        public static IJsonLogger UseScope(this IJsonLogger logger, object scopeId)
+        {
+            return new ScopedLogger(logger, scopeId);
+        }
+
         private static void WriteLogEntry(
             IJsonLogger logger,
             LogSeverity severity,

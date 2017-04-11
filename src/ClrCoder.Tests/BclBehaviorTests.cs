@@ -93,6 +93,43 @@ namespace ClrCoder.Tests
         }
 
         /// <summary>
+        /// Determines what will happens when CTS disposes.
+        /// </summary>
+        [Test]
+        public void CombinedCtsCancelSourceShouldBeDetermined()
+        {
+            var cts1 = new CancellationTokenSource();
+            var ct1 = cts1.Token;
+            var cts2 = new CancellationTokenSource();
+            var ct2 = cts2.Token;
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
+            var linkedCt = linkedCts.Token;
+            Func<Task> asyncAction = async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(1000), linkedCt);
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        (ex.CancellationToken == linkedCt).Should().BeTrue();
+                        
+                        // This is the only way to determine what CTS was canceled.
+                        ct2.IsCancellationRequested.Should().BeTrue();
+                    }
+                };
+
+            Task.Factory.StartNew(
+                () =>
+                    {
+                        Thread.Sleep(100);
+                        cts2.Cancel();
+                    });
+
+            asyncAction().Wait();
+        }
+
+        /// <summary>
         /// Await behavior test for completed task.
         /// </summary>
         /// <returns>Async execution task.</returns>
