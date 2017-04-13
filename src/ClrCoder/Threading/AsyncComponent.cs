@@ -74,7 +74,7 @@ namespace ClrCoder.Threading
         /// Starts new cancellable operation. This operation have it's own cancellation token source.
         /// </summary>
         /// <param name="cancellationTokens">Cancellation tokens that can cancel this operation.</param>
-        /// <exception cref="ComponentFaultException">Component disposed.</exception>
+        /// <exception cref="ComponentDisposedException">Component disposed.</exception>
         /// <returns>The cancellable operation.</returns>
         protected CancellableAsyncComponentOperation StartCancellableOperation(
             params CancellationToken[] cancellationTokens)
@@ -94,7 +94,7 @@ namespace ClrCoder.Threading
             catch (InvalidOperationException)
             {
                 Interlocked.Decrement(ref _asyncOperationsCount);
-                throw new ComponentFaultException("Component disposed.");
+                throw new ComponentDisposedException();
             }
         }
 
@@ -109,12 +109,12 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Verifies that component not in the "disposing" or "disposed" state.
         /// </summary>
-        /// <exception cref="ComponentFaultException">Component disposed.</exception>
+        /// <exception cref="ComponentDisposedException">Component disposed.</exception>
         protected void VerifyComponentAlive()
         {
             if (ProcessingCancellationToken.IsCancellationRequested)
             {
-                throw new ComponentFaultException("Component disposed.");
+                throw new ComponentDisposedException();
             }
         }
 
@@ -133,6 +133,7 @@ namespace ClrCoder.Threading
             }
         }
 
+        /// <inheritdoc/>
         protected override void OnDisposeStarted()
         {
             base.OnDisposeStarted();

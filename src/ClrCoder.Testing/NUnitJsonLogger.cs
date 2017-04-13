@@ -28,7 +28,7 @@ namespace ClrCoder.Testing
     {
         private readonly DateTimeZone _localZone;
 
-        private TestExecutionContext _testExecutionContext;
+        private TestExecutionContext testExecutionContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
@@ -46,7 +46,6 @@ namespace ClrCoder.Testing
         /// <param name="serializerSource">The serializer source.</param>
         public NUnitJsonLogger(
             IAsyncHandler asyncHandler,
-            TestExecutionContext context = null,
             IJsonSerializerSource serializerSource = null)
         {
             if (asyncHandler == null)
@@ -55,8 +54,6 @@ namespace ClrCoder.Testing
             }
 
             AsyncHandler = asyncHandler;
-
-            _testExecutionContext = context ?? TestExecutionContext.CurrentContext;
 
             SerializerSource = serializerSource ?? StdJsonLogging.DefaultSerializerSource;
 
@@ -76,34 +73,35 @@ namespace ClrCoder.Testing
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
-            _testExecutionContext.OutWriter.WriteLine(
+            var testExecutionContext = TestExecutionContext.CurrentContext;
+            testExecutionContext.OutWriter.WriteLine(
                 $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
 
             if (logEntry.Exception != null)
             {
                 var baseIntent = "  |";
-                _testExecutionContext.OutWriter.Write(baseIntent);
-                _testExecutionContext.OutWriter.WriteLine(
+                testExecutionContext.OutWriter.Write(baseIntent);
+                testExecutionContext.OutWriter.WriteLine(
                     "------------------------------------- Exception ---------------------------------------");
                 string intent = string.Empty;
                 ExceptionDto curException = logEntry.Exception;
                 do
                 {
-                    _testExecutionContext.OutWriter.Write(baseIntent);
-                    _testExecutionContext.OutWriter.Write(intent);
+                    testExecutionContext.OutWriter.Write(baseIntent);
+                    testExecutionContext.OutWriter.Write(intent);
                     if (intent != string.Empty)
                     {
-                        _testExecutionContext.OutWriter.Write("<--");
+                        testExecutionContext.OutWriter.Write("<--");
                     }
 
                     string name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
-                    _testExecutionContext.OutWriter.WriteLine($"{name}: {curException.Message}");
+                    testExecutionContext.OutWriter.WriteLine($"{name}: {curException.Message}");
                     curException = curException.InnerException;
                     intent += "    ";
                 }
                 while (curException != null);
-                _testExecutionContext.OutWriter.Write(baseIntent);
-                _testExecutionContext.OutWriter.WriteLine(
+                testExecutionContext.OutWriter.Write(baseIntent);
+                testExecutionContext.OutWriter.WriteLine(
                     "---------------------------------------------------------------------------------------");
             }
         }

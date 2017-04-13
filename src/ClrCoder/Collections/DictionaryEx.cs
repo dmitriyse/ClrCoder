@@ -15,7 +15,7 @@ namespace ClrCoder.Collections
     /// </remarks>
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
-    public class DictionaryEx<TKey, TValue> : Dictionary<TKey, TValue>
+    public class DictionaryEx<TKey, TValue> : Dictionary<TKey, TValue>, IDictionaryEx<TKey, TValue>
     {
         public DictionaryEx()
         {
