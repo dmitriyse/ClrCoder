@@ -43,11 +43,15 @@ namespace ClrCoder.Collections
             return _inner.Values.GetEnumerator();
         }
 
+        public TValue this[TKey index]
+        {
+            get => _inner[index];
+            set => _inner[index] = value;
+        }
+
         public bool IsReadOnly { get; }
 
         public IEqualityComparer<TKey> Comparer { get; }
-
-        public TValue this[TKey key] => _inner[key];
 
         public void Add(TValue item)
         {
@@ -97,7 +101,7 @@ namespace ClrCoder.Collections
             return _inner.Values.GetEnumerator();
         }
 
-        IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+        public IEnumerator<TValue> GetEnumerator()
         {
             return _inner.Values.GetEnumerator();
         }
@@ -107,7 +111,7 @@ namespace ClrCoder.Collections
             return _inner.GetEnumerator();
         }
 
-        public IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable)_inner.Values).GetEnumerator();
         }

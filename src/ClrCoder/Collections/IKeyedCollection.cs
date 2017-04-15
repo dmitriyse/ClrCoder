@@ -20,5 +20,7 @@ namespace ClrCoder.Collections
         new int Count { get; }
 
         new IEnumerator<TValue> GetEnumerator();
+
+        new TValue this[TKey index] { get; set; }
     }
 }
