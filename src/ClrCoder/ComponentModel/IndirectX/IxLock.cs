@@ -47,7 +47,6 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="target">The lock target.</param>
         public IxLock(T target)
         {
-            EnsureNotDefault();
             _target = target;
         }
 
@@ -99,7 +98,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private void EnsureNotDefault()
         {
-            if (_instanceLock == null)
+            if (_instanceLock == null && _target.Equals(default(T)))
             {
                 throw new InvalidOperationException("Cannot use default value.");
             }
