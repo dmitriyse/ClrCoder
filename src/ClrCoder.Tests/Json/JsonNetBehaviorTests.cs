@@ -13,6 +13,8 @@ namespace ClrCoder.Tests.Json
 
     using FluentAssertions;
 
+    using Flurl;
+
     using Newtonsoft.Json;
 
     using NUnit.Framework;
@@ -85,6 +87,19 @@ namespace ClrCoder.Tests.Json
                 .Items.First()
                 .Should()
                 .Be("MyTest");
+        }
+
+        /// <summary>
+        /// Tests json serialization behavior.
+        /// </summary>
+        [Test]
+        [Ignore("For manual testing")]
+        public void JsonSerializeTest()
+        {
+            string result = JsonConvert.SerializeObject(
+                new Url("http://test.com"),
+                JsonDefaults.JsonConfigSerializerSource.Settings);
+            TestContext.WriteLine(result);
         }
 
         /// <summary>

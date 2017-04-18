@@ -7,6 +7,7 @@ namespace ClrCoder.Net.Http
 {
 #if NET46 || NETSTANDARD1_6
     using System;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -15,8 +16,12 @@ namespace ClrCoder.Net.Http
 
     using Flurl;
     using Flurl.Http;
+    using Flurl.Http.Configuration;
 
     using JetBrains.Annotations;
+
+    using Logging;
+    using Logging.Std;
 
     using Validation;
 
@@ -246,6 +251,170 @@ namespace ClrCoder.Net.Http
             VxArgs.NotNull(content, nameof(content));
 
             return PostBytesAsync(new FlurlClient(url), content, setHeadersAction, cancellationToken);
+        }
+
+        /// <summary>
+        /// Enables request/response dumping to the provided logger.
+        /// </summary>
+        /// <param name="flurlClient">Flurl fluent syntax.</param>
+        /// <param name="logger">The logger.</param>
+        /// <returns></returns>
+        public static IFlurlClient WithDump(this IFlurlClient flurlClient, IJsonLogger logger)
+        {
+            return flurlClient.ConfigureClient(
+                client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger));
+        }
+
+        /// <summary>
+        /// Enables request/response dumping to the provided logger.
+        /// </summary>
+        /// <param name="url">Flurl url.</param>
+        /// <param name="logger">The logger.</param>
+        /// <returns></returns>
+        public static IFlurlClient WithDump(this Url url, IJsonLogger logger)
+        {
+            return url.ConfigureClient(client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger));
+        }
+
+        private class DumpHandler : DelegatingHandler
+        {
+            public DumpHandler(HttpMessageHandler inner, IJsonLogger logger)
+                : base(inner)
+            {
+                Log = new ClassJsonLogger<DumpHandler>(logger);
+            }
+
+            private IJsonLogger Log { get; }
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                Guid id = Guid.NewGuid();
+                var wasContentDumpingStarted = false;
+                var requestDump = new RequestDump();
+                try
+                {
+                    requestDump.Method = request.Method?.ToString() ?? "<null>";
+                    requestDump.HttpProtocolVersion = request.Version?.ToString() ?? "<null>";
+                    requestDump.Url = request.RequestUri?.AbsoluteUri ?? "<null>";
+                    requestDump.Headers = request.Headers.ToDictionary(x => x.Key, x => x.Value.ToArray());
+
+                    if (request.Content != null)
+                    {
+                        wasContentDumpingStarted = true;
+                        await request.Content.LoadIntoBufferAsync();
+                        requestDump.RequestBody = await request.Content.ReadAsByteArrayAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (wasContentDumpingStarted)
+                    {
+                        Log.Error(
+                            _ => _($"Error dumping request content: {requestDump.Method} {requestDump.Url}")
+                                .Data(new { RequestDump = requestDump })
+                                .Exception(ex));
+                    }
+                    else
+                    {
+                        Log.Error(
+                            _ => _($"Error dumping request: {requestDump.Method} {requestDump.Url}")
+                                .Data(new { RequestDump = requestDump })
+                                .Exception(ex));
+                    }
+
+                    throw;
+                }
+
+                Log.Trace(
+                    _ => _($"Client http request started: {requestDump.Method} {requestDump.Url}")
+                        .Data(new { RequestDump = requestDump, ClientRequestId = id }));
+
+                HttpResponseMessage response;
+                try
+                {
+                    response = await base.SendAsync(request, cancellationToken);
+                    Log.Debug(
+                        _ => _(
+                            $"Response received, starting read: {requestDump.Method} {requestDump.Url} -> {(int)response.StatusCode} {response.ReasonPhrase}"));
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(
+                        _ => _($"Client http request error. ({requestDump.Method} {requestDump.Url})")
+                            .Data(new { ClientRequestId = id })
+                            .Exception(ex));
+                    throw;
+                }
+
+                var responseDump = new ResponseDump();
+                wasContentDumpingStarted = false;
+                try
+                {
+                    responseDump.StatusCode = ((int)response.StatusCode).ToString();
+                    responseDump.ReasonPhrase = response.ReasonPhrase ?? "<null>";
+                    responseDump.Headers = response.Headers.ToDictionary(x => x.Key, x => x.Value.ToArray());
+
+                    if (response.Content != null)
+                    {
+                        wasContentDumpingStarted = true;
+                        await response.Content.LoadIntoBufferAsync();
+                        responseDump.ResponseBody = await response.Content.ReadAsByteArrayAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (wasContentDumpingStarted)
+                    {
+                        Log.Error(
+                            _ => _(
+                                    $"Error dumping response content: {requestDump.Method} {requestDump.Url} -> {response.StatusCode} {response.ReasonPhrase}")
+                                .Data(new { ResponseDump = responseDump, ClientResponseId = id })
+                                .Exception(ex));
+                    }
+                    else
+                    {
+                        Log.Error(
+                            _ => _(
+                                    $"Error dumping response: {requestDump.Method} {requestDump.Url} -> {response.StatusCode} {response.ReasonPhrase}")
+                                .Data(new { ResponseDump = responseDump, ClientResponseId = id })
+                                .Exception(ex));
+                    }
+
+                    throw;
+                }
+
+                Log.Trace(
+                    _ => _(
+                            $"Response received: {requestDump.Method} {requestDump.Url} -> {responseDump.StatusCode} {responseDump.ReasonPhrase}")
+                        .Data(new { ResponseDump = responseDump, ClientResponseId = id }));
+
+                return response;
+            }
+        }
+
+        /// <summary>
+        /// Factory for add request/response dump.
+        /// </summary>
+        private class HttpClientWithDumpingFactory : IHttpClientFactory
+        {
+            private readonly IJsonLogger _logger;
+
+            public HttpClientWithDumpingFactory(IJsonLogger logger)
+            {
+                _logger = logger;
+            }
+
+            public HttpClient CreateClient(Url url, HttpMessageHandler handler)
+            {
+                return new HttpClient(new FlurlMessageHandler(handler));
+            }
+
+            public HttpMessageHandler CreateMessageHandler()
+            {
+                return new DumpHandler(new HttpClientHandler(), _logger);
+            }
         }
     }
 

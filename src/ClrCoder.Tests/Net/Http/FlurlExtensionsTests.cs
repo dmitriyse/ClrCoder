@@ -1,43 +1,40 @@
-﻿// <copyright file="FlurlBehaviorTests.cs" company="ClrCoder project">
+﻿// <copyright file="FlurlExtensionsTests.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace ClrCoder.Tests.Net.Http
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Threading;
     using System.Threading.Tasks;
 
-    using ClrCoder.Json;
+    using ClrCoder.AspNetCore.Hosting;
     using ClrCoder.Logging;
     using ClrCoder.Net.Http;
     using ClrCoder.Threading;
-    using ClrCoder.AspNetCore.Hosting;
 
     using FluentAssertions;
 
-    using Microsoft.AspNetCore.Mvc;
-
     using Flurl;
     using Flurl.Http;
+
+    using Microsoft.AspNetCore.Mvc;
 
     using Newtonsoft.Json;
 
     using NUnit.Framework;
 
+    using Runtime.Serialization;
+
     using Testing;
 
     /// <summary>
-    /// Tests flurl implementation.
+    /// Tests for the <see cref="FlurlHttpExtensions"/>.
     /// </summary>
     [TestFixture]
-    public class FlurlBehaviorTests
+    public class FlurlExtensionsTests
     {
         /// <summary>
-        /// Test for connecting to unknown DNS name.
+        /// Test for connecting to unknown DNS name. // TODO: Rewrite test.
         /// </summary>
         /// <param name="host"> The <c>host</c>. </param>
         /// <param name="dnsOrIp"> The dns or IP. </param>
@@ -46,11 +43,11 @@ namespace ClrCoder.Tests.Net.Http
         /// Async execution TPL task.
         /// </returns>
         [Test]
-        [TestCase("http://localhost:5001", "http://localhost:5001", "Flurl")]
-        [TestCase("http://localhost:5001", "http://localhost:5001", "nFlurl")]
-        [TestCase("http://localhost:5001", "http://nobody-knows-me-99923.com", "Flurl")]
-        [TestCase("http://localhost:5001", "http://10.110.110.110/", "nFlurl")]
-        [TestCase("http://localhost:5001", "http://46.20.65.243:22222/", "")]
+        [TestCase("http://localhost:5062", "http://localhost:5062", "Flurl")]
+        [TestCase("http://localhost:5062", "http://localhost:5062", "nFlurl")]
+        [TestCase("http://localhost:5062", "http://nobody-knows-me-99923.com", "Flurl")]
+        [TestCase("http://localhost:5062", "http://10.110.110.110/", "nFlurl")]
+        [TestCase("http://localhost:5062", "http://46.20.65.243:22222/", "")]
         public async Task FlurlHttpExtensionsTest(string host, string dnsOrIp, string pathSegment)
         {
             try
@@ -58,7 +55,7 @@ namespace ClrCoder.Tests.Net.Http
                 using (HostUtils.HostController<TestFlurlController>(host))
                 {
                     string response = await new Url(dnsOrIp).AppendPathSegment(pathSegment).GetAsync().ReceiveString();
-                    if (pathSegment == "Flurl" && host == "http://localhost:5001")
+                    if (pathSegment == "Flurl" && host == "http://localhost:5062")
                     {
                         response.Should().BeEquivalentTo("Hello");
                     }
@@ -90,21 +87,32 @@ namespace ClrCoder.Tests.Net.Http
             }
         }
 
-        /// <summary>
-        /// Tests json serialization behavior.
-        /// </summary>
         [Test]
-        [Ignore("For manual testing")]
-        public void JsonSerializeTest()
+        public async Task SendJsonAsyncWithDumpTest()
         {
-            string result = JsonConvert.SerializeObject(
-                new Url("http://test.com"),
-                JsonDefaults.JsonConfigSerializerSource.Settings);
-            TestContext.WriteLine(result);
+            var data = new MethodInfoDto { Name = "name", TypeFullName = "fullname" };
+
+            IJsonLogger logger = new NUnitJsonLogger(new SyncHandler());
+
+            using (HostUtils.HostController<TestFlurlController>("http://localhost:5062"))
+            {
+                string response = await new Url("http://localhost:5062").AppendPathSegment("Flurl")
+                                      .WithDump(logger)
+                                      .PostJsonAsync(data)
+                                      .ReceiveString();
+
+                var responseData = JsonConvert.DeserializeObject<MethodInfoDto>(response);
+                responseData.Should().NotBeNull();
+                responseData.Name.Should().Be(data.Name);
+                responseData.TypeFullName.Should().Be(data.TypeFullName);
+            }
         }
 
+        /// <summary>
+        /// Controller for testing flurl extensions.
+        /// </summary>
         [Route("/Flurl")]
-        public class TestFlurlController
+        private class TestFlurlController
         {
             [HttpGet]
             public string Get()
@@ -113,10 +121,11 @@ namespace ClrCoder.Tests.Net.Http
             }
 
             [HttpPost]
-            public string Post()
+            public string Post([FromBody] MethodInfoDto data)
             {
-                return "Bye";
+                return JsonConvert.SerializeObject(data);
             }
         }
+
     }
 }
