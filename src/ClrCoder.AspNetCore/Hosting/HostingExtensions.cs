@@ -281,7 +281,7 @@ namespace ClrCoder.AspNetCore.Hosting
                         using (var sigTerm = new UnixSignal(Signum.SIGTERM))
                         {
                             var signals = new[] { sigInt, sigTerm };
-                            for (;)
+                            for (;;)
                             {
                                 int id = UnixSignal.WaitAny(signals);
 
