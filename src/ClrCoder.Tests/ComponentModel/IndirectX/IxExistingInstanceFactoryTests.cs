@@ -33,7 +33,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                        .Configure(
                            rootNodes =>
                                rootNodes.Add<DummyObject>(
-                                   factory: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
+                                   instanceBuilder: new IxExistingInstanceFactoryConfig<DummyObject>(instance),
                                    disposeHandler: obj => Task.CompletedTask))
                        .Build())
                 .AsyncUsing(

@@ -7,15 +7,11 @@ namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
     using System.Threading.Tasks;
 
-    using Attributes;
-
     using JetBrains.Annotations;
-
-    using MoreLinq;
 
     using ObjectModel;
 
@@ -126,7 +122,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                   {
                                       ScopeBinding = cfgContract.ScopeBinding,
                                       Identifier = cfgContract.Identifier,
-                                      Factory = cfgContract.Factory,
+                                      InstanceBuilder = cfgContract.InstanceBuilder,
                                       Multiplicity = cfgContract.Multiplicity,
                                       DisposeHandler = cfgContract.DisposeHandler,
                                       ExportFilter = cfgContract.ExportFilter,
@@ -154,7 +150,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                         configProviderConfig = new IxStdProviderConfig
                                                    {
                                                        Identifier = new IxIdentifier(nodeConfig.GetType()),
-                                                       Factory = new IxExistingInstanceFactoryConfig<object>(nodeConfig),
+                                                       InstanceBuilder =
+                                                           new IxExistingInstanceFactoryConfig<object>(nodeConfig),
                                                    };
                     }
 
@@ -202,132 +199,6 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         #endregion
 
-        private InstanceFactoryBuilderDelegate ClassInstanceFactoryBuilder(
-            InstanceFactoryBuilderDelegate next)
-        {
-            return factoryConfig =>
-                {
-                    TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
-
-                    if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassInstanceBuilderConfig<>))
-                    {
-                        TypeInfo instanceClass = configTypeInfo.GenericTypeArguments[0].GetTypeInfo();
-                        ConstructorInfo[] constructors =
-                            instanceClass.DeclaredConstructors.Where(x => !x.IsStatic).ToArray();
-                        if (constructors.Length == 0)
-                        {
-                            // Currently impossible case.
-                            throw new IxConfigurationException(
-                                $"Cannot use IxClassInstanceFactory because no any constructors found in the class {instanceClass.FullName}.");
-                        }
-
-                        if (constructors.Length > 1)
-                        {
-                            throw new IxConfigurationException(
-                                $"Cannot use IxClassInstanceFactory because more than one constructors defined in the class {instanceClass.FullName}.");
-                        }
-
-                        ConstructorInfo constructorInfo = constructors.Single();
-
-                        HashSet<IxIdentifier> dependencies =
-                            constructorInfo.GetParameters().Select(x => new IxIdentifier(x.ParameterType)).ToHashSet();
-                        if (dependencies.Count != constructorInfo.GetParameters().Length)
-                        {
-                            throw new IxConfigurationException(
-                                "Multiple parameters with the same type not supported by IxClassRawFactory.");
-                        }
-
-                        // TODO: Add tests for this feature
-                        List<RequireAttribute> requireAttributes =
-                            constructorInfo.GetCustomAttributes<RequireAttribute>().ToList();
-                        foreach (RequireAttribute requireAttribute in requireAttributes)
-                        {
-                            if (!dependencies.Add(new IxIdentifier(requireAttribute.Type)))
-                            {
-                                throw new IxConfigurationException(
-                                    "Multiple parameters with the same type not supported by IxClassRawFactory.");
-                            }
-                        }
-
-                        return new IxInstanceFactory(
-                            (instance, parentInstance, resolveContext) => ResolveList(
-                                instance,
-                                dependencies,
-                                resolveContext,
-                                resolvedDependencies =>
-                                    {
-                                        try
-                                        {
-                                            object[] arguments = constructorInfo.GetParameters()
-                                                .Select(
-                                                    x =>
-                                                        resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
-                                                .ToArray();
-
-                                            object instanceObj = constructorInfo.Invoke(arguments);
-
-                                            Critical.Assert(
-                                                instanceObj != null,
-                                                "Constructor call through reflection should not return null.");
-
-                                            lock (instance.ProviderNode.Host.InstanceTreeSyncRoot)
-                                            {
-                                                instance.Object = instanceObj;
-
-                                                foreach (KeyValuePair<IxIdentifier, IIxInstance> kvp
-                                                    in resolvedDependencies)
-                                                {
-                                                    // ReSharper disable once ObjectCreationAsStatement
-                                                    new IxReferenceLock(kvp.Value, instance);
-                                                }
-                                            }
-
-                                            // Result true or false does not make sence, it's just to avoid of creation parameterless ResolveList method.
-                                            return Task.FromResult(true);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            return Task.FromException<bool>(ex);
-                                        }
-                                    }),
-                            configTypeInfo.GenericTypeArguments[0]);
-                    }
-
-                    return next(factoryConfig);
-                };
-        }
-
-        private InstanceFactoryBuilderDelegate ExistingInstanceRawFactoryBuilder(
-            InstanceFactoryBuilderDelegate next)
-        {
-            return factoryConfig =>
-                {
-                    TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
-
-                    if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>))
-                    {
-                        object instanceObj = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
-                        if (instanceObj == null)
-                        {
-                            throw new InvalidOperationException(
-                                "Existing instance factory config should have not null instance.");
-                        }
-
-                        return new IxInstanceFactory(
-                            (instance, parentInstance, resolveContext) =>
-                                {
-                                    instance.Object = instanceObj;
-                                    return Task.CompletedTask;
-                                },
-                            configTypeInfo.GenericTypeArguments[0]);
-                    }
-
-                    return next(factoryConfig);
-                };
-        }
-
         private ScopeBinderBuilderDelegate RegistrationScopeBinderBuilder(ScopeBinderBuilderDelegate next)
         {
             return config =>
@@ -341,6 +212,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 };
         }
 
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence",
+            Justification = "Reviewed. Suppression is OK here.")]
         private ProviderNodeBuilderDelegate ScopeBuilder(ProviderNodeBuilderDelegate next)
         {
             return (nodeConfig, parentNode) =>
@@ -363,7 +236,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     var cfg = nodeConfig as IxScopeConfig;
                     var cfgContract = (IIxScopeConfig)nodeConfig;
-                    if (cfg == null)
+                    if (cfg == null
+                        || cfg.GetType() != typeof(IxScopeConfig) && cfg.GetType() != typeof(IxHostConfig))
                     {
                         cfg = new IxScopeConfig
                                   {
@@ -371,8 +245,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                                       ExportFilter = cfgContract.ExportFilter,
                                       ExportToParentFilter = cfgContract.ExportToParentFilter,
                                       ImportFilter = cfgContract.ImportFilter,
-                                      IsInstanceless = cfgContract.IsInstanceless
+                                      IsInstanceless = cfgContract.IsInstanceless,
                                   };
+
+                        foreach (IIxProviderNodeConfig node in cfgContract.Nodes)
+                        {
+                            cfg.Nodes.Add(node);
+                        }
                     }
 
                     if (cfg.Identifier == null)
@@ -439,12 +318,12 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(nodeConfig, parentNode);
                     }
 
-                    if (cfg.Factory == null)
+                    if (cfg.InstanceBuilder == null)
                     {
                         throw new InvalidOperationException("Instance factory should be configured.");
                     }
 
-                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.Factory);
+                    IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.InstanceBuilder);
 
                     if (cfg.DisposeHandler == null)
                     {

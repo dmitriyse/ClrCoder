@@ -29,7 +29,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             // TODO: Load priorities from configs.
             InstanceFactoryBuilder.Add(ExistingInstanceRawFactoryBuilder, 100);
-            InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 100);
+            InstanceFactoryBuilder.Add(ClassInstanceFactoryBuilder, 200);
+            InstanceFactoryBuilder.Add(DelegateInstanceBuilder, 300);
 
             VisibilityFilterBuilder.Add(StdVisibilityFilterBuilder, 100);
 
@@ -83,7 +84,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 new IxStdProviderConfig
                     {
                         Identifier = new IxIdentifier(typeof(IIxHost)),
-                        Factory = new IxExistingInstanceFactoryConfig<IIxHost>(this),
+                        InstanceBuilder = new IxExistingInstanceFactoryConfig<IIxHost>(this),
                         DisposeHandler = obj => Task.CompletedTask
                     });
 

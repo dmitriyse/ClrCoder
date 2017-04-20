@@ -17,13 +17,13 @@ namespace ClrCoder.AspNetCore
     {
         IxIdentifier? IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(IWebAppComponent), Name);
 
-        IIxInstanceBuilderConfig IIxStdProviderConfig.Factory => new IxClassInstanceBuilderConfig<WebHostDeployment>();
+        IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder => new IxClassInstanceBuilderConfig<WebHostDeployment>();
 
         /// <summary>
         /// Environment variable that can be used to <c>override</c> urls.
         /// </summary>
         [CanBeNull]
-        public string UrlsEnvironmentVariableName { get; set; }
+        public string UrlsConfigKey { get; set; }
 
         /// <summary>
         /// Default urls that should be used, when urls are not specified by any other means.

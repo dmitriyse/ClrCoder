@@ -39,10 +39,11 @@ namespace ClrCoder.Runtime.Serialization
                 throw new ArgumentNullException(nameof(methodInfo));
             }
 
+            // ReSharper disable once ConstantConditionalAccessQualifier
             return new MethodInfoDto
                        {
                            Name = methodInfo.Name,
-                           TypeFullName = methodInfo.DeclaringType.FullName
+                           TypeFullName = methodInfo.DeclaringType?.FullName
                        };
         }
     }

@@ -9,6 +9,8 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Diagnostics;
     using System.Threading.Tasks;
 
+    using Threading;
+
     /// <summary>
     /// Standard singleton provider.
     /// </summary>
@@ -118,10 +120,19 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             Debug.Assert(InstanceFactory != null, "InstanceFactory != null");
 
-            await InstanceFactory.Factory(
-                halfInstantiatedInstance,
-                parentInstance,
-                context);
+            try
+            {
+                await InstanceFactory.Factory(
+                    halfInstantiatedInstance,
+                    parentInstance,
+                    context);
+            }
+            catch
+            {
+                result.Dispose();
+                await halfInstantiatedInstance.AsyncDispose();
+                throw;
+            }
 
             Critical.Assert(
                 halfInstantiatedInstance.Object != null,

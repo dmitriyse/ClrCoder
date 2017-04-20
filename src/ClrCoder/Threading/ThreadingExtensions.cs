@@ -6,6 +6,7 @@
 namespace ClrCoder.Threading
 {
     using System;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -61,7 +62,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
                 throw;
             }
@@ -97,7 +98,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
 
                 throw;
@@ -134,7 +135,7 @@ namespace ClrCoder.Threading
             }
             catch (Exception ex)
             {
-                var exceptional = obj as IExceptionalAsyncDisposable;
+                var exceptional = obj as IAbortableAsyncDisposable;
                 exceptional?.HandleException(ex);
 
                 throw;
@@ -174,6 +175,16 @@ namespace ClrCoder.Threading
         public static Task GetOrDefault([CanBeNull] this Task task)
         {
             return task ?? Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Gets result of task, from unknown final type task. CoreFX Proposal: https://github.com/dotnet/corefx/issues/17094.
+        /// </summary>
+        /// <param name="task">Task to get result from.</param>
+        /// <returns>Result of the task.</returns>
+        public static object GetResult(this Task task)
+        {
+            return task.GetType().GetTypeInfo().GetDeclaredProperty("Result")?.GetValue(task);
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// Instance builder config. (Class constructor, existing instance, etc.).
         /// </summary>
         [CanBeNull]
-        IIxInstanceBuilderConfig Factory { get; }
+        IIxInstanceBuilderConfig InstanceBuilder { get; }
 
         /// <summary>
         /// Overrides dispose operation.

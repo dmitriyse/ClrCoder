@@ -9,9 +9,12 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// IndirectX helpers and fluent API syntax extension.
     /// </summary>
+    [PublicAPI]
     public static class IxExtensions
     {
         /// <summary>
@@ -51,7 +54,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// visible in parent node.
         /// </param>
         /// <param name="exportFilter">Export to children filter. Controls which registrations of <c>this</c> node.</param>
-        /// <param name="factory">Instance builder config. (Class constructor, existing instance, etc.).</param>
+        /// <param name="instanceBuilder">Instance builder config. (Class constructor, existing instance, etc.).</param>
         /// <param name="multiplicity">Multiplicity config. (Singleton, pool, <c>factory</c> etc.).</param>
         /// <param name="disposeHandler">Overrides dispose operation.</param>
         /// <param name="nodes">Action that build nested <c>nodes</c>.</param>
@@ -63,14 +66,14 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig importFilter = null,
             IIxVisibilityFilterConfig exportToParentFilter = null,
             IIxVisibilityFilterConfig exportFilter = null,
-            IIxInstanceBuilderConfig factory = null,
+            IIxInstanceBuilderConfig instanceBuilder = null,
             IIxMultiplicityConfig multiplicity = null,
             IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
         {
             var depNode = new IxStdProviderConfig
                               {
-                                  Factory = factory,
+                                  InstanceBuilder = instanceBuilder,
                                   Identifier = new IxIdentifier(typeof(TContract), name),
                                   ScopeBinding = scopeBinding,
                                   Multiplicity = multiplicity,
@@ -150,6 +153,29 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
 
             return new IxLock<T>(await resolver.Resolve(new IxIdentifier(typeof(T), name)));
+        }
+
+        /// <summary>
+        /// Resolves instance just to instantiate it.
+        /// </summary>
+        /// <remarks>
+        /// In many cases this method should be replaced by https://github.com/dmitriyse/ClrCoder/issues/8 (Auto activateion).
+        /// </remarks>
+        /// <typeparam name="T">Type of target <c>object</c>.</typeparam>
+        /// <param name="resolver">Resolver that should be used.</param>
+        /// <param name="name">Name of registration.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public static async Task WarmUp<T>(this IIxResolver resolver, string name = null)
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            using (await resolver.Resolve(new IxIdentifier(typeof(T), name)))
+            {
+                // Do nothing.
+            }
         }
     }
 }

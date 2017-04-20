@@ -25,7 +25,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         /// <inheritdoc/>
         [CanBeNull]
-        public virtual IIxInstanceBuilderConfig Factory { get; set; }
+        public virtual IIxInstanceBuilderConfig InstanceBuilder { get; set; }
 
         /// <summary>
         /// Overrides dispose operation.

@@ -36,9 +36,9 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                            rootNodes =>
                                rootNodes
                                    .Add<SimplestDummy>(
-                                       factory: new IxClassInstanceBuilderConfig<SimplestDummy>())
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<SimplestDummy>())
                                    .Add<WithSimplestDependencyDummy>(
-                                       factory: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<WithSimplestDependencyDummy>()))
                        .Build())
                 .AsyncUsing(
                     async host =>
@@ -65,7 +65,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                            rootNodes =>
                                rootNodes
                                    .Add<PrivateConstructorDummy>(
-                                       factory: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<PrivateConstructorDummy>(),
                                        disposeHandler: obj => Task.CompletedTask))
                        .Build())
                 .AsyncUsing(
@@ -93,7 +93,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                         .Configure(
                             n =>
                                 n.Add<DuplicateArgumentConstructorDummy>(
-                                    factory:
+                                    instanceBuilder:
                                     new IxClassInstanceBuilderConfig<DuplicateArgumentConstructorDummy>()))
                         .Build();
                 };
@@ -113,7 +113,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                         .Configure(
                             n =>
                                 n.Add<MultiConstructorsDummy>(
-                                    factory:
+                                    instanceBuilder:
                                     new IxClassInstanceBuilderConfig<MultiConstructorsDummy>()))
                         .
                         Build();
@@ -133,7 +133,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                        .Configure(
                            rootNodes =>
                                rootNodes.Add<SimplestDummy>(
-                                   factory: new IxClassInstanceBuilderConfig<SimplestDummy>(),
+                                   instanceBuilder: new IxClassInstanceBuilderConfig<SimplestDummy>(),
                                    disposeHandler: obj => Task.CompletedTask))
                        .Build())
                 .AsyncUsing(
@@ -228,7 +228,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             Type IIxBasicIdentificationConfig.ContractType { get; } = typeof(IDummyContract);
 
-            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } =
+            IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder { get; } =
                 new IxClassInstanceBuilderConfig<DummyImplementation>();
         }
 
@@ -239,7 +239,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         {
             Type IIxBasicIdentificationConfig.ContractType { get; } = typeof(IDummyConsumer);
 
-            IIxInstanceBuilderConfig IIxStdProviderConfig.Factory { get; } =
+            IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder { get; } =
                 new IxClassInstanceBuilderConfig<DummyContractConsumer>();
         }
 

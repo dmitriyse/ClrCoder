@@ -28,10 +28,10 @@ namespace ClrCoder.Cluster
         {
             hostBuilder.Nodes
                 .Add<IClusterNode>(
-                    factory: new IxClassInstanceBuilderConfig<ClusterNode>(),
+                    instanceBuilder: new IxClassInstanceBuilderConfig<ClusterNode>(),
                     nodes: x =>
                         x.Add<IWebHostBuilder>(
-                            factory: new IxExistingInstanceFactoryConfig<IWebHostBuilder>(
+                            instanceBuilder: new IxExistingInstanceFactoryConfig<IWebHostBuilder>(
                                 new WebHostBuilder()
                                     .UseKestrel()
                                     .UseContentRoot(Directory.GetCurrentDirectory()))));
