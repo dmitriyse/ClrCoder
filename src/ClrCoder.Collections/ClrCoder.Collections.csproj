@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>0.2.0</VersionPrefix>
-    <TargetFramework>netstandard1.0</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>ClrCoder.Collections</AssemblyName>
     <PackageId>ClrCoder.Collections</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections" Version="4.0.11" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

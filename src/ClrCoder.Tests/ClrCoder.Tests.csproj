@@ -5,13 +5,14 @@
 
   <!--Fix for the bug https://github.com/dotnet/sdk/issues/826-->
   <PropertyGroup Condition="'IsWindows'=='true'">
-    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0;net46</TargetFrameworks>
+    <!--<TargetFrameworks>netcoreapp1.1;netcoreapp1.0;net46</TargetFrameworks>-->
   </PropertyGroup>
   <PropertyGroup Condition="'IsWindows'!='true'">
-    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0</TargetFrameworks>
+    <!--<TargetFrameworks>netcoreapp1.1;netcoreapp1.0</TargetFrameworks>-->
   </PropertyGroup>
 
   <PropertyGroup>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
     <VersionPrefix>0.1.1</VersionPrefix>
     <AssemblyName>ClrCoder.Tests</AssemblyName>
     <PackageId>ClrCoder.Tests</PackageId>
