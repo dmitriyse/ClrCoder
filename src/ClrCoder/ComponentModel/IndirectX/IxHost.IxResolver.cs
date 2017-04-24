@@ -5,6 +5,8 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+#pragma warning disable 618
+
     using System;
     using System.Collections.Generic;
     using System.Threading;
