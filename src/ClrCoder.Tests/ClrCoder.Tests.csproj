@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClrCoder.Testing\ClrCoder.Testing.csproj" />
+    <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
     <ProjectReference Include="..\ClrCoder\ClrCoder.csproj" />
     <ProjectReference Include="..\ClrCoder.AspNetCore\ClrCoder.AspNetCore.csproj" />
   </ItemGroup>
