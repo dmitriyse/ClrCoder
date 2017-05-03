@@ -91,7 +91,6 @@ namespace ClrCoder.Logger
                             (_, e) =>
                                 _("WebApp pipeline error").Exception(e));
                     });
-
                app.UseMvc();
         }
 

@@ -10,6 +10,9 @@ namespace ClrCoder.Logging
     using System.Threading.Tasks;
 
     using AspNetCore;
+    using AspNetCore.Hosting;
+
+    using ClrCoder.Json;
 
     using ComponentModel.IndirectX;
     using ComponentModel.IndirectX.Attributes;
@@ -49,9 +52,13 @@ namespace ClrCoder.Logging
                 // Should be removed after adoption IndirectX to Asp.Net core.
                 .ConfigureServices(
                     x => x
+                        .AddHttpRequestScopeService()
+                        .AddScopedHttpContextAccessor()
                         .AddSingleton(new Tuple<IJsonLogger, IIxResolver>(Log, resolver))
+                        .AddSingleton<ILogReader>(logReader)
                         .AddSingleton(config))
                 .UseStartup<LoggerWebAppStartup>()
+                .ConfigureJsonFormatters(JsonDefaults.RestRpcSerializerSource.Settings)
                 .Build();
             _webHost.Start();
 
