@@ -1,6 +1,6 @@
 ﻿// <copyright file="LoggerWebAppStartup.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
-// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace ClrCoder.Logger
@@ -10,7 +10,6 @@ namespace ClrCoder.Logger
     using System.Net;
     using System.Reflection;
 
-    using AspNetCore;
     using AspNetCore.Hosting;
 
     using ComponentModel.IndirectX;
@@ -22,9 +21,7 @@ namespace ClrCoder.Logger
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.HttpOverrides;
-    using Microsoft.AspNetCore.Rewrite;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -91,7 +88,9 @@ namespace ClrCoder.Logger
                             (_, e) =>
                                 _("WebApp pipeline error").Exception(e));
                     });
-               app.UseMvc();
+
+            app.UseCors("CorsPolicy");
+            app.UseMvc();
         }
 
         /// <summary>
@@ -103,6 +102,17 @@ namespace ClrCoder.Logger
         {
             // Add framework services.
             services.AddMvc().AddApplicationPart(typeof(LogsController).GetTypeInfo().Assembly);
+
+            services.AddCors(
+                options =>
+                    {
+                        options.AddPolicy(
+                            "CorsPolicy",
+                            builder => builder.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader()
+                                .AllowCredentials());
+                    });
         }
     }
 }
