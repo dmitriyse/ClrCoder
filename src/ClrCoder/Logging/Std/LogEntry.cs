@@ -5,6 +5,8 @@
 
 namespace ClrCoder.Logging.Std
 {
+    using System;
+
     using JetBrains.Annotations;
 
     using Newtonsoft.Json;
@@ -19,6 +21,17 @@ namespace ClrCoder.Logging.Std
     /// </summary>
     public class LogEntry : JLogEntry
     {
+        [JsonConstructor]
+        public LogEntry (string entryId)
+        {
+            EntryId = entryId;
+        }
+
+        public LogEntry(): this(Guid.NewGuid().ToString())
+        {
+            
+        }
+
         /// <summary>
         /// Call place information.
         /// </summary>
@@ -36,6 +49,12 @@ namespace ClrCoder.Logging.Std
         /// </summary>
         [CanBeNull]
         public string DotNetType { get; set; }
+
+        /// <summary>
+        /// Log entry identifier.
+        /// </summary>
+        [NotNull]
+        public string EntryId { get; }
 
         /// <summary>
         /// UTC when event was raised.
