@@ -12,6 +12,10 @@ namespace ClrCoder.Logging
 
     using Json;
 
+    using Newtonsoft.Json;
+
+    using NodaTime;
+
     using Std;
 
     using Text;
@@ -52,6 +56,10 @@ namespace ClrCoder.Logging
             _fileName = fileName;
             AsyncHandler = asyncHandler;
             SerializerSource = serializerSource ?? StdJsonLogging.DefaultSerializerSource;
+            if (SerializerSource.Settings.Formatting != Formatting.None)
+            {
+                throw new NotSupportedException("Serialized json strings should be formatted in a one line.");
+            }
         }
 
         /// <inheritdoc/>
@@ -60,23 +68,30 @@ namespace ClrCoder.Logging
         /// <inheritdoc/>
         public IJsonSerializerSource SerializerSource { get; }
 
+        /// <summary>
+        /// Gets logs file name for current application execution.
+        /// </summary>
+        /// <returns>File name for logging.</returns>
+        public static string GetLogFileNameForCurrentAppRun()
+        {
+            string logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+            if (!Directory.Exists(logsDirectory))
+            {
+                Directory.CreateDirectory(logsDirectory);
+            }
+
+            DateTimeZone timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+
+            ZonedDateTime localTime = SystemClock.Instance.GetCurrentInstant().InZone(timeZone);
+            string fileName = $"{localTime:yyyy-MM-dd_HH-mm-ss}.jlog";
+            return Path.GetFullPath(Path.Combine(logsDirectory, fileName));
+        }
+
         /// <inheritdoc/>
         public void Log(object entry)
         {
-            var entryString = entry as string;
-            if (entryString != null)
-            {
-                if (entryString.Contains("\n"))
-                {
-                    throw new NotSupportedException("Serialized json strings should be formatted in a one line.");
-                }
-
-                File.AppendAllLines(_fileName, new[] { entryString }, EncodingEx.UTF8NoBom);
-            }
-            else
-            {
-                throw new NotSupportedException("Log entries should be serialized.");
-            }
+            string entryString = StdJsonLogging.NormalizeToString(entry, SerializerSource);
+            File.AppendAllLines(_fileName, new[] { entryString }, EncodingEx.UTF8NoBom);
         }
     }
 }
