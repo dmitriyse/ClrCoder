@@ -7,7 +7,6 @@ namespace ClrCoder.Logger
 {
   using System;
   using System.Collections.Generic;
-  using System.Linq;
 
   using System.Threading.Tasks;
 
@@ -41,8 +40,6 @@ namespace ClrCoder.Logger
     /// </summary>
     /// <param name="start"> The start instant. </param>
     /// <param name="end"> The end instant. </param>
-    /// <param name="top"> The top. </param>
-    /// <param name="skip"> The skip. </param>
     /// <returns>
     /// Returns all video entries.
     /// </returns>
@@ -50,9 +47,7 @@ namespace ClrCoder.Logger
 
     public async Task<IActionResult> Get(
       [FromQuery] string start,
-      [FromQuery] string end,
-      [FromQuery] int? top,
-      [FromQuery] int? skip)
+      [FromQuery] string end)
     {
       Instant startInstant;
       Instant endInstant;
@@ -90,19 +85,7 @@ namespace ClrCoder.Logger
 
       IReadOnlyList<LogEntry> items = await _logReader.GetLogs(new Interval<Instant>(startInstant, endInstant));
 
-      IQueryable<LogEntry> result = items.AsQueryable();
-
-      if (skip != null)
-      {
-        result = result.Skip(skip.Value);
-      }
-
-      if (top!= null)
-      {
-        result = result.Take(top.Value);
-      }
-
-      return Ok(result.ToArray());
+      return Ok(items);
     }
   }
 }
