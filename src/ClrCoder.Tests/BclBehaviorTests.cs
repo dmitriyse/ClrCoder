@@ -330,6 +330,7 @@ namespace ClrCoder.Tests
         /// <param name="expected">Expected combined path.</param>
         [Test]
         [TestCase("c:\\test.com", "abc", "c:\\test.com\\abc")]
+        [TestCase("c:\\test.com", "c:\\test.me", "c:\\test.me")]
         public void PathCombineTest(string a, string b, string expected)
         {
             Path.Combine(a, b).Replace("/", "\\").Should().Be(expected);
