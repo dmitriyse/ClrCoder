@@ -14,6 +14,15 @@ namespace ClrCoder.Threading
     /// </summary>
     public class SyncHandler : IAsyncHandler
     {
+        private SyncHandler()
+        {
+        }
+
+        /// <summary>
+        /// Sync handler single instance.
+        /// </summary>
+        public static SyncHandler Instance { get; } = SyncHandler.Instance;
+
         /// <inheritdoc/>
         public void RunAsync(Action action)
         {

@@ -34,7 +34,7 @@ namespace ClrCoder.Testing
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
         public NUnitJsonLogger()
-            : this(new SyncHandler())
+            : this(SyncHandler.Instance)
         {
         }
 

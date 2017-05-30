@@ -92,7 +92,7 @@ namespace ClrCoder.Tests.Net.Http
         {
             var data = new MethodInfoDto { Name = "name", TypeFullName = "fullname" };
 
-            IJsonLogger logger = new NUnitJsonLogger(new SyncHandler());
+            IJsonLogger logger = new NUnitJsonLogger(SyncHandler.Instance);
 
             using (HostUtils.HostController<TestFlurlController>("http://localhost:5062"))
             {

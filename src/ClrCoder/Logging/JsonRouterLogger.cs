@@ -34,7 +34,7 @@ namespace ClrCoder.Logging
         }
 
         /// <inheritdoc/>
-        public IAsyncHandler AsyncHandler { get; } = new SyncHandler();
+        public IAsyncHandler AsyncHandler { get; } = SyncHandler.Instance;
 
         /// <inheritdoc/>
         public IJsonSerializerSource SerializerSource { get; }
