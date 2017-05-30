@@ -22,14 +22,14 @@ namespace ClrCoder.Logging.Std
     public class LogEntry : JLogEntry
     {
         [JsonConstructor]
-        public LogEntry (string entryId)
+        public LogEntry(string entryId)
         {
             EntryId = entryId;
         }
 
-        public LogEntry(): this(Guid.NewGuid().ToString())
+        public LogEntry()
+            : this(Guid.NewGuid().ToString())
         {
-            
         }
 
         /// <summary>

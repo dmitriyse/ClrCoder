@@ -13,6 +13,12 @@ namespace ClrCoder.AspNetCore
 
     public static class HttpRequestScopeExtensions
     {
+        public static IServiceCollection AddHttpRequestScopeService(this IServiceCollection services)
+        {
+            services.AddScoped(sp => sp.GetService<IHttpContextAccessor>().HttpContext.GetRequestScope());
+            return services;
+        }
+
         public static IHttpRequestScope GetRequestScope(this HttpContext context)
         {
             return (IHttpRequestScope)context.Items[WebAppHttpScopeBinderMiddleware.RequestScopeKey];
@@ -22,12 +28,6 @@ namespace ClrCoder.AspNetCore
         {
             builder.UseMiddleware<WebAppHttpScopeBinderMiddleware>(resolver);
             return builder;
-        }
-
-        public static IServiceCollection AddHttpRequestScopeService(this IServiceCollection services)
-        {
-            services.AddScoped(sp => sp.GetService<IHttpContextAccessor>().HttpContext.GetRequestScope());
-            return services;
         }
     }
 }

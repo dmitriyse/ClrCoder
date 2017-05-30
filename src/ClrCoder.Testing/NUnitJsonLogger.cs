@@ -73,7 +73,7 @@ namespace ClrCoder.Testing
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
-            var testExecutionContext = TestExecutionContext.CurrentContext;
+            TestExecutionContext testExecutionContext = TestExecutionContext.CurrentContext;
             testExecutionContext.OutWriter.WriteLine(
                 $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
 

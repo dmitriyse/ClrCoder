@@ -8,7 +8,8 @@ using System.Reflection;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyMetadata("ImplicitNullability.AppliesTo", "InputParameters, RefParameters, OutParametersAndResult, Fields")]
+[assembly:
+    AssemblyMetadata("ImplicitNullability.AppliesTo", "InputParameters, RefParameters, OutParametersAndResult, Fields")]
 [assembly: AssemblyMetadata("ImplicitNullability.Fields", "RestrictToReferenceTypes")]
 [assembly: AssemblyTitle("ClrCoder")]
 [assembly: AssemblyDescription("")]

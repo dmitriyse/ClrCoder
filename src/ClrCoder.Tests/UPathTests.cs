@@ -12,20 +12,20 @@ namespace ClrCoder.Tests
     [TestFixture]
     public class UPathTests
     {
-        [TestCase("c:/test/me", "C:\\test\\me")]
-        [TestCase("/test/me", "C:\\test\\me")]
-        [TestCase("test/me", "test\\me")]
-        public void ToWindowsPathTest(string source, string expected)
-        {
-            new UPath(source).ToWindowsPath().Should().Be(expected);
-        }
-
         [TestCase("c:/test/me", "/test/me")]
         [TestCase("/test/me", "/test/me")]
         [TestCase("test/me", "test/me")]
         public void ToUnixPathTest(string source, string expected)
         {
             new UPath(source).ToUnixPath().Should().Be(expected);
+        }
+
+        [TestCase("c:/test/me", "C:\\test\\me")]
+        [TestCase("/test/me", "C:\\test\\me")]
+        [TestCase("test/me", "test\\me")]
+        public void ToWindowsPathTest(string source, string expected)
+        {
+            new UPath(source).ToWindowsPath().Should().Be(expected);
         }
     }
 }

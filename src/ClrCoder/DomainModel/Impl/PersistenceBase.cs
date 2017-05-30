@@ -200,7 +200,7 @@ namespace ClrCoder.DomainModel.Impl
             _isInitialized = true;
 
             _nonDeclaredResolvePlugins.AddRange(_plugins.Where(x => x.AreNonDeclaredRepositoryTypesSupported));
-            foreach (KeyValuePair<Type, PersistencePluginBase<TPersistence, TUnitOfWork>> kvp 
+            foreach (KeyValuePair<Type, PersistencePluginBase<TPersistence, TUnitOfWork>> kvp
                 in _plugins.SelectMany(
                     x =>
                         x.SupportedRepositoryTypes.Select(

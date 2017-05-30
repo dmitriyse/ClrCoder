@@ -40,6 +40,19 @@ namespace ClrCoder.Tests.Json
                 .Be("MyTest");
         }
 
+        /// <summary>
+        /// Tests json serialization behavior.
+        /// </summary>
+        [Test]
+        [Ignore("For manual testing")]
+        public void JsonSerializeTest()
+        {
+            string result = JsonConvert.SerializeObject(
+                new Url("http://test.com"),
+                JsonDefaults.JsonConfigSerializerSource.Settings);
+            TestContext.WriteLine(result);
+        }
+
         [Test]
         [Ignore("Currently IKeyedCollection has no any convertor for Json.Net")]
         public void MaterializedKeyedCollectionTest()
@@ -87,19 +100,6 @@ namespace ClrCoder.Tests.Json
                 .Items.First()
                 .Should()
                 .Be("MyTest");
-        }
-
-        /// <summary>
-        /// Tests json serialization behavior.
-        /// </summary>
-        [Test]
-        [Ignore("For manual testing")]
-        public void JsonSerializeTest()
-        {
-            string result = JsonConvert.SerializeObject(
-                new Url("http://test.com"),
-                JsonDefaults.JsonConfigSerializerSource.Settings);
-            TestContext.WriteLine(result);
         }
 
         /// <summary>

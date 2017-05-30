@@ -126,6 +126,5 @@ namespace ClrCoder.Tests.Net.Http
                 return JsonConvert.SerializeObject(data);
             }
         }
-
     }
 }

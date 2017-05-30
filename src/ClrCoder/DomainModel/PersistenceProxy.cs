@@ -116,5 +116,4 @@ namespace ClrCoder.DomainModel
             return new UnitOfWorkProxy<TR1, TR2, TR3, TR4>(_impl.OpenUnitOfWork());
         }
     }
-
 }

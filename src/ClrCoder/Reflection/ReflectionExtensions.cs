@@ -349,14 +349,14 @@ namespace ClrCoder
 
         private static class GetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<ValueTuple<Type, string>, Func<TObject, TValue>> Getters =
-                new ConcurrentDictionary<ValueTuple<Type, string>, Func<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<(Type, string), Func<TObject, TValue>> Getters =
+                new ConcurrentDictionary<(Type, string), Func<TObject, TValue>>();
         }
 
         private static class SetterCache<TObject, TValue>
         {
-            public static readonly ConcurrentDictionary<ValueTuple<Type, string>, Action<TObject, TValue>> Setters =
-                new ConcurrentDictionary<ValueTuple<Type, string>, Action<TObject, TValue>>();
+            public static readonly ConcurrentDictionary<(Type, string), Action<TObject, TValue>> Setters =
+                new ConcurrentDictionary<(Type, string), Action<TObject, TValue>>();
         }
     }
 }

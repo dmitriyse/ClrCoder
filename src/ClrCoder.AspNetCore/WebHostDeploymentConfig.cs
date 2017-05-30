@@ -17,7 +17,8 @@ namespace ClrCoder.AspNetCore
     {
         IxIdentifier? IIxProviderNodeConfig.Identifier => new IxIdentifier(typeof(IWebAppComponent), Name);
 
-        IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder => new IxClassInstanceBuilderConfig<WebHostDeployment>();
+        IIxInstanceBuilderConfig IIxStdProviderConfig.InstanceBuilder =>
+            new IxClassInstanceBuilderConfig<WebHostDeployment>();
 
         /// <summary>
         /// Environment variable that can be used to <c>override</c> urls.

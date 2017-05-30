@@ -5,7 +5,6 @@
 
 namespace ClrCoder
 {
-    using System;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -28,10 +27,13 @@ namespace ClrCoder
         /// <param name="fileName">The file name to deserialize from.</param>
         /// <param name="encoding">The encoding.</param>
         /// <returns>Deserialized data.</returns>
-        public static async ValueTask<T> DeserializeFile<T>(this JsonSerializer serializer, string fileName, Encoding encoding = null)
+        public static async ValueTask<T> DeserializeFile<T>(
+            this JsonSerializer serializer,
+            string fileName,
+            Encoding encoding = null)
         {
             // TODO: Replace to RecyclableMemoeryStream.
-            MemoryStream memStream = new MemoryStream();
+            var memStream = new MemoryStream();
             using (var fileStream = new FileStream(fileName, FileMode.Open))
             {
                 await fileStream.CopyToAsync(memStream);
@@ -39,7 +41,9 @@ namespace ClrCoder
 
             memStream.Position = 0;
 
-            using (var sr = encoding != null ? new StreamReader(memStream, encoding) : new StreamReader(memStream))
+            using (StreamReader sr = encoding != null
+                                         ? new StreamReader(memStream, encoding)
+                                         : new StreamReader(memStream))
             {
                 using (var jsonReader = new JsonTextReader(sr))
                 {

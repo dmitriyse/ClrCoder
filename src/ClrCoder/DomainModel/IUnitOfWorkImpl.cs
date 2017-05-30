@@ -16,6 +16,7 @@ namespace ClrCoder.DomainModel
         /// </summary>
         /// <typeparam name="T">Repository type.</typeparam>
         /// <returns>Repository instance of asked type.</returns>
-        T GetRepository<T>() where T : class, IRepository;
+        T GetRepository<T>()
+            where T : class, IRepository;
     }
 }

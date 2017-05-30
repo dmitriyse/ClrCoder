@@ -1,6 +1,6 @@
 // <copyright file="LoggerWebAppConfig.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
-// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace ClrCoder.Logging
@@ -8,8 +8,6 @@ namespace ClrCoder.Logging
     using System;
     using System.Collections.Generic;
     using System.IO;
-
-    using AspNetCore;
 
     using ComponentModel.IndirectX;
 

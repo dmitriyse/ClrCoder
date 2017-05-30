@@ -59,7 +59,8 @@ namespace ClrCoder.DomainModel.Impl
         }
 
         /// <inheritdoc/>
-        public T GetRepository<T>() where T : class, IRepository
+        public T GetRepository<T>()
+            where T : class, IRepository
         {
             return Persistence.ResolveRepository<T>((TUnitOfWork)this);
         }
@@ -132,11 +133,13 @@ namespace ClrCoder.DomainModel.Impl
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1110:OpeningParenthesisMustBeOnDeclarationLine",
+        [SuppressMessage(
+            "StyleCop.CSharp.ReadabilityRules",
+            "SA1110:OpeningParenthesisMustBeOnDeclarationLine",
             Justification = "Reviewed. Suppression is OK here.")]
         protected override async Task AsyncDispose()
         {
-            List<ValueTuple<PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>>> entriesToDispose;
+            List<(PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)> entriesToDispose;
             lock (DisposeSyncRoot)
             {
                 entriesToDispose =
@@ -151,7 +154,7 @@ namespace ClrCoder.DomainModel.Impl
             }
 
             foreach (
-                ValueTuple<PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>> tuple 
+                (PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>) tuple
                 in entriesToDispose)
             {
                 try

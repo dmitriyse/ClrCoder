@@ -23,7 +23,8 @@ namespace ClrCoder.Annotations
         | AttributeTargets.Field
         | AttributeTargets.Method
         | AttributeTargets.Property
-        | AttributeTargets.Parameter, AllowMultiple = true)]
+        | AttributeTargets.Parameter,
+        AllowMultiple = true)]
     [PublicAPI]
     public class TypeChoiceAttribute : Attribute
     {

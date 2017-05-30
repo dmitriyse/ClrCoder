@@ -1,6 +1,6 @@
 ﻿// <copyright file="LoggerWebApp.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
-// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace ClrCoder.Logging
@@ -12,10 +12,10 @@ namespace ClrCoder.Logging
     using AspNetCore;
     using AspNetCore.Hosting;
 
-    using ClrCoder.Json;
-
     using ComponentModel.IndirectX;
     using ComponentModel.IndirectX.Attributes;
+
+    using Json;
 
     using Logger;
 
@@ -30,13 +30,13 @@ namespace ClrCoder.Logging
     /// <summary>
     /// Fron Media Web application. Provides Vimy media related REST API.
     /// </summary>
-    public class LoggerWebApp : AsyncDisposableBase,  ILoggerWebApp
+    public class LoggerWebApp : AsyncDisposableBase, ILoggerWebApp
     {
-        
         private readonly IWebHost _webHost;
 
         [Require(typeof(IWebAppComponent))]
-        //[Require(typeof(IClusterNode))]
+
+        // [Require(typeof(IClusterNode))]
         private LoggerWebApp(
             IIxResolver resolver,
             IWebHostBuilder webHostBuilder,

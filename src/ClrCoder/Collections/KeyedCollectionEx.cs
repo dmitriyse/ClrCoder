@@ -38,20 +38,15 @@ namespace ClrCoder.Collections
 
         public int Count => _inner.Count;
 
-        IEnumerator<TValue> IReadOnlyKeyedCollection<TKey, TValue>.GetEnumerator()
-        {
-            return _inner.Values.GetEnumerator();
-        }
+        public bool IsReadOnly { get; }
+
+        public IEqualityComparer<TKey> Comparer { get; }
 
         public TValue this[TKey index]
         {
             get => _inner[index];
             set => _inner[index] = value;
         }
-
-        public bool IsReadOnly { get; }
-
-        public IEqualityComparer<TKey> Comparer { get; }
 
         public void Add(TValue item)
         {
@@ -94,6 +89,11 @@ namespace ClrCoder.Collections
         public void CopyTo(TValue[] array, int arrayIndex)
         {
             _inner.Values.CopyTo(array, arrayIndex);
+        }
+
+        IEnumerator<TValue> IReadOnlyKeyedCollection<TKey, TValue>.GetEnumerator()
+        {
+            return _inner.Values.GetEnumerator();
         }
 
         IEnumerator<TValue> IKeyedCollection<TKey, TValue>.GetEnumerator()

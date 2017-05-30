@@ -232,7 +232,8 @@ namespace ClrCoder.Logic
 
                 if (i != 0 && _parts[i].Start == null)
                 {
-                    throw new ArgumentException("Only the first multi-interval part can have opened starting boundary.");
+                    throw new ArgumentException(
+                        "Only the first multi-interval part can have opened starting boundary.");
                 }
 
                 if (i != _parts.Count - 1)

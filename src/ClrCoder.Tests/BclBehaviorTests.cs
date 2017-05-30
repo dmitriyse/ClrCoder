@@ -49,11 +49,8 @@ namespace ClrCoder.Tests
         public void CancellationTokenSourceDisposeBehavior()
         {
             var cts = new CancellationTokenSource();
-            var ct = cts.Token;
-            Func<Task> asyncAction = async () =>
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(1000), ct);
-                };
+            CancellationToken ct = cts.Token;
+            Func<Task> asyncAction = async () => { await Task.Delay(TimeSpan.FromMilliseconds(1000), ct); };
 
             Task.Factory.StartNew(
                 () =>
@@ -69,41 +66,14 @@ namespace ClrCoder.Tests
         /// Determines what will happens when CTS disposes.
         /// </summary>
         [Test]
-        public void DirectCancelLinkedTokenSource()
-        {
-            var cts1 = new CancellationTokenSource();
-            var ct1 = cts1.Token;
-            var cts2 = new CancellationTokenSource();
-            var ct2 = cts2.Token;
-            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
-            var linkedCt = linkedCts.Token;
-            Func<Task> asyncAction = async () =>
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(1000), linkedCt);
-                };
-
-            Task.Factory.StartNew(
-                () =>
-                    {
-                        Thread.Sleep(100);
-                        linkedCts.Cancel();
-                    });
-
-            asyncAction.ShouldThrow<TaskCanceledException>();
-        }
-
-        /// <summary>
-        /// Determines what will happens when CTS disposes.
-        /// </summary>
-        [Test]
         public void CombinedCtsCancelSourceShouldBeDetermined()
         {
             var cts1 = new CancellationTokenSource();
-            var ct1 = cts1.Token;
+            CancellationToken ct1 = cts1.Token;
             var cts2 = new CancellationTokenSource();
-            var ct2 = cts2.Token;
-            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
-            var linkedCt = linkedCts.Token;
+            CancellationToken ct2 = cts2.Token;
+            CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
+            CancellationToken linkedCt = linkedCts.Token;
             Func<Task> asyncAction = async () =>
                 {
                     try
@@ -113,7 +83,7 @@ namespace ClrCoder.Tests
                     catch (OperationCanceledException ex)
                     {
                         (ex.CancellationToken == linkedCt).Should().BeTrue();
-                        
+
                         // This is the only way to determine what CTS was canceled.
                         ct2.IsCancellationRequested.Should().BeTrue();
                     }
@@ -153,6 +123,30 @@ namespace ClrCoder.Tests
             await Task.CompletedTask.ConfigureAwait(false);
 
             Thread.CurrentThread.ManagedThreadId.Should().Be(originalThreadId);
+        }
+
+        /// <summary>
+        /// Determines what will happens when CTS disposes.
+        /// </summary>
+        [Test]
+        public void DirectCancelLinkedTokenSource()
+        {
+            var cts1 = new CancellationTokenSource();
+            CancellationToken ct1 = cts1.Token;
+            var cts2 = new CancellationTokenSource();
+            CancellationToken ct2 = cts2.Token;
+            CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct1, ct2);
+            CancellationToken linkedCt = linkedCts.Token;
+            Func<Task> asyncAction = async () => { await Task.Delay(TimeSpan.FromMilliseconds(1000), linkedCt); };
+
+            Task.Factory.StartNew(
+                () =>
+                    {
+                        Thread.Sleep(100);
+                        linkedCts.Cancel();
+                    });
+
+            asyncAction.ShouldThrow<TaskCanceledException>();
         }
 
         /// <summary>
