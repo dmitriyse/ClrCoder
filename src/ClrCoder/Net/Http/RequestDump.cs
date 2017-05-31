@@ -8,7 +8,7 @@ namespace ClrCoder.Net.Http
     using System.Collections.Generic;
 
     /// <summary>
-    /// The http reuqest dump.
+    /// The http request dump.
     /// </summary>
     public class RequestDump
     {

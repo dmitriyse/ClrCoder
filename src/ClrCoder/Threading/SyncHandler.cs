@@ -21,7 +21,7 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Sync handler single instance.
         /// </summary>
-        public static SyncHandler Instance { get; } = SyncHandler.Instance;
+        public static SyncHandler Instance { get; } = new SyncHandler();
 
         /// <inheritdoc/>
         public void RunAsync(Action action)
