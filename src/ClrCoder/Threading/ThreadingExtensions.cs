@@ -236,6 +236,92 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Transforms task to task with timeout.
+        /// </summary>
+        /// <param name="task">The task to convert.</param>
+        /// <param name="timeout">The timeout time.</param>
+        /// <param name="cancellationToken">
+        /// Cancellation token that cancels original task. If cancellation fires before timeout,
+        /// result task will wait original task regardless of timeout.
+        /// </param>
+        /// <returns>Task with the timeout.</returns>
+        public static async Task TimeoutAfter(
+            this Task task,
+            TimeSpan timeout,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (timeout == Timeout.InfiniteTimeSpan)
+            {
+                await task;
+                return;
+            }
+
+            if (timeout < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout should be positive.");
+            }
+
+            if (task.IsCompleted)
+            {
+                await task;
+                return;
+            }
+
+            Task timeoutTask = Task.Delay(timeout, cancellationToken);
+
+            await Task.WhenAny(task, timeoutTask);
+            if (task.IsCompleted || timeoutTask.IsCanceled)
+            {
+                await task;
+                return;
+            }
+
+            throw new TimeoutException();
+        }
+
+        /// <summary>
+        /// Transforms task to task with timeout.
+        /// </summary>
+        /// <typeparam name="TResult">The result of the original task.</typeparam>
+        /// <param name="task">The task to convert.</param>
+        /// <param name="timeout">The timeout time.</param>
+        /// <param name="cancellationToken">
+        /// Cancellation token that cancels original task. If cancellation fires before timeout,
+        /// result task will wait original task regardless of timeout.
+        /// </param>
+        /// <returns>Task with the timeout.</returns>
+        public static async Task<TResult> TimeoutAfter<TResult>(
+            this Task<TResult> task,
+            TimeSpan timeout,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (timeout == Timeout.InfiniteTimeSpan)
+            {
+                return await task;
+            }
+
+            if (timeout < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout should be positive.");
+            }
+
+            if (task.IsCompleted)
+            {
+                return await task;
+            }
+
+            Task timeoutTask = Task.Delay(timeout, cancellationToken);
+
+            await Task.WhenAny(task, timeoutTask);
+            if (task.IsCompleted || timeoutTask.IsCanceled)
+            {
+                return await task;
+            }
+
+            throw new TimeoutException();
+        }
+
+        /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
         /// <typeparam name="TResult">Type of task.</typeparam>
