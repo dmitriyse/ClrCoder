@@ -144,13 +144,14 @@ namespace ClrCoder.AspNetCore.AsyncResponse
         private Workflow GetOrCreateWorkflow(TResponseKey key)
         {
             Workflow workflow;
-            bool isWorkflowCreated;
+            bool isWorkflowCreated = false;
             lock (_workflows)
             {
                 if (!_workflows.TryGetValue(key, out workflow))
                 {
                     workflow = new Workflow(this, key);
                     _workflows.Add(key, workflow);
+                    isWorkflowCreated = true;
                 }
             }
 
