@@ -107,6 +107,10 @@ namespace ClrCoder.AspNetCore.AsyncResponse
             try
             {
                 key = _keyExtractor(httpContext);
+                if (_useRequestBodyBuffering)
+                {
+                    ((MemoryStream)httpContext.Request.Body).Position = 0;
+                }
             }
             catch (Exception e)
             {
