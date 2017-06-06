@@ -106,12 +106,9 @@ namespace ClrCoder.Cluster
                 {
                     _webHost?.Dispose();
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex.IsProcessable())
                 {
-                    if (!ex.IsProcessable())
-                    {
-                        throw;
-                    }
+                    // Do nothing.
                 }
 
                 Log.Trace(_ => _("Asp.Net core shutdown completed"));

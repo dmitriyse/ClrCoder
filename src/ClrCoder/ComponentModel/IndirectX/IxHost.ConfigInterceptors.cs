@@ -503,27 +503,14 @@ namespace ClrCoder.ComponentModel.IndirectX
                     if (type == null)
                     {
                         IxDisposeHandlerDelegate nextHandler = next(null);
-                        return obj =>
+                        return async obj =>
                             {
-                                var disposable = obj as IDisposable;
-                                if (disposable != null)
+                                if (obj is IDisposable disposable)
                                 {
-                                    try
-                                    {
-                                        disposable.Dispose();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        if (!ex.IsProcessable())
-                                        {
-                                            return Task.FromException(ex);
-                                        }
-                                    }
-
-                                    return Task.CompletedTask;
+                                    disposable.Dispose();
                                 }
 
-                                return nextHandler(obj);
+                                await nextHandler(obj);
                             };
                     }
 
@@ -532,22 +519,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(type);
                     }
 
-                    return obj =>
+                    return async obj =>
                         {
-                            try
-                            {
-                                Critical.Assert(obj != null, "Dispose handler called for null object");
-                                ((IDisposable)obj).Dispose();
-                            }
-                            catch (Exception ex)
-                            {
-                                if (!ex.IsProcessable())
-                                {
-                                    return Task.FromException(ex);
-                                }
-                            }
-
-                            return Task.CompletedTask;
+                            Critical.Assert(obj != null, "Dispose handler called for null object");
+                            ((IDisposable)obj).Dispose();
                         };
                 };
         }
@@ -559,27 +534,14 @@ namespace ClrCoder.ComponentModel.IndirectX
                     if (type == null)
                     {
                         IxDisposeHandlerDelegate nextHandler = next(null);
-                        return obj =>
+                        return async obj =>
                             {
-                                var disposable = obj as IAsyncDisposable;
-                                if (disposable != null)
+                                if (obj is IAsyncDisposable disposable)
                                 {
-                                    try
-                                    {
-                                        disposable.StartDispose();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        if (!ex.IsProcessable())
-                                        {
-                                            return Task.FromException(ex);
-                                        }
-                                    }
-
-                                    return Task.CompletedTask;
+                                    await disposable.AsyncDispose();
                                 }
 
-                                return nextHandler(obj);
+                                await nextHandler(obj);
                             };
                     }
 
@@ -588,22 +550,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(type);
                     }
 
-                    return obj =>
+                    return async obj =>
                         {
-                            try
-                            {
-                                Critical.Assert(obj != null, "Dispose handler called for null object");
-                                ((IAsyncDisposable)obj).StartDispose();
-                            }
-                            catch (Exception ex)
-                            {
-                                if (!ex.IsProcessable())
-                                {
-                                    return Task.FromException(ex);
-                                }
-                            }
-
-                            return Task.CompletedTask;
+                            Critical.Assert(obj != null, "Dispose handler called for null object");
+                            await ((IAsyncDisposable)obj).AsyncDispose();
                         };
                 };
         }

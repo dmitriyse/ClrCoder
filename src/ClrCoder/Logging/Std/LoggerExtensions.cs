@@ -51,13 +51,8 @@ namespace ClrCoder.Logging.Std
                                 e.SetExtensionData(jProperty.Name, jProperty.Value);
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) when (ex.IsProcessable())
                         {
-                            if (!ex.IsProcessable())
-                            {
-                                throw;
-                            }
-
                             // TODO: Dump exception.
                             e.SetExtensionData("DataSerializationError", ex.ToString());
                         }

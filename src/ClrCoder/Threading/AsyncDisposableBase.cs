@@ -37,6 +37,9 @@ namespace ClrCoder.Threading
 
         private bool _isActualDisposeCalled;
 
+        [CanBeNull]
+        private Exception _lastError;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncDisposableBase"/> class.
         /// </summary>
@@ -107,7 +110,16 @@ namespace ClrCoder.Threading
                         _isDisposeStarted = true;
 
                         // Reentrancy source #1.
-                        OnDisposeStarted();
+                        try
+                        {
+                            OnDisposeStarted();
+                        }
+                        catch (Exception ex)
+                        {
+                            // Caching even not processable exception.
+                            // Last error will be thrown at the end if the dispose process.
+                            _lastError = ex;
+                        }
 
                         if (!_isDisposeSuspended && !_isActualDisposeCalled)
                         {
@@ -187,11 +199,16 @@ namespace ClrCoder.Threading
             var isAsyncRun = false;
 
             // This line will never throw any exception.
-            Task disposeResult = AsyncDispose().WithSyncDetection();
+            Task disposeResult = AsyncDispose();
 
             try
             {
                 await disposeResult.WithSyncDetection(isSync => isAsyncRun = !isSync);
+
+                if (_lastError != null)
+                {
+                    throw _lastError;
+                }
 
                 if (isAsyncRun)
                 {

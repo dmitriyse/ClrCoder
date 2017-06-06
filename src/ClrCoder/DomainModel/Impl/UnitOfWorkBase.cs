@@ -154,20 +154,16 @@ namespace ClrCoder.DomainModel.Impl
             }
 
             foreach (
-                (PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>) tuple
+                (PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)
+                tuple
                 in entriesToDispose)
             {
                 try
                 {
                     await tuple.Item2.EnsureDisposed(tuple.Item1, (TUnitOfWork)this, _isDiscardRequested);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex.IsProcessable())
                 {
-                    if (!ex.IsProcessable())
-                    {
-                        throw;
-                    }
-
                     // TODO: Log problem
                 }
             }

@@ -76,12 +76,9 @@ namespace ClrCoder.Runtime.Serialization
                                 dto.SetExtensionData(declaredProperty.Name, propertyValue);
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception e) when (e.IsProcessable())
                         {
-                            if (!e.IsProcessable())
-                            {
-                                throw;
-                            }
+                            // Do nothing.
                         }
                     }
 

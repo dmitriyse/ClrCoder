@@ -65,7 +65,7 @@ namespace ClrCoder.Tests.Threading
             var expectedAsymptotically = (int)Math.Round(
                 (delayMilliseconds * 2) / 350.0,
                 MidpointRounding.AwayFromZero);
-            var maxDelta = 3;
+            var maxDelta = 5;
             writer.WriteLine($"Total executed work items = {allWorkItems.Count}");
             writer.WriteLine($"Expected asymptotically = {expectedAsymptotically}");
             Math.Abs(allWorkItems.Count - expectedAsymptotically).Should().BeLessOrEqualTo(maxDelta);

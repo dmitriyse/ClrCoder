@@ -91,12 +91,9 @@ namespace ClrCoder.Logging
                 _webHost.Dispose();
                 LoggerExtensions.Info(Log, _ => _("Asp.Net core shutdown completed"));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex.IsProcessable())
             {
-                if (!ex.IsProcessable())
-                {
-                    throw;
-                }
+                // Do nothing.
             }
         }
     }

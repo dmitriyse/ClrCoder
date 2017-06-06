@@ -7,6 +7,8 @@ namespace ClrCoder.Threading
 {
     using System.Threading.Tasks;
 
+    using Annotations;
+
     /// <summary>
     /// Asynchronously disposable.
     /// </summary>
@@ -22,6 +24,7 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Initiates async disposing, allowed to be called multiple times. Should never <see langword="throw"/> an exception.
         /// </summary>
+        [Robust]
         void StartDispose();
     }
 }
