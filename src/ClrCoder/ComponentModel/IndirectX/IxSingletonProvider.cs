@@ -93,7 +93,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             try
             {
                 await instance.ObjectCreationTask;
-                return creatorLock ?? new IxInstanceTempLock(instance);
+                return creatorLock ?? new IxInstancePinLock(instance);
             }
             catch
             {

@@ -197,7 +197,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                           null))
             {
                 var resolver = (IxResolver)rootResolverLock.Target.Object;
-                Debug.Assert(
+                Critical.CheckedAssert(
                     resolver.ParentContext == null && resolver.ParentFrame == null,
                     "After resolve finished, resolver should not be bound to any context.");
 

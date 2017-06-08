@@ -71,35 +71,33 @@ namespace ClrCoder.ComponentModel.IndirectX
             using (HashSet<IxIdentifier>.Enumerator enumerator = dependencies.GetEnumerator())
             {
                 var result = new Dictionary<IxIdentifier, IIxInstance>();
-                Func<Task<TResult>> resolveItem = null;
-                resolveItem = async () =>
+
+                async Task<TResult> ResolveItem()
+                {
+                    // ReSharper disable once AccessToDisposedClosure
+                    if (!enumerator.MoveNext())
                     {
-                        // ReSharper disable once AccessToDisposedClosure
-                        if (!enumerator.MoveNext())
+                        return await targetOperation(result);
+                    }
+
+                    // ReSharper disable once AccessToDisposedClosure
+                    IxIdentifier identifier = enumerator.Current;
+
+                    using (IIxInstanceLock instanceLock = await Resolve(originInstance, identifier, context, frame))
+                    {
+                        result.Add(identifier, instanceLock.Target);
+                        TResult resultItem = await ResolveItem();
+
+                        if (identifier.Type == typeof(IIxResolver))
                         {
-                            return await targetOperation(result);
+                            (instanceLock.Target as IxResolver)?.ClearParentResolveContext();
                         }
 
-                        // ReSharper disable once AccessToDisposedClosure
-                        IxIdentifier identifier = enumerator.Current;
+                        return resultItem;
+                    }
+                }
 
-                        using (IIxInstanceLock instanceLock =
-                            await Resolve(originInstance, identifier, context, frame)
-                        )
-                        {
-                            result.Add(identifier, instanceLock.Target);
-                            TResult resultItem = await resolveItem();
-
-                            if (identifier.Type == typeof(IIxResolver))
-                            {
-                                (instanceLock.Target as IxResolver)?.ClearParentResolveContext();
-                            }
-
-                            return resultItem;
-                        }
-                    };
-
-                return await resolveItem();
+                return await ResolveItem();
             }
         }
 
@@ -230,7 +228,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                         curInstance != null,
                                         "Instance of an appropriate provider should be found.");
 
-                                    return new IxInstanceTempLock(curInstance);
+                                    return new IxInstancePinLock(curInstance);
                                 }
                             }
                         }
@@ -303,7 +301,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             return async (originInstance, identifier, context, frame) =>
                 {
                     IIxInstanceLock instance =
-                        await _argumentProvider.GetInstance(_rootScopeInstance, identifier, context, frame);
+                        _argumentProvider.TryGetInstance(identifier, context);
 
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     if (instance == null)

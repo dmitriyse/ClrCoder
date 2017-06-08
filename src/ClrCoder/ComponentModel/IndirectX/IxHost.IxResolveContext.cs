@@ -9,6 +9,8 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Collections.Generic;
     using System.Threading;
 
+    using Annotations;
+
     using JetBrains.Annotations;
 
     /// <content>Resolve context implementation.</content>
@@ -17,6 +19,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <summary>
         /// Resolve context.
         /// </summary>
+        [InvalidUsageIsCritical]
         public class IxResolveContext
         {
             private readonly IIxInstance _originInstance;
@@ -31,10 +34,15 @@ namespace ClrCoder.ComponentModel.IndirectX
                 [CanBeNull] IxResolveContext parentContext,
                 IReadOnlyDictionary<IxIdentifier, object> arguments)
             {
+                Critical.CheckedAssert(originInstance != null, "Origin instance should be null.");
+                Critical.CheckedAssert(arguments != null, "Arguments dictionary should not be null.");
+
                 Arguments = arguments;
                 _originInstance = originInstance;
                 ParentContext = parentContext;
                 _rootContext = parentContext?._rootContext ?? this;
+
+                Critical.CheckedAssert(_rootContext != null, "Root context should not be null.");
             }
 
             [CanBeNull]
@@ -60,19 +68,14 @@ namespace ClrCoder.ComponentModel.IndirectX
             [CanBeNull]
             public object GetData(IxProviderNode providerNode)
             {
-                if (providerNode == null)
-                {
-                    throw new ArgumentNullException(nameof(providerNode));
-                }
+                Critical.CheckedAssert(providerNode != null, "providerNode != null");
 
                 if (!Monitor.IsEntered(_originInstance.ProviderNode.Host.InstanceTreeSyncRoot))
                 {
                     Critical.Assert(false, "Data manipulations should be performed under lock.");
                 }
 
-                object result;
-
-                _rootContext.ProvidersData.TryGetValue(providerNode, out result);
+                _rootContext.ProvidersData.TryGetValue(providerNode, out object result);
 
                 return result;
             }
@@ -80,10 +83,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             /// <inheritdoc/>
             public void SetData(IxProviderNode providerNode, [CanBeNull] object data)
             {
-                if (providerNode == null)
-                {
-                    throw new ArgumentNullException(nameof(providerNode));
-                }
+                Critical.CheckedAssert(providerNode != null, "providerNode != null");
 
                 if (!Monitor.IsEntered(_originInstance.ProviderNode.Host.InstanceTreeSyncRoot))
                 {

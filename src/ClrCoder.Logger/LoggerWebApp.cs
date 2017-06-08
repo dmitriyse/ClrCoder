@@ -13,7 +13,6 @@ namespace ClrCoder.Logging
     using AspNetCore.Hosting;
 
     using ComponentModel.IndirectX;
-    using ComponentModel.IndirectX.Attributes;
 
     using Json;
 

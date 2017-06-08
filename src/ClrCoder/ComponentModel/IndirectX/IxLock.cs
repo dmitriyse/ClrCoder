@@ -6,6 +6,9 @@
 namespace ClrCoder.ComponentModel.IndirectX
 {
     using System;
+    using System.Reflection;
+
+    using Annotations;
 
     using JetBrains.Annotations;
 
@@ -21,21 +24,17 @@ namespace ClrCoder.ComponentModel.IndirectX
         [CanBeNull]
         private readonly IIxInstanceLock _instanceLock;
 
-        private readonly T _target;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="IxLock{T}"/> class.
         /// </summary>
         /// <param name="instanceLock">IndirectX instance lock.</param>
+        [InvalidUsageIsCritical]
         public IxLock(IIxInstanceLock instanceLock)
         {
-            if (instanceLock == null)
-            {
-                throw new ArgumentNullException(nameof(instanceLock));
-            }
+            Critical.Assert(instanceLock != null, "Lock target should not be null.");
 
             _instanceLock = instanceLock;
-            _target = (T)_instanceLock.Target.Object;
+            Target = (T)_instanceLock.Target.Object;
         }
 
         /// <summary>
@@ -43,30 +42,43 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         /// <remarks>
         /// HACK: Remove me please!
+        /// Currently only used to get Cluster reference to pseudo remote object.
         /// </remarks>
         /// <param name="target">The lock target.</param>
+        [InvalidUsageIsCritical]
         public IxLock(T target)
         {
-            _target = target;
+            Critical.CheckedAssert(
+                typeof(T).GetTypeInfo().IsClass,
+                "Cluster reference hack can be crated for reference types.");
+            Target = target;
         }
 
         /// <summary>
         /// Locked <c>object</c>.
         /// </summary>
-        public T Target
-        {
-            get
-            {
-                EnsureNotDefault();
-                return _target;
-            }
-        }
+        [CanBeNull]
+        public T Target { get; }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            EnsureNotDefault();
-            _instanceLock?.Dispose();
+            try
+            {
+                try
+                {
+                    _instanceLock?.Dispose();
+                }
+                catch (Exception ex) when (ex.IsProcessable())
+                {
+                    Critical.Assert(false, "Dispose should not raise any error.");
+                }
+            }
+            catch
+            {
+                // Dispose should decouple errors propagation.
+                // Usually dispose errors relates only to disposing component, but not to it's caller.
+            }
         }
 
         /// <inheritdoc/>
@@ -93,15 +105,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return _instanceLock?.GetHashCode() ?? 0;
-        }
-
-        private void EnsureNotDefault()
-        {
-            if (_instanceLock == null && _target.Equals(default(T)))
-            {
-                throw new InvalidOperationException("Cannot use default value.");
-            }
+            return _instanceLock?.GetHashCode() ?? typeof(T).GetHashCode();
         }
 
         /// <summary>

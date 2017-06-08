@@ -6,12 +6,17 @@
 namespace ClrCoder
 {
 #if DEBUG
-    using System.Diagnostics;
 #endif
     using System;
+    using System.Diagnostics;
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
+
+    using Logging;
+    using Logging.Std;
+
+    using Validation;
 
     /// <summary>
     /// Utilities for handling critical application problems.
@@ -26,20 +31,9 @@ namespace ClrCoder
         /// </summary>
         public static CriticalAssertionFaultHandlerDelegate AssertionFaultHandler
         {
-            get
-            {
-                return _assertionFaultHandler;
-            }
+            get => _assertionFaultHandler;
 
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _assertionFaultHandler = value;
-            }
+            set => _assertionFaultHandler = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -70,6 +64,57 @@ namespace ClrCoder
             }
         }
 
+        /// <summary>
+        /// Asserts <paramref name="condition"/> is true, and produce critical error otherwise.
+        /// </summary>
+        /// <param name="condition">Condition to verify.</param>
+        /// <param name="message">Assertion fault error description.</param>
+        /// <param name="detailMessage">Assertion fault details.</param>
+        /// <param name="fileName">Sources file name where an assertion faulted./</param>
+        /// <param name="memberName">Member name where an assertion faulted.</param>
+        /// <param name="lineNumber">Source file line number where an assertion faulted.</param>
+        [AssertionMethod]
+        [Conditional("CHECKED_BUILD")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CheckedAssert(
+            [AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition,
+            string message,
+            string detailMessage = null,
+            [CallerFilePath] string fileName = null,
+            [CallerMemberName] string memberName = null,
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            if (!condition)
+            {
+                // ReSharper disable AssignNullToNotNullAttribute
+                HandleAssertionFault(message, detailMessage, fileName, memberName, lineNumber);
+
+                // ReSharper restore AssignNullToNotNullAttribute
+            }
+        }
+
+        /// <summary>
+        /// Adds critical error logging to the specified json logger.
+        /// </summary>
+        /// <param name="logger">Json logger.</param>
+        public static void SetupDefaultHandlerWithJsonLogger(IJsonLogger logger)
+        {
+            VxArgs.NotNull(logger, nameof(logger));
+
+            _assertionFaultHandler = (msg, details, callerInfo) =>
+                {
+                    try
+                    {
+                        DefaultAssertionHandler(msg, details, callerInfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Critical(_ => _("Critical assertion.").Details(msg).Exception(ex));
+                        throw;
+                    }
+                };
+        }
+
         private static void DefaultAssertionHandler(string message, string detailMessage, CallerInfo callerInfo)
         {
 #if DEBUG
@@ -87,22 +132,13 @@ namespace ClrCoder
             string member,
             int lineNumber)
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+            // ReSharper disable ConstantNullCoalescingCondition
+            AssertionFaultHandler(
+                message,
+                detailMessage,
+                new CallerInfo(fileName ?? "Unspecified file", member ?? "Unspecified member", lineNumber));
 
-            if (fileName == null)
-            {
-                throw new ArgumentNullException(nameof(fileName));
-            }
-
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            AssertionFaultHandler(message, detailMessage, new CallerInfo(fileName, member, lineNumber));
+            // ReSharper restore ConstantNullCoalescingCondition
         }
     }
 

@@ -6,26 +6,24 @@
 namespace ClrCoder.ComponentModel.IndirectX
 {
 #pragma warning disable 1998
-    using System;
     using System.Threading.Tasks;
+
+    using Annotations;
 
     using JetBrains.Annotations;
 
     using Threading;
 
+    /// <summary>
+    /// Special instance implementation of <see cref="IIxInstance"/> for passing resolve arguments.
+    /// </summary>
+    [InvalidUsageIsCritical]
     public class IxArgumentInstance : AsyncDisposableBase, IIxInstance
     {
-        public IxArgumentInstance(IxArgumentProvider providerNode, object instanceObj)
+        ///
+        public IxArgumentInstance(IxArgumentProvider providerNode, [CanBeNull] object instanceObj)
         {
-            if (providerNode == null)
-            {
-                throw new ArgumentNullException(nameof(providerNode));
-            }
-
-            if (instanceObj == null)
-            {
-                throw new ArgumentNullException(nameof(instanceObj));
-            }
+            Critical.CheckedAssert(providerNode != null, "Provider node should not be null.");
 
             Object = instanceObj;
             ProviderNode = providerNode;
@@ -38,8 +36,14 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         IIxResolver IIxInstance.Resolver
         {
-            get => throw new NotSupportedException();
-            set => throw new NotSupportedException();
+            get
+            {
+                Critical.Assert(false, "Unsupported.");
+                return null;
+            }
+
+            //// ReSharper disable once ValueParameterNotUsed
+            set => Critical.Assert(false, "Unsupported");
         }
 
         Task IIxInstance.ObjectCreationTask => Task.CompletedTask;
@@ -63,7 +67,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         [CanBeNull]
         object IIxInstance.GetData(IxProviderNode providerNode)
         {
-            throw new NotSupportedException();
+            Critical.Assert(false, "Unsupported.");
+            return null;
         }
 
         void IIxInstance.RemoveLock(IIxInstanceLock instanceLock)
@@ -78,7 +83,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         void IIxInstance.SetData(IxProviderNode providerNode, [CanBeNull] object data)
         {
-            throw new NotSupportedException();
+            Critical.Assert(false, "Unsupported.");
         }
 
         /// <inheritdoc/>

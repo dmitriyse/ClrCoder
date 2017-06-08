@@ -15,6 +15,7 @@ namespace ClrCoder.Testing
 
     using NodaTime;
 
+    using NUnit.Framework;
     using NUnit.Framework.Internal;
 
     using Runtime.Serialization;
@@ -73,37 +74,48 @@ namespace ClrCoder.Testing
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
 
-            TestExecutionContext testExecutionContext = TestExecutionContext.CurrentContext;
-            testExecutionContext.OutWriter.WriteLine(
+            WriteLine(
                 $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
 
             if (logEntry.Exception != null)
             {
                 var baseIntent = "  |";
-                testExecutionContext.OutWriter.Write(baseIntent);
-                testExecutionContext.OutWriter.WriteLine(
+                Write(baseIntent);
+                WriteLine(
                     "------------------------------------- Exception ---------------------------------------");
                 string intent = string.Empty;
                 ExceptionDto curException = logEntry.Exception;
                 do
                 {
-                    testExecutionContext.OutWriter.Write(baseIntent);
-                    testExecutionContext.OutWriter.Write(intent);
+                    Write(baseIntent);
+                    Write(intent);
                     if (intent != string.Empty)
                     {
-                        testExecutionContext.OutWriter.Write("<--");
+                        Write("<--");
                     }
 
                     string name = curException.TypeFullName?.Split('.')?.Last() ?? "NullName";
-                    testExecutionContext.OutWriter.WriteLine($"{name}: {curException.Message}");
+                    WriteLine($"{name}: {curException.Message}");
                     curException = curException.InnerException;
                     intent += "    ";
                 }
                 while (curException != null);
-                testExecutionContext.OutWriter.Write(baseIntent);
-                testExecutionContext.OutWriter.WriteLine(
+                Write(baseIntent);
+                WriteLine(
                     "---------------------------------------------------------------------------------------");
             }
+        }
+
+        private void Write(string msg)
+        {
+            TestContext.Write(msg);
+            TestContext.Progress.Write(msg);
+        }
+
+        private void WriteLine(string msg)
+        {
+            TestContext.WriteLine(msg);
+            TestContext.Progress.WriteLine(msg);
         }
     }
 }

@@ -26,6 +26,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <DefineConstants>$(DefineConstants);CHECKED_BUILD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

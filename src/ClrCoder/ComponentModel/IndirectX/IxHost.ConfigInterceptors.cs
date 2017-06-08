@@ -5,6 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+#pragma warning disable 1998
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -26,11 +27,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public InterceptableDelegate<InstanceFactoryBuilderDelegate> InstanceFactoryBuilder { get; } =
             new InterceptableDelegate<InstanceFactoryBuilderDelegate>(
-                config =>
-                    {
-                        throw new NotSupportedException(
-                            $"Raw instance factory with type {config.GetType()} is not supported.");
-                    });
+                config => throw new NotSupportedException(
+                              $"Raw instance factory with type {config.GetType()} is not supported."));
 
         /// <summary>
         /// Creates dependency node from <paramref name="config"/>.
@@ -47,31 +45,23 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public InterceptableDelegate<VisibilityFilterBuilderDelegate> VisibilityFilterBuilder { get; } =
             new InterceptableDelegate<VisibilityFilterBuilderDelegate>(
-                config =>
-                    {
-                        throw new NotSupportedException(
-                            $"Visibility filter with type {config.GetType()} is not supported.");
-                    });
+                config => throw new NotSupportedException(
+                              $"Visibility filter with type {config.GetType()} is not supported."));
 
         /// <summary>
         /// Interceptors chain that builds node provider.
         /// </summary>
         public InterceptableDelegate<ProviderNodeBuilderDelegate> ProviderNodeBuilder { get; } =
             new InterceptableDelegate<ProviderNodeBuilderDelegate>(
-                (cfg, parent) =>
-                    {
-                        throw new NotSupportedException($"Node with type {cfg.GetType()} is not supported.");
-                    });
+                (cfg, parent) => throw new NotSupportedException($"Node with type {cfg.GetType()} is not supported."));
 
         /// <summary>
         /// Interceptors chain that builds scope binder.
         /// </summary>
         public InterceptableDelegate<ScopeBinderBuilderDelegate> ScopeBinderBuilder { get; } =
             new InterceptableDelegate<ScopeBinderBuilderDelegate>(
-                config =>
-                    {
-                        throw new NotSupportedException($"Scope binder with type {config.GetType()} is not supported.");
-                    });
+                config => throw new NotSupportedException(
+                              $"Scope binder with type {config.GetType()} is not supported."));
 
         /// <summary>
         /// Interceptors chain that builds dispose handler.
@@ -80,23 +70,6 @@ namespace ClrCoder.ComponentModel.IndirectX
             new InterceptableDelegate<DisposeHandlerBuilderDelegate>(
                 type =>
                     {
-                        if (type == null)
-                        {
-                            return obj =>
-                                {
-                                    try
-                                    {
-                                        Critical.Assert(obj != null, "Dispose handler called on not null object.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        return Task.FromException(ex);
-                                    }
-
-                                    return Task.CompletedTask;
-                                };
-                        }
-
                         // By default no any dispose action required on object.
                         return obj => Task.CompletedTask;
                     });
@@ -310,8 +283,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.Multiplicity == null)
                     {
-                        // TODO: Replace to configuration validation exception.
-                        throw new InvalidOperationException("Multiplicity should be specified.");
+                        throw new IxConfigurationException("Multiplicity should be specified.");
                     }
 
                     if (!(cfg.Multiplicity is IxSingletonMultiplicityConfig))
@@ -321,7 +293,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.InstanceBuilder == null)
                     {
-                        throw new InvalidOperationException("Instance factory should be configured.");
+                        throw new IxConfigurationException("Instance factory should be configured.");
                     }
 
                     IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.InstanceBuilder);
@@ -333,18 +305,18 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.ExportFilter == null)
                     {
-                        throw new InvalidOperationException("Export filter should be defined for provider node.");
+                        throw new IxConfigurationException("Export filter should be defined for provider node.");
                     }
 
                     if (cfg.ExportToParentFilter == null)
                     {
-                        throw new InvalidOperationException(
+                        throw new IxConfigurationException(
                             "Export to parent filter should be defined for provider node.");
                     }
 
                     if (cfg.ImportFilter == null)
                     {
-                        throw new InvalidOperationException("Import filter should be defined for provider node.");
+                        throw new IxConfigurationException("Import filter should be defined for provider node.");
                     }
 
                     IxVisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
@@ -353,12 +325,12 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.ScopeBinding == null)
                     {
-                        throw new InvalidOperationException("Scope binding should be specified.");
+                        throw new IxConfigurationException("Scope binding should be specified.");
                     }
 
                     if (cfg.DisposeHandler == null)
                     {
-                        throw new InvalidOperationException("Dispose handler should be specified.");
+                        throw new IxConfigurationException("Dispose handler should be specified.");
                     }
 
                     IxScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
@@ -395,7 +367,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     if (cfg.Multiplicity == null)
                     {
                         // TODO: Replace to configuration validation exception.
-                        throw new InvalidOperationException("Multiplicity should be specified.");
+                        throw new IxConfigurationException("Multiplicity should be specified.");
                     }
 
                     if (!(cfg.Multiplicity is IxPerResolveMultiplicityConfig))
@@ -405,7 +377,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.InstanceBuilder == null)
                     {
-                        throw new InvalidOperationException("Instance factory should be configured.");
+                        throw new IxConfigurationException("Instance factory should be configured.");
                     }
 
                     IxInstanceFactory instanceFactory = InstanceFactoryBuilder.Delegate(cfg.InstanceBuilder);
@@ -417,18 +389,18 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.ExportFilter == null)
                     {
-                        throw new InvalidOperationException("Export filter should be defined for provider node.");
+                        throw new IxConfigurationException("Export filter should be defined for provider node.");
                     }
 
                     if (cfg.ExportToParentFilter == null)
                     {
-                        throw new InvalidOperationException(
+                        throw new IxConfigurationException(
                             "Export to parent filter should be defined for provider node.");
                     }
 
                     if (cfg.ImportFilter == null)
                     {
-                        throw new InvalidOperationException("Import filter should be defined for provider node.");
+                        throw new IxConfigurationException("Import filter should be defined for provider node.");
                     }
 
                     IxVisibilityFilter exportFilter = VisibilityFilterBuilder.Delegate(cfg.ExportFilter);
@@ -437,12 +409,12 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                     if (cfg.ScopeBinding == null)
                     {
-                        throw new InvalidOperationException("Scope binding should be specified.");
+                        throw new IxConfigurationException("Scope binding should be specified.");
                     }
 
                     if (cfg.DisposeHandler == null)
                     {
-                        throw new InvalidOperationException("Dispose handler should be specified.");
+                        throw new IxConfigurationException("Dispose handler should be specified.");
                     }
 
                     IxScopeBinderDelegate scopeBinder = ScopeBinderBuilder.Delegate(cfg.ScopeBinding);
@@ -470,7 +442,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         return next(visibilityConfig);
                     }
 
-                    var stdConfig = visibilityConfig as IxStdVisibilityFilterConfig;
+                    var stdConfig = (IxStdVisibilityFilterConfig)visibilityConfig;
                     return id =>
                         {
                             if (stdConfig.WhiteList != null)
@@ -500,29 +472,36 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return type =>
                 {
-                    if (type == null)
-                    {
-                        IxDisposeHandlerDelegate nextHandler = next(null);
-                        return async obj =>
-                            {
-                                if (obj is IDisposable disposable)
-                                {
-                                    disposable.Dispose();
-                                }
-
-                                await nextHandler(obj);
-                            };
-                    }
-
-                    if (!typeof(IDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (type != null && !typeof(IDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                     {
                         return next(type);
                     }
 
+                    IxDisposeHandlerDelegate nextHandler = next(null);
                     return async obj =>
                         {
-                            Critical.Assert(obj != null, "Dispose handler called for null object");
-                            ((IDisposable)obj).Dispose();
+                            if (obj is IDisposable disposable)
+                            {
+                                try
+                                {
+                                    try
+                                    {
+                                        disposable.Dispose();
+                                    }
+                                    catch (Exception ex) when (ex.IsProcessable())
+                                    {
+                                        Critical.Assert(false, "Dispose should not throw any exceptions.");
+                                    }
+                                }
+                                catch
+                                {
+                                    // Mute all dispose errors.
+                                }
+                            }
+                            else
+                            {
+                                await nextHandler(obj);
+                            }
                         };
                 };
         }
@@ -531,29 +510,38 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return type =>
                 {
-                    if (type == null)
-                    {
-                        IxDisposeHandlerDelegate nextHandler = next(null);
-                        return async obj =>
-                            {
-                                if (obj is IAsyncDisposable disposable)
-                                {
-                                    await disposable.AsyncDispose();
-                                }
-
-                                await nextHandler(obj);
-                            };
-                    }
-
-                    if (!typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (type != null && !typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                     {
                         return next(type);
                     }
 
+                    IxDisposeHandlerDelegate nextHandler = next(null);
                     return async obj =>
                         {
-                            Critical.Assert(obj != null, "Dispose handler called for null object");
-                            await ((IAsyncDisposable)obj).AsyncDispose();
+                            if (obj is IAsyncDisposable disposable)
+                            {
+                                try
+                                {
+                                    try
+                                    {
+                                        await disposable.AsyncDispose();
+                                    }
+                                    catch (Exception ex) when (ex.IsProcessable())
+                                    {
+                                        Critical.Assert(false, "Dispose should not throw any exceptions.");
+                                    }
+                                }
+                                catch
+                                {
+                                    // Mute all dispose errors.
+                                }
+                            }
+                            else
+                            {
+                                await nextHandler(obj);
+                            }
+
+                            await nextHandler(obj);
                         };
                 };
         }

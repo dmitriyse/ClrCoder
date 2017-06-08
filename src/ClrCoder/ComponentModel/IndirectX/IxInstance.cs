@@ -68,7 +68,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 new IxInstanceChildLock(parentInstance, this);
             }
 
-            creatorTempLock = new IxInstanceTempLock(this);
+            creatorTempLock = new IxInstancePinLock(this);
             _initTempLock = creatorTempLock;
         }
 

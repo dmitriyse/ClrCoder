@@ -31,7 +31,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <summary>
         /// Gets resolved object.
         /// </summary>
-        [NotNull]
+        /// <remarks>Can be null, mainly in parametrized initialization cases.</remarks>
         object Object { get; }
 
         void AddLock(IIxInstanceLock instanceLock);

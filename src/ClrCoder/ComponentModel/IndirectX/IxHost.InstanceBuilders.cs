@@ -12,8 +12,6 @@ namespace ClrCoder.ComponentModel.IndirectX
     using System.Reflection;
     using System.Threading.Tasks;
 
-    using Attributes;
-
     using MoreLinq;
 
     using Threading;
@@ -211,6 +209,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
                                     object instanceObj = instanceObjTask.GetResult();
 
+                                    // TODO: TryCast, 
+                                    // TODO: Allow null result.
                                     Critical.Assert(
                                         instanceObj != null,
                                         "Constructor call through reflection should not return null.");

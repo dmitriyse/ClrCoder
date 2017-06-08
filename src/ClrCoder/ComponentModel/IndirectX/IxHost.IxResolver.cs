@@ -63,7 +63,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 {
                     if (!Monitor.IsEntered(Host.InstanceTreeSyncRoot))
                     {
-                        throw new InvalidOperationException(
+                        Critical.Assert(
+                            false,
                             "Inspecting instance parent should be performed under InstanceTreeLock.");
                     }
 
@@ -73,11 +74,15 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             IIxResolver IIxInstance.Resolver
             {
-                get => throw new InvalidOperationException(
-                           "This is too virtual instance and cannot have nested resolver.");
+                get
+                {
+                    Critical.Assert(
+                        false,
+                        "This is too virtual instance and cannot have nested resolver.");
+                    return null;
+                }
 
-                set => throw new InvalidOperationException(
-                           "This is too virtual instance and cannot have nested resolver.");
+                set => Critical.Assert(false, "This is too virtual instance and cannot have nested resolver.");
             }
 
             ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.OwnedLocks => throw new NotSupportedException(
@@ -85,7 +90,14 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks => throw new NotSupportedException(
             ////                                                              "This is too virtual.");
-            Task IAsyncDisposable.DisposeTask => throw new NotSupportedException("Too virtual for dispose.");
+            Task IAsyncDisposable.DisposeTask
+            {
+                get
+                {
+                    Critical.Assert(false, "Too virtual for dispose.");
+                    return null;
+                }
+            }
 
             public Task<object> ObjectTask { get; }
 
@@ -111,13 +123,14 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             void IIxInstance.AddOwnedLock(IIxInstanceLock instanceLock)
             {
-                throw new NotSupportedException(
-                    "This is completely virtual object and cannot own locks.");
+                Critical.Assert(false, "This is completely virtual object and cannot own locks.");
             }
 
+            [CanBeNull]
             object IIxInstance.GetData(IxProviderNode providerNode)
             {
-                throw new NotSupportedException("This object not intendet to have children and children data.");
+                Critical.Assert(false, "This object not intendet to have children and children data.");
+                return null;
             }
 
             void IIxInstance.RemoveLock(IIxInstanceLock instanceLock)
@@ -130,8 +143,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             void IIxInstance.RemoveOwnedLock(IIxInstanceLock instanceLock)
             {
-                throw new NotSupportedException(
-                    "This is completely virtual object and cannot own locks.");
+                Critical.Assert(false, "This is completely virtual object and cannot own locks.");
             }
 
             public async Task<IIxInstanceLock> Resolve(
@@ -143,20 +155,20 @@ namespace ClrCoder.ComponentModel.IndirectX
                     ParentContext,
                     arguments ?? new Dictionary<IxIdentifier, object>());
 
-                using (new IxInstanceTempLock(OwnerInstance))
+                using (new IxInstancePinLock(OwnerInstance))
                 {
                     return await Host.Resolve(OwnerInstance, identifier, context, ParentFrame);
                 }
             }
 
-            void IIxInstance.SetData(IxProviderNode providerNode, object data)
+            void IIxInstance.SetData(IxProviderNode providerNode, [CanBeNull] object data)
             {
-                throw new NotSupportedException("This object not intendet to have children and children data.");
+                Critical.Assert(false, "This object not intended to have children and children data.");
             }
 
             public void StartDispose()
             {
-                throw new NotSupportedException("This method is too virtual to dispose it.");
+                Critical.CheckedAssert(false, "This method is too virtual to dispose it.");
             }
 
             public void ClearParentResolveContext()

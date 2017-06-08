@@ -64,7 +64,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 else
                 {
                     singleton = (IxScopeInstance)data;
-                    scopeLock = new IxInstanceTempLock(singleton);
+                    scopeLock = new IxInstancePinLock(singleton);
                 }
 
                 return scopeLock;
