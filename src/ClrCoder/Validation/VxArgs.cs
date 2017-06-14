@@ -38,7 +38,7 @@ namespace ClrCoder.Validation
         /// <param name="name">Argument <c>name</c>.</param>
         public static void FinitPositive(double? value, [InvokerParameterName] string name)
         {
-            if (value != null && !(value > 0.0) && double.IsPositiveInfinity(value.Value))
+            if ((value != null) && !(value > 0.0) && double.IsPositiveInfinity(value.Value))
             {
                 throw new ArgumentOutOfRangeException(name, $"{name} should be finite positive.");
             }
@@ -56,6 +56,19 @@ namespace ClrCoder.Validation
             if (!(value >= start) || !(value <= end))
             {
                 throw new ArgumentOutOfRangeException($"{name} should fall in range [{start}, {end}]", nameof(name));
+            }
+        }
+
+        /// <summary>
+        /// Validates that argument is non negative.
+        /// </summary>
+        /// <param name="value">Argument <c>value</c>.</param>
+        /// <param name="name">Argument <c>name</c>.</param>
+        public static void NonNegative(int value, [InvokerParameterName] string name)
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException($"{name} should not be negative.", name);
             }
         }
 
@@ -180,7 +193,7 @@ namespace ClrCoder.Validation
         /// <param name="name">Argument <c>name</c>.</param>
         public static void PositiveSize(Size size, [InvokerParameterName] string name)
         {
-            if (size.Width <= 0 || size.Height <= 0)
+            if ((size.Width <= 0) || (size.Height <= 0))
             {
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non-zero positive");
             }
@@ -193,7 +206,7 @@ namespace ClrCoder.Validation
         /// <param name="name">Argument <c>name</c>.</param>
         public static void PositiveSize(Size? size, [InvokerParameterName] string name)
         {
-            if (size != null && (size.Value.Width <= 0 || size.Value.Height <= 0))
+            if ((size != null) && ((size.Value.Width <= 0) || (size.Value.Height <= 0)))
             {
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non-zero positive");
             }
@@ -225,7 +238,7 @@ namespace ClrCoder.Validation
                 // ReSharper disable once ObjectCreationAsStatement
                 var uriObj = new Uri(uri, UriKind.Absolute);
 
-                if (uriObj.Scheme != "http" && uriObj.Scheme != "https")
+                if ((uriObj.Scheme != "http") && (uriObj.Scheme != "https"))
                 {
                     throw new ArgumentException($"{name} should use http/https", name);
                 }
