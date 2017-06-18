@@ -52,6 +52,12 @@ namespace ClrCoder.Logging
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
 
+            var directoryName = Path.GetDirectoryName(fileName);
+            if (!Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+            
             // ReSharper restore JoinNullCheckWithUsage
             _fileName = fileName;
             AsyncHandler = asyncHandler;
