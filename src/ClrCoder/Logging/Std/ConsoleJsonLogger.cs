@@ -23,6 +23,8 @@ namespace ClrCoder.Logging.Std
     /// </summary>
     public class ConsoleJsonLogger : IJsonLogger
     {
+        private readonly LogSeverity _maxSeverity;
+
         private readonly DateTimeZone _localZone;
 
         /// <summary>
@@ -30,8 +32,13 @@ namespace ClrCoder.Logging.Std
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
         /// <param name="serializerSource">Logging serializer. Used to convert objects to strings and to JObject.</param>
-        public ConsoleJsonLogger(IAsyncHandler asyncHandler, IJsonSerializerSource serializerSource = null)
+        /// <param name="maxSeverity">Maximal visible severity.</param>
+        public ConsoleJsonLogger(
+            IAsyncHandler asyncHandler,
+            IJsonSerializerSource serializerSource = null,
+            LogSeverity maxSeverity = LogSeverity.Debug)
         {
+            _maxSeverity = maxSeverity;
             if (asyncHandler == null)
             {
                 throw new ArgumentNullException(nameof(asyncHandler));
@@ -60,6 +67,11 @@ namespace ClrCoder.Logging.Std
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
             ConsoleColor colorBackup = Console.ForegroundColor;
+            if (logEntry.Severity > _maxSeverity)
+            {
+                return;
+            }
+
             try
             {
                 switch (logEntry.Severity)
