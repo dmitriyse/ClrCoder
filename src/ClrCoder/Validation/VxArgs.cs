@@ -73,6 +73,19 @@ namespace ClrCoder.Validation
         }
 
         /// <summary>
+        /// Validates that Width and Height are both non negative.
+        /// </summary>
+        /// <param name="size">Size to validate.</param>
+        /// <param name="name">Argument <c>name</c>.</param>
+        public static void NonNegativeSize(Size? size, [InvokerParameterName] string name)
+        {
+            if ((size != null) && ((size.Value.Width < 0) || (size.Value.Height < 0)))
+            {
+                throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non negative");
+            }
+        }
+
+        /// <summary>
         /// Validates argument string is not empty.
         /// </summary>
         /// <param name="str">String to validate.</param>
