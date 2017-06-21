@@ -11,6 +11,7 @@ namespace ClrCoder.Logging.Std
     using Json;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     using NodaTime;
 
@@ -99,8 +100,30 @@ namespace ClrCoder.Logging.Std
                         break;
                 }
 
+                string scopePrefix = string.Empty;
+                if (logEntry.ExtensionData != null && logEntry.ExtensionData.TryGetValue(ScopedLogger.ExtensionDataKey, out object scopeInfo))
+                {
+
+                    if (scopeInfo is JObject jobj)
+                    {
+                        if (jobj.TryGetValue("id", out JToken value))
+                        {
+                            scopePrefix = value.ToString();
+                        }
+                    }
+                    else if (scopeInfo is StdLogScope stdLogScope)
+                    {
+                        scopePrefix = stdLogScope.Id.ToString();
+                    }
+
+                    if (scopePrefix != string.Empty)
+                    {
+                        scopePrefix += "=> ";
+                    }
+                }
+
                 Console.WriteLine(
-                    $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{logEntry.Message}");
+                    $"{logEntry.Instant.InZone(_localZone):hh:mm:ss.f}: {dotNetTypePrefix}{scopePrefix}{logEntry.Message}");
                 if (logEntry.Exception != null)
                 {
                     var baseIntent = "  |";

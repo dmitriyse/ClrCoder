@@ -55,7 +55,7 @@ namespace ClrCoder.Validation
         {
             if (!(value >= start) || !(value <= end))
             {
-                throw new ArgumentOutOfRangeException($"{name} should fall in range [{start}, {end}]", nameof(name));
+                throw new ArgumentOutOfRangeException($"{name} should fall in range [{start}, {end}]", name);
             }
         }
 

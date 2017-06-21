@@ -21,6 +21,11 @@ namespace ClrCoder.Logging.Std
     /// </remarks>
     public class ScopedLogger : IJsonLogger
     {
+        /// <summary>
+        /// Scope info key in the extension data dictionary.
+        /// </summary>
+        public const string ExtensionDataKey = "logScope";
+
         private readonly object _scopeId;
 
         private IJsonLogger _inner;
@@ -54,21 +59,21 @@ namespace ClrCoder.Logging.Std
 
             // TODO: Implement nested scopes.
             logEntry.SetExtensionData(
-                "logScope",
-                new LogScope
+                ExtensionDataKey,
+                new StdLogScope
                     {
                         Id = _scopeId
                     });
 
             _inner.Log(logEntry);
         }
+    }
 
-        private class LogScope
-        {
-            public object Id { get; set; }
+    public class StdLogScope
+    {
+        public object Id { get; set; }
 
-            [CanBeNull]
-            public LogScope NestedScope { get; set; }
-        }
+        [CanBeNull]
+        public StdLogScope NestedScope { get; set; }
     }
 }
