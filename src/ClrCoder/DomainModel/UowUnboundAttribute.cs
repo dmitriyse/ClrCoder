@@ -12,7 +12,7 @@ namespace ClrCoder.DomainModel
     /// <summary>
     /// Shows that a value received from a tagged property can be used out of UoW.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Interface)]
     [PublicAPI]
     public class UowUnboundAttribute : Attribute
     {

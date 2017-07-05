@@ -3,16 +3,13 @@
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-
-#pragma warning disable 1998
-
 namespace ClrCoder.DomainModel.Impl.InMemory
 {
+#pragma warning disable 1998
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -30,7 +27,7 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     /// <typeparam name="TStorage">Final in-memory storage type.</typeparam>
     /// <typeparam name="TRepository">Final repository type.</typeparam>
     /// <typeparam name="TKey">Key type.</typeparam>
-    /// <typeparam name="TEntity">entity type.</typeparam>
+    /// <typeparam name="TEntity">The entity type.</typeparam>
     public abstract class InMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey,
                                           TEntity>
         : PersistencePluginBase<TPersistence, TUnitOfWork>
@@ -52,12 +49,12 @@ namespace ClrCoder.DomainModel.Impl.InMemory
         /// <see cref="InMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/> class.
         /// </summary>
         /// <param name="persistence">Owner persistence.</param>
-        /// <param name="supportedRepositoryTypes">Provides repository types that can be resolved with <c>this</c> plugin.</param>
         /// <param name="mergeComparer">Compares entities in merge algorithms.</param>
+        /// <param name="supportedRepositoryTypes">Provides repository types that can be resolved with <c>this</c> plugin.</param>
         public InMemoryStorage(
             TPersistence persistence,
             IEqualityComparer<TEntity> mergeComparer,
-            [Immutable] IReadOnlyCollection<Type> supportedRepositoryTypes)
+            [Immutable] IReadOnlySet<Type> supportedRepositoryTypes)
             : base(persistence, supportedRepositoryTypes, false)
         {
             if (mergeComparer == null)

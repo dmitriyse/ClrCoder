@@ -200,7 +200,7 @@ namespace ClrCoder.Tests.DomainModel
                 DummyEntity>
         {
             public SimpleInMemoryStorage(SimplePersistence persistence, IEqualityComparer<DummyEntity> mergeComparer)
-                : base(persistence, mergeComparer, new HashSet<Type> { typeof(IDummyEntityRepository) })
+                : base(persistence, mergeComparer, new HashSetEx<Type> { typeof(IDummyEntityRepository) })
             {
             }
 

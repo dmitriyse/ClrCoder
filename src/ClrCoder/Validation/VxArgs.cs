@@ -281,5 +281,20 @@ namespace ClrCoder.Validation
                 throw new ArgumentException(ex.Message, name, ex);
             }
         }
+
+        /// <summary>
+        /// Validates that value typed argument is initialized (not equals to the default value).
+        /// </summary>
+        /// <typeparam name="T">The value type.</typeparam>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="name">The argument name.</param>
+        public static void NonDefault<T>(T value, [InvokerParameterName] string name)
+            where T:struct, IEquatable<T>
+        {
+            if (value.Equals(default(T)))
+            {
+                throw new ArgumentException("Argument should not be equal to the default value.", name);
+            }
+        }
     }
 }

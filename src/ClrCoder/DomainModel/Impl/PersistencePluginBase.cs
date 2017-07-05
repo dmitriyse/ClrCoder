@@ -32,7 +32,7 @@ namespace ClrCoder.DomainModel.Impl
         /// </param>
         protected PersistencePluginBase(
             TPersistence persistence,
-            [Immutable] IReadOnlyCollection<Type> supportedRepositoryTypes,
+            [Immutable] IReadOnlySet<Type> supportedRepositoryTypes,
             bool areNonDeclaredRepositoryTypesSupported)
         {
             if (persistence == null)
@@ -49,7 +49,7 @@ namespace ClrCoder.DomainModel.Impl
         /// <summary>
         /// Provides repository types that can be resolved with <c>this</c> plugin.
         /// </summary>
-        public IReadOnlyCollection<Type> SupportedRepositoryTypes { get; }
+        public IReadOnlySet<Type> SupportedRepositoryTypes { get; }
 
         /// <summary>
         /// Shows that plugin can resolve non declared repository types in the <see cref="SupportedRepositoryTypes"/>.
