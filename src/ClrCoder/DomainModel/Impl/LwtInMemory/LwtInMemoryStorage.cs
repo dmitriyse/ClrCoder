@@ -8,6 +8,8 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -28,8 +30,8 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
     /// <typeparam name="TRepository">The final repository type.</typeparam>
     /// <typeparam name="TKey">The entity key type.</typeparam>
     /// <typeparam name="TEntity">The entity type.</typeparam>
-    public class LwtInMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey,
-                                    TEntity>
+    public abstract class LwtInMemoryStorage<TPersistence, TUnitOfWork, TStorage, TRepository, TKey,
+                                             TEntity>
         : PersistencePluginBase<TPersistence, TUnitOfWork>
         where TPersistence : PersistenceBase<TPersistence, TUnitOfWork>
         where TUnitOfWork : UnitOfWorkBase<TPersistence, TUnitOfWork>
@@ -56,6 +58,8 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
             : base(persistence, supportedRepositoryTypes, false)
         {
             _entities = new SortedDictionary<TKey, TEntity>(keysComparer);
+
+            persistence.UnitOfWorkOpened += UnitOfWorkOpened;
         }
 
         /// <summary>
@@ -148,6 +152,25 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         protected override async Task AsyncDispose()
         {
             // Do nothing.
+        }
+
+        /// <summary>
+        /// Creates repository on transaction opening.
+        /// </summary>
+        /// <returns>Created repository.</returns>
+        protected abstract TRepository CreateRepository();
+
+        private void UnitOfWorkOpened(TUnitOfWork uow)
+        {
+            if (uow == null)
+            {
+                throw new ArgumentNullException(nameof(uow));
+            }
+
+            // We are under lock here.
+            Debug.Assert(Monitor.IsEntered(uow.DisposeSyncRoot), "Repository creation allowed only under lock");
+
+            uow.SetPluginEntry(this, CreateRepository());
         }
     }
 }
