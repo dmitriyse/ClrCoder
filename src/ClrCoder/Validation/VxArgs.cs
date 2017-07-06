@@ -195,7 +195,7 @@ namespace ClrCoder.Validation
         {
             if (value == null)
             {
-                throw new ArgumentNullException(nameof(errorName));
+                throw new ArgumentNullException(errorName);
             }
         }
 
