@@ -148,7 +148,7 @@ namespace ClrCoder.AspNetCore.AsyncResponse
         private Workflow GetOrCreateWorkflow(TResponseKey key)
         {
             Workflow workflow;
-            bool isWorkflowCreated = false;
+            var isWorkflowCreated = false;
             lock (_workflows)
             {
                 if (!_workflows.TryGetValue(key, out workflow))
@@ -174,10 +174,11 @@ namespace ClrCoder.AspNetCore.AsyncResponse
 
             private readonly TResponseKey _key;
 
-            private readonly TaskCompletionSource<bool> _aspNetPipelineHandlingCompletedPromise =
-                new TaskCompletionSource<bool>();
+            private readonly TaskCompletionSource<ValueVoid> _aspNetPipelineHandlingCompletedPromise =
+                new TaskCompletionSource<ValueVoid>();
 
-            private readonly TaskCompletionSource<bool> _handlingCompletedPromise = new TaskCompletionSource<bool>();
+            private readonly TaskCompletionSource<ValueVoid> _handlingCompletedPromise =
+                new TaskCompletionSource<ValueVoid>();
 
             public Workflow(AsyncResponseHandler<TResponseKey> owner, TResponseKey key)
             {
@@ -246,8 +247,8 @@ namespace ClrCoder.AspNetCore.AsyncResponse
                     }
                     else
                     {
-                        _aspNetPipelineHandlingCompletedPromise.SetResult(true);
-                        _handlingCompletedPromise.SetResult(true);
+                        _aspNetPipelineHandlingCompletedPromise.SetResult(default(ValueVoid));
+                        _handlingCompletedPromise.SetResult(default(ValueVoid));
                     }
                 }
                 finally

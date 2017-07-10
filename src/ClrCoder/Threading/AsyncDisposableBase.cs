@@ -26,7 +26,7 @@ namespace ClrCoder.Threading
         /// TODO: Replace with CancellationTokenSource.
         /// </summary>
         [CanBeNull]
-        private TaskCompletionSource<bool> _disposeCompletionSource;
+        private TaskCompletionSource<ValueVoid> _disposeCompletionSource;
 
         [CanBeNull]
         private Task _disposeTask;
@@ -70,7 +70,7 @@ namespace ClrCoder.Threading
                         // Implicit memory barrier here
                         if (_disposeTask == null)
                         {
-                            _disposeCompletionSource = new TaskCompletionSource<bool>();
+                            _disposeCompletionSource = new TaskCompletionSource<ValueVoid>();
                             _disposeTask = _disposeCompletionSource.Task;
                         }
 
@@ -221,7 +221,7 @@ namespace ClrCoder.Threading
                             "Dispose task initialized here to completion source task or to DoAsyncDispose wrapper result Task");
 
                         // If completion source was used prior to StartDispose method we should finalize completion source.
-                        _disposeCompletionSource?.SetResult(true);
+                        _disposeCompletionSource?.SetResult(default(ValueVoid));
 
                         // -------Implicit memory barrier here-----------
                     }
@@ -233,7 +233,7 @@ namespace ClrCoder.Threading
                         _disposeTask == null
                         || _disposeCompletionSource != null && _disposeTask == _disposeCompletionSource.Task,
                         "Dispose task should be null here, except when completion source was created.");
-                    _disposeCompletionSource?.SetResult(true);
+                    _disposeCompletionSource?.SetResult(default(ValueVoid));
                 }
             }
             catch (Exception ex)

@@ -7,6 +7,8 @@ namespace ClrCoder.Collections
 {
     using System.Collections.Generic;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Represents a collection of keys and values.
     /// </summary>
@@ -21,9 +23,25 @@ namespace ClrCoder.Collections
         {
         }
 
-        public DictionaryEx(IEqualityComparer<TKey> comparer)
+        public DictionaryEx([CanBeNull]IEqualityComparer<TKey> comparer)
             : base(comparer)
         {
+        }
+
+        public DictionaryEx(int capacity)
+            : base(capacity)
+        {
+            
+        }
+
+        public DictionaryEx(IDictionary<TKey, TValue> dictionary): base(dictionary)
+        {
+
+        }
+
+        public DictionaryEx(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) : base(dictionary, comparer)
+        {
+
         }
     }
 }

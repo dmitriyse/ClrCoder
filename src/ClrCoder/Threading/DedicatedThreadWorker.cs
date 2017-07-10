@@ -270,14 +270,14 @@ namespace ClrCoder.Threading
             {
                 _ct.ThrowIfCancellationRequested();
 
-                var taskCompletionSource = new TaskCompletionSource<bool>();
+                var taskCompletionSource = new TaskCompletionSource<ValueVoid>();
                 _workItems.Add(
                     () =>
                         {
                             try
                             {
                                 action();
-                                taskCompletionSource.SetResult(true);
+                                taskCompletionSource.SetResult(default(ValueVoid));
                             }
                             catch (Exception ex)
                             {
