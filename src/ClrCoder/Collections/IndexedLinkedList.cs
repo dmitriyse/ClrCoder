@@ -422,6 +422,46 @@ namespace ClrCoder.Collections
             return false;
         }
 
+        /// <summary>
+        /// Tries to get next item in the list.
+        /// </summary>
+        /// <param name="key">The key of the item to get next item for.</param>
+        /// <param name="item">The next item relative to the specified item key.</param>
+        /// <returns>true, if the list contains elements after the specified item key, otherwise false.</returns>
+        /// <exception cref="KeyNotFoundException">Key should exists in the list.</exception>
+        public bool TryGetNext(TKey key, out KeyValuePair<TKey, TValue> item)
+        {
+            LinkedListNode<KeyValuePair<TKey, TValue>> nextNode = _index[key].Next;
+            if (nextNode != null)
+            {
+                item = nextNode.Value;
+                return true;
+            }
+
+            item = default(KeyValuePair<TKey, TValue>);
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to get previous item in the list.
+        /// </summary>
+        /// <param name="key">The key of the item to get next item for.</param>
+        /// <param name="item">The previous item relative to the specified item key.</param>
+        /// <returns>true, if the list contains elements before the specified item key, otherwise false.</returns>
+        /// <exception cref="KeyNotFoundException">Key should exists in the list.</exception>
+        public bool TryGetPrevious(TKey key, out KeyValuePair<TKey, TValue> item)
+        {
+            LinkedListNode<KeyValuePair<TKey, TValue>> previousNode = _index[key].Previous;
+            if (previousNode != null)
+            {
+                item = previousNode.Value;
+                return true;
+            }
+
+            item = default(KeyValuePair<TKey, TValue>);
+            return false;
+        }
+
         [Serializable]
         private struct Enumerator : IDictionaryEnumerator, IDisposable
         {
