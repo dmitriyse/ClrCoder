@@ -184,6 +184,114 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <summary>
+        /// Gets locks on the required <c>object</c> from the specified <c>resolver</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of target <c>object</c>.</typeparam>
+        /// <typeparam name="TArg1">The type of the first argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg2">The type of the second argument for current resolve operation.</typeparam>
+        /// <param name="resolver">Resolver that should be used.</param>
+        /// <param name="name">Name of registration.</param>
+        /// <param name="arg1">The first argument for current resolve operation.</param>
+        /// <param name="arg2">The second argument for current resolve operation.</param>
+        /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
+        public static async Task<IxLock<T>> Get<T, TArg1, TArg2>(
+            this IIxResolver resolver,
+            [CanBeNull] string name,
+            TArg1 arg1,
+            TArg2 arg2)
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            return new IxLock<T>(
+                await resolver.Resolve(
+                    new IxIdentifier(typeof(T), name),
+                    new Dictionary<IxIdentifier, object>
+                        {
+                            { new IxIdentifier(typeof(TArg1)), arg1 },
+                            { new IxIdentifier(typeof(TArg2)), arg2 }
+                        }));
+        }
+
+        /// <summary>
+        /// Gets locks on the required <c>object</c> from the specified <c>resolver</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of target <c>object</c>.</typeparam>
+        /// <typeparam name="TArg1">The type of the first argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg2">The type of the second argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg3">The type of the third argument for current resolve operation.</typeparam>
+        /// <param name="resolver">Resolver that should be used.</param>
+        /// <param name="name">Name of registration.</param>
+        /// <param name="arg1">The first argument for current resolve operation.</param>
+        /// <param name="arg2">The second argument for current resolve operation.</param>
+        /// <param name="arg3">The third argument for current resolve operation.</param>
+        /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
+        public static async Task<IxLock<T>> Get<T, TArg1, TArg2, TArg3>(
+            this IIxResolver resolver,
+            [CanBeNull] string name,
+            TArg1 arg1,
+            TArg2 arg2,
+            TArg3 arg3)
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            return new IxLock<T>(
+                await resolver.Resolve(
+                    new IxIdentifier(typeof(T), name),
+                    new Dictionary<IxIdentifier, object>
+                        {
+                            { new IxIdentifier(typeof(TArg1)), arg1 },
+                            { new IxIdentifier(typeof(TArg2)), arg2 },
+                            { new IxIdentifier(typeof(TArg3)), arg3 }
+                        }));
+        }
+
+        /// <summary>
+        /// Gets locks on the required <c>object</c> from the specified <c>resolver</c>.
+        /// </summary>
+        /// <typeparam name="T">Type of target <c>object</c>.</typeparam>
+        /// <typeparam name="TArg1">The type of the first argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg2">The type of the second argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg3">The type of the third argument for current resolve operation.</typeparam>
+        /// <typeparam name="TArg4">The type of the fourth argument for current resolve operation.</typeparam>
+        /// <param name="resolver">Resolver that should be used.</param>
+        /// <param name="name">Name of registration.</param>
+        /// <param name="arg1">The first argument for current resolve operation.</param>
+        /// <param name="arg2">The second argument for current resolve operation.</param>
+        /// <param name="arg3">The third argument for current resolve operation.</param>
+        /// <param name="arg4">The fourth argument for current resolve operation.</param>
+        /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
+        public static async Task<IxLock<T>> Get<T, TArg1, TArg2, TArg3, TArg4>(
+            this IIxResolver resolver,
+            [CanBeNull] string name,
+            TArg1 arg1,
+            TArg2 arg2,
+            TArg3 arg3,
+            TArg4 arg4)
+        {
+            if (resolver == null)
+            {
+                throw new ArgumentNullException(nameof(resolver));
+            }
+
+            return new IxLock<T>(
+                await resolver.Resolve(
+                    new IxIdentifier(typeof(T), name),
+                    new Dictionary<IxIdentifier, object>
+                        {
+                            { new IxIdentifier(typeof(TArg1)), arg1 },
+                            { new IxIdentifier(typeof(TArg2)), arg2 },
+                            { new IxIdentifier(typeof(TArg3)), arg3 },
+                            { new IxIdentifier(typeof(TArg4)), arg4 }
+                        }));
+        }
+
+        /// <summary>
         /// Resolves instance just to instantiate it.
         /// </summary>
         /// <remarks>
