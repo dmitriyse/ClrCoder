@@ -162,7 +162,7 @@ namespace ClrCoder.AspNetCore.AsyncResponse
             if (isWorkflowCreated)
             {
                 // Safe way to start task.
-                TaskEx.AsyncInvoke(workflow.Run);
+                Task.Run(workflow.Run);
             }
 
             return workflow;

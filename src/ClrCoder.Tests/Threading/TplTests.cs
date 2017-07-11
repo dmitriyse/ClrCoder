@@ -1,4 +1,4 @@
-﻿// <copyright file="TaskExTests.cs" company="ClrCoder project">
+﻿// <copyright file="TplTests.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -9,8 +9,6 @@ namespace ClrCoder.Tests.Threading
     using System.Threading;
     using System.Threading.Tasks;
 
-    using ClrCoder.Threading;
-
     using Diagnostics;
 
     using FluentAssertions;
@@ -18,10 +16,10 @@ namespace ClrCoder.Tests.Threading
     using NUnit.Framework;
 
     /// <summary>
-    /// Tests for the <see cref="TaskEx"/>.
+    /// TPL behavior tests.
     /// </summary>
     [TestFixture]
-    public class TaskExTests
+    public class TplTests
     {
         /// <summary>
         /// Async invoke methods test.
@@ -31,27 +29,33 @@ namespace ClrCoder.Tests.Threading
         public async Task AsyncInvokeTest()
         {
             CodeTimer timer = CodeTimer.Start();
-            Task task = TaskEx.AsyncInvoke(DelayInSyncPart, Thread.CurrentThread.ManagedThreadId);
+            int curThreadId = Thread.CurrentThread.ManagedThreadId;
+            Task task = Task.Run(
+                async () =>
+                    {
+                        await DelayInSyncPart(curThreadId);
+                    });
+
             timer.Time.Should().BeLessThan(0.5);
             await task;
             timer.Time.Should().BeGreaterThan(2.0);
 
             try
             {
-                await TaskEx.AsyncInvoke(ThrowTestException);
+                await Task.Run(ThrowTestException);
             }
             catch (InvalidOperationException)
             {
                 // This is expected exception.
             }
 
-            int my42 = await TaskEx.AsyncInvoke(GiveMeTheAnswer);
+            int my42 = await Task.Run(async ()=> await GiveMeTheAnswer());
             my42.Should().Be(42);
 
             try
             {
                 // ReSharper disable once UnusedVariable
-                int hope42 = await TaskEx.AsyncInvoke(GiveMeTheError);
+                int hope42 = await Task.Run(GiveMeTheError);
                 Assert.Fail();
             }
             catch (InvalidOperationException)
