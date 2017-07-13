@@ -18,6 +18,9 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <typeparam name="T">Type of object.</typeparam>
     public class IxLock<T> : IDisposable
     {
+        [CanBeNull]
+        private readonly T _target;
+
         /// <summary>
         /// Can be <see langword="null"/> in a case where it is default value.
         /// </summary>
@@ -34,7 +37,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             Critical.Assert(instanceLock != null, "Lock target should not be null.");
 
             _instanceLock = instanceLock;
-            Target = (T)_instanceLock.Target.Object;
+            _target = (T)_instanceLock.Target.Object;
         }
 
         /// <summary>
@@ -50,15 +53,33 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             Critical.CheckedAssert(
                 typeof(T).GetTypeInfo().IsClass,
-                "Cluster reference hack can be crated for reference types.");
-            Target = target;
+                "Cluster reference hack can be created only for reference types.");
+            _target = target;
         }
 
         /// <summary>
-        /// Locked <c>object</c>.
+        /// Locked <c>object</c> with not-null assurance.
+        /// </summary>
+        [NotNull]
+        public T Target
+        {
+            get
+            {
+                if (_target == null)
+                {
+                    throw new NullReferenceException(
+                        "You cannot use null-resolved object in the non-null expressions.");
+                }
+
+                return _target;
+            }
+        }
+
+        /// <summary>
+        /// Locked <c>object</c> allowed to be null.
         /// </summary>
         [CanBeNull]
-        public T Target { get; }
+        public T TargetUnsafe { get; }
 
         /// <inheritdoc/>
         public void Dispose()

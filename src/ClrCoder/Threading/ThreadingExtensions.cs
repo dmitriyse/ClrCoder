@@ -6,12 +6,15 @@
 namespace ClrCoder.Threading
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
+
+    using Validation;
 
     /// <summary>
     /// Threading related extensions methods.
@@ -201,6 +204,122 @@ namespace ClrCoder.Threading
         public static CancellationTokenAwaiter GetAwaiter(this CancellationToken cancellationToken)
         {
             return new CancellationTokenAwaiter(cancellationToken);
+        }
+
+        /// <summary>
+        /// Gets value from the async results dictionary or call create methods.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the resource key.</typeparam>
+        /// <typeparam name="TValue">The type of the result value.</typeparam>
+        /// <param name="asyncResultsDictionary">The dictionary with asynchronous results.</param>
+        /// <param name="key">The key of result to get or create.</param>
+        /// <param name="createFunc">The result creation async function.</param>
+        /// <param name="allowRetry">Allows to retry call to createFunc when it throws an exception.</param>
+        /// <returns>Async result task, corresponding to the specified key.</returns>
+        public static ValueTask<TValue> GetOrCreateAsync<TKey, TValue>(
+            this IDictionary<TKey, ValueTask<TValue>> asyncResultsDictionary,
+            TKey key,
+            Func<TKey, ValueTask<TValue>> createFunc,
+            bool allowRetry = true)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            VxArgs.NotNull(asyncResultsDictionary, nameof(asyncResultsDictionary));
+            VxArgs.NotNull(createFunc, nameof(createFunc));
+
+            lock (asyncResultsDictionary)
+            {
+                if (asyncResultsDictionary.TryGetValue(key, out var asyncResult))
+                {
+                    return asyncResult;
+                }
+
+                asyncResult = new ValueTask<TValue>(
+                    Task.Run(
+                        async () =>
+                            {
+                                try
+                                {
+                                    return await createFunc(key);
+                                }
+                                catch (Exception)
+                                {
+                                    if (allowRetry)
+                                    {
+                                        lock (asyncResultsDictionary)
+                                        {
+                                            asyncResultsDictionary.Remove(key);
+                                        }
+                                    }
+
+                                    throw;
+                                }
+                            }));
+
+                asyncResultsDictionary.Add(key, asyncResult);
+                return asyncResult;
+            }
+        }
+
+        /// <summary>
+        /// Gets value from the async results dictionary or call create methods.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the resource key.</typeparam>
+        /// <typeparam name="TValue">The type of the result value.</typeparam>
+        /// <param name="asyncResultsDictionary">The dictionary with asynchronous results.</param>
+        /// <param name="key">The key of result to get or create.</param>
+        /// <param name="createFunc">The result creation async function.</param>
+        /// <param name="allowRetry">Allows to retry call to createFunc when it throws an exception.</param>
+        /// <returns>Async result task, corresponding to the specified key.</returns>
+        public static Task<TValue> GetOrCreateAsync<TKey, TValue>(
+            this IDictionary<TKey, Task<TValue>> asyncResultsDictionary,
+            TKey key,
+            Func<TKey, Task<TValue>> createFunc,
+            bool allowRetry = true)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            VxArgs.NotNull(asyncResultsDictionary, nameof(asyncResultsDictionary));
+            VxArgs.NotNull(createFunc, nameof(createFunc));
+
+            lock (asyncResultsDictionary)
+            {
+                if (asyncResultsDictionary.TryGetValue(key, out var asyncResult))
+                {
+                    return asyncResult;
+                }
+
+                asyncResult =
+                    Task.Run(
+                        async () =>
+                            {
+                                try
+                                {
+                                    return await createFunc(key);
+                                }
+                                catch (Exception)
+                                {
+                                    if (allowRetry)
+                                    {
+                                        lock (asyncResultsDictionary)
+                                        {
+                                            asyncResultsDictionary.Remove(key);
+                                        }
+                                    }
+
+                                    throw;
+                                }
+                            });
+
+                asyncResultsDictionary.Add(key, asyncResult);
+                return asyncResult;
+            }
         }
 
         /// <summary>

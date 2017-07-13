@@ -86,6 +86,7 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
                 else
                 {
                     TEntity newEntity = createFunc();
+                    _entities.Add(entityKey, newEntity);
                     Critical.Assert(
                         newEntity.Key.Equals(entityKey),
                         "Created entity should have the same key as was queried to the CreateOrUpdateEntity method.");
@@ -133,7 +134,7 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         /// <param name="key">The key of the entity to select.</param>
         /// <param name="entity">The found entity snapshot or null.</param>
         /// <returns>true - if entity was found, false otherwise.</returns>
-        public bool TrySelectEntity(TKey key, [CanBeNull] out TEntity entity)
+        public bool TrySelectEntity(TKey key, [NotNull] out TEntity entity)
         {
             lock (_entities)
             {
