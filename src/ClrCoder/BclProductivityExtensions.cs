@@ -11,6 +11,8 @@ namespace ClrCoder
     using System.Linq;
     using System.Runtime.CompilerServices;
 
+    using BigMath;
+
     using JetBrains.Annotations;
 
 #if NET46
@@ -182,7 +184,7 @@ namespace ClrCoder
         /// <returns>true, if sequence is null or empty.</returns>
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> sequence)
         {
-            return sequence == null || !sequence.Any();
+            return (sequence == null) || !sequence.Any();
         }
 
         /// <summary>
@@ -193,9 +195,7 @@ namespace ClrCoder
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
         /// <see cref="CriticalException"/>,
-#if NET46
-
-/// <see cref="StackOverflowException"/>,
+#if NET46 /// <see cref="StackOverflowException"/>,
 /// <see cref="ThreadAbortException"/>.
 #endif
 
@@ -253,7 +253,7 @@ namespace ClrCoder
         /// <returns><see langword="true"/> if value fit in renage with extended boundaries by a specified precision.</returns>
         public static bool NearInRange(this double x, double start, double end, double precision)
         {
-            return x > start - precision && x < end + precision;
+            return (x > start - precision) && (x < end + precision);
         }
 
         /// <summary>
@@ -368,7 +368,8 @@ namespace ClrCoder
         /// <paramref name="substitute"/> when <paramref name="source"/> is equals to the
         /// <paramref name="comparand"/>, or <paramref name="source"/> otherwise.
         /// </returns>
-        public static T Replace<T>(this T source, T comparand, T substitute) where T : IEquatable<T>
+        public static T Replace<T>(this T source, T comparand, T substitute)
+            where T : IEquatable<T>
         {
             return source.Equals(comparand) ? substitute : source;
         }
@@ -380,9 +381,7 @@ namespace ClrCoder
         /// <remarks>
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
-#if NET46
-
-/// <see cref="StackOverflowException"/>,
+#if NET46 /// <see cref="StackOverflowException"/>,
 /// <see cref="ThreadAbortException"/>.
 #endif
 
@@ -534,7 +533,7 @@ namespace ClrCoder
         public static bool? ToBool(this string str)
         {
             bool result;
-            return str != null && bool.TryParse(str, out result) ? (bool?)result : null;
+            return (str != null) && bool.TryParse(str, out result) ? (bool?)result : null;
         }
 
         /// <summary>
@@ -545,7 +544,7 @@ namespace ClrCoder
         public static decimal? ToDecimal(this string str)
         {
             decimal result;
-            return str != null
+            return (str != null)
                    && decimal.TryParse(
                        str.Replace(",", "."),
                        NumberStyles.Any,
@@ -556,6 +555,20 @@ namespace ClrCoder
         }
 
         /// <summary>
+        /// Binary transforms <see cref="Int128"/> to the the <see cref="Guid"/>.
+        /// </summary>
+        /// <param name="i">The <see cref="Int128"/> value.</param>
+        /// <returns>The <see cref="Guid"/> value.</returns>
+        public static unsafe Guid ToGuid(this Int128 i)
+        {
+            Guid result;
+            var parts = (ulong*)&result;
+            parts[0] = i.Low;
+            parts[1] = i.High;
+            return result;
+        }
+
+        /// <summary>
         /// Converts string to <see langword="int"/>.
         /// </summary>
         /// <param name="str">String to convert to <see langword="int"/>.</param>
@@ -563,7 +576,18 @@ namespace ClrCoder
         public static int? ToInt(this string str)
         {
             int result;
-            return str != null && int.TryParse(str, out result) ? (int?)result : null;
+            return (str != null) && int.TryParse(str, out result) ? (int?)result : null;
+        }
+
+        /// <summary>
+        /// Binary transforms the <see cref="Guid"/> to the <see cref="Int128"/>.
+        /// </summary>
+        /// <param name="guid">The guid to convert.</param>
+        /// <returns>The <see cref="Int128"/> value.</returns>
+        public static unsafe Int128 ToInt(this Guid guid)
+        {
+            var parts = (ulong*)&guid;
+            return new Int128(parts[1], parts[0]);
         }
 
         /// <summary>

@@ -6,7 +6,14 @@
 namespace ClrCoder.Cluster
 {
 #pragma warning disable 1998
+    using System;
     using System.Threading.Tasks;
+
+    using BigMath;
+
+    using IO;
+
+    using ObjectModel;
 
     using Threading;
 
@@ -16,6 +23,51 @@ namespace ClrCoder.Cluster
     public class ClusterNodeMock : AsyncDisposableBase, IClusterNode
     {
         private readonly TaskCompletionSource<int> _resultCompletionSource = new TaskCompletionSource<int>();
+
+        ClusterObjectKey IKeyed<ClusterObjectKey>.Key
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        ClusterNodeKey IKeyed<ClusterNodeKey>.Key
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <inheritdoc/>
+        public Int128 GetPromiseId<T>(Task<T> task)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public Int128 GetPromiseId<T>(TaskCompletionSource<T> completionSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ReceiveCall(string method, IClusterIoMessage message, IClusterIoMessageBuilder responseBuilder)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public Task<T> RestoreFuture<T>(Int128 promiseId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public TaskCompletionSource<T> RestorePromise<T>(Int128 promiseId)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc/>
         public Task<int> WaitTermination()

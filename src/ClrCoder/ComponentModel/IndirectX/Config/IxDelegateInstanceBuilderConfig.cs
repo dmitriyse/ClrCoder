@@ -37,7 +37,22 @@ namespace ClrCoder.ComponentModel.IndirectX
             return new IxDelegateInstanceBuilderConfig(func);
         }
 
-        public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, TResult>(Func<T1, T2, T3, Task<TResult>> func)
+        public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, TResult>(
+            Func<T1, T2, T3, Task<TResult>> func)
+        {
+            VxArgs.NotNull(func, nameof(func));
+            return new IxDelegateInstanceBuilderConfig(func);
+        }
+
+        public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, T4, TResult>(
+            Func<T1, T2, T3, T4, Task<TResult>> func)
+        {
+            VxArgs.NotNull(func, nameof(func));
+            return new IxDelegateInstanceBuilderConfig(func);
+        }
+
+        public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, T4, T5, TResult>(
+            Func<T1, T2, T3, T4, T5, Task<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);

@@ -695,6 +695,7 @@ Licensed under the Apache 2.0 license. See LICENSE file in the project root for 
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Downloaders/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Enqueues/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=enqueuing/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=guid/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=initializable/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=linq/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Middleware/@EntryIndexedValue">True</s:Boolean>
@@ -702,6 +703,7 @@ Licensed under the Apache 2.0 license. See LICENSE file in the project root for 
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=reentrancy/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Reentrancy/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=Registerer/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=remoting/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=resized/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=serializers/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ReSpeller/UserDictionaries/=en_005Fus/Words/=struct/@EntryIndexedValue">True</s:Boolean>

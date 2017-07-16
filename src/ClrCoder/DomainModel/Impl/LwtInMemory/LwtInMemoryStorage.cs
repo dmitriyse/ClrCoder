@@ -149,6 +149,22 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
             }
         }
 
+        /// <summary>
+        /// Updates entity.
+        /// </summary>
+        /// <remarks>
+        /// Update are performed in the critical section, so left any processing out-of those functions.
+        /// </remarks>
+        /// <param name="entityKey">The entity key.</param>
+        /// <param name="updateAction">The update action. It will be called when entity with the specified key exists.</param>
+        public void UpdateEntity(TKey entityKey, Action<TEntity> updateAction)
+        {
+            CreateOrUpdateEntity(
+                entityKey,
+                updateAction,
+                () => throw new KeyNotFoundException());
+        }
+
         /// <inheritdoc/>
         protected override async Task AsyncDispose()
         {

@@ -26,6 +26,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);CHECKED_BUILD</DefineConstants>
   </PropertyGroup>
 
@@ -34,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BigMathCore" Version="1.0.0" />
     <PackageReference Include="NodaTime" Version="2.0.1" />
     <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />

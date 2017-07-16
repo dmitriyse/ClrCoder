@@ -9,10 +9,15 @@
 namespace ClrCoder.Cluster
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
+    using BigMath;
+
     using ComponentModel.IndirectX;
+
+    using IO;
 
     using Logging;
     using Logging.Std;
@@ -20,6 +25,8 @@ namespace ClrCoder.Cluster
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Hosting.Server.Features;
     using Microsoft.Extensions.DependencyInjection;
+
+    using ObjectModel;
 
     using Threading;
 
@@ -29,6 +36,8 @@ namespace ClrCoder.Cluster
     public class ClusterNode : AsyncDisposableBase, IClusterNode
     {
         private readonly IIxHost _indirectXHost;
+
+        private readonly ConditionalWeakTable<object, object> _objectToKey;
 
         private IWebHost _webHost;
 
@@ -79,7 +88,45 @@ namespace ClrCoder.Cluster
                 };
         }
 
+        /// <inheritdoc/>
+        public ClusterNodeKey Key { get; }
+
+        ClusterObjectKey IKeyed<ClusterObjectKey>.Key { get; }
+
         private ClassJsonLogger<ClusterNode> Log { get; }
+
+        /// <inheritdoc/>
+        public Int128 GetPromiseId<T>(Task<T> task)
+        {
+            return (Int128)_objectToKey.GetValue(task, k => Guid.NewGuid().ToInt());
+        }
+
+        /// <inheritdoc/>
+        public Int128 GetPromiseId<T>(TaskCompletionSource<T> completionSource)
+        {
+            return (Int128)_objectToKey.GetValue(completionSource, k => Guid.NewGuid().ToInt());
+        }
+
+        /// <inheritdoc/>
+        Task IClusterIoObject.ReceiveCall(
+            string method,
+            IClusterIoMessage message,
+            IClusterIoMessageBuilder responseBuilder)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public Task<T> RestoreFuture<T>(Int128 promiseId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public TaskCompletionSource<T> RestorePromise<T>(Int128 promiseId)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc/>
         public async Task<int> WaitTermination()
