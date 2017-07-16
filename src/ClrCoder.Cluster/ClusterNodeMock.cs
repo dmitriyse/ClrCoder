@@ -36,7 +36,8 @@ namespace ClrCoder.Cluster
         {
             get
             {
-                throw new NotImplementedException();
+                // TODO: Implement me.
+                return new ClusterNodeKey("single-node");
             }
         }
 

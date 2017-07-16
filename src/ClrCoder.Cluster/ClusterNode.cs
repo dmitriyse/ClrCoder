@@ -24,11 +24,11 @@ namespace ClrCoder.Cluster
 
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Hosting.Server.Features;
-    using Microsoft.Extensions.DependencyInjection;
 
     using ObjectModel;
 
     using Threading;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// ClrCoder cluster node.
@@ -37,7 +37,7 @@ namespace ClrCoder.Cluster
     {
         private readonly IIxHost _indirectXHost;
 
-        private readonly ConditionalWeakTable<object, object> _objectToKey;
+        private readonly ConditionalWeakTable<object, object> _objectToKey = new ConditionalWeakTable<object, object>();
 
         private IWebHost _webHost;
 
@@ -66,6 +66,9 @@ namespace ClrCoder.Cluster
 
             _webHost.Start();
             _hostLifetimeService = _webHost.Services.GetRequiredService<IApplicationLifetime>();
+
+            // TODO: Implement me.
+            Key = new ClusterNodeKey("single-node");
 
             var addressesFeature = _webHost.ServerFeatures.Get<IServerAddressesFeature>();
 
