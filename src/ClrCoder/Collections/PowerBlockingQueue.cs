@@ -7,6 +7,7 @@ namespace ClrCoder.Collections
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -50,7 +51,11 @@ namespace ClrCoder.Collections
         /// Dequeues item(s) from the queue with potential blocking.
         /// </summary>
         /// <param name="tryDequeueFunc">The try-enqueue action, called on each collection state change after dequeue operation.</param>
-        public Task Dequeue([NotNull] Func<TInnerCollection, bool> tryDequeueFunc)
+        /// <param name="cancellationToken">The operation cancellation token.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public Task Dequeue(
+            [NotNull] Func<TInnerCollection, bool> tryDequeueFunc,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             VxArgs.NotNull(tryDequeueFunc, nameof(tryDequeueFunc));
 
@@ -63,9 +68,13 @@ namespace ClrCoder.Collections
                     return Task.CompletedTask;
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var completionSource = new TaskCompletionSource<ValueVoid>();
 
                 _pendingDequeueActions.AddLast((completionSource, tryDequeueFunc));
+
+                SubscribeToCancellationToken(completionSource, cancellationToken, _pendingDequeueActions, true);
 
                 return completionSource.Task;
             }
@@ -75,7 +84,11 @@ namespace ClrCoder.Collections
         /// Enqueues item(s) to the queue with potential blocking.
         /// </summary>
         /// <param name="tryEnqueueFunc">The try-enqueue action, called on each collection state change after dequeue operation.</param>
-        public Task Enqueue([NotNull] Func<TInnerCollection, bool> tryEnqueueFunc)
+        /// <param name="cancellationToken">The operation cancellation token.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public Task Enqueue(
+            [NotNull] Func<TInnerCollection, bool> tryEnqueueFunc,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             VxArgs.NotNull(tryEnqueueFunc, nameof(tryEnqueueFunc));
 
@@ -88,11 +101,51 @@ namespace ClrCoder.Collections
                     return Task.CompletedTask;
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var completionSource = new TaskCompletionSource<ValueVoid>();
 
                 _pendingEnqueueActions.AddLast((completionSource, tryEnqueueFunc));
 
+                SubscribeToCancellationToken(completionSource, cancellationToken, _pendingEnqueueActions, true);
+
                 return completionSource.Task;
+            }
+        }
+
+        private void SubscribeToCancellationToken(
+            TaskCompletionSource<ValueVoid> completionSource,
+            CancellationToken cancellationToken,
+            LinkedList<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> listToRemovePendingAction,
+            bool tryEnqueueFirst)
+        {
+            if (cancellationToken != default(CancellationToken))
+            {
+                cancellationToken.Register(
+                    () =>
+                        {
+                            lock (_syncRoot)
+                            {
+                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node = listToRemovePendingAction.First;
+                                while (node != null)
+                                {
+                                    if (ReferenceEquals(node.Value.Tcs, completionSource))
+                                    {
+                                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete = node;
+                                        node = node.Next;
+                                        listToRemovePendingAction.Remove(nodeToDelete);
+                                    }
+                                    else
+                                    {
+                                        node = node.Next;
+                                    }
+                                }
+
+                                completionSource.TrySetCanceled(cancellationToken);
+
+                                TryPendingActions(tryEnqueueFirst);
+                            }
+                        });
             }
         }
 
