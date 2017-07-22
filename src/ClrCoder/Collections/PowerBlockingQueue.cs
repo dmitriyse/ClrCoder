@@ -29,7 +29,7 @@ namespace ClrCoder.Collections
     {
         private readonly TInnerCollection _items;
 
-        private readonly object _syncRoot = new object();
+        private readonly object _syncRoot;
 
         private LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)> _pendingEnqueueActions =
             new LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)>();
@@ -41,10 +41,12 @@ namespace ClrCoder.Collections
         /// Initializes a new instance of the <see cref="PowerBlockingQueue{TInnerCollection}"/> class.
         /// </summary>
         /// <param name="items">The inner queue collection.</param>
-        public PowerBlockingQueue(TInnerCollection items)
+        /// <param name="syncRoot">The collection synchronization object.</param>
+        public PowerBlockingQueue(TInnerCollection items, object syncRoot = null)
         {
             VxArgs.NotNull(items, nameof(items));
             _items = items;
+            _syncRoot = syncRoot ?? new object();
         }
 
         /// <summary>

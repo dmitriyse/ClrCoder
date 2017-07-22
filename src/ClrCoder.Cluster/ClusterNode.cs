@@ -24,18 +24,23 @@ namespace ClrCoder.Cluster
 
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Hosting.Server.Features;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
 
     using ObjectModel;
 
     using Threading;
-    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// ClrCoder cluster node.
     /// </summary>
     public class ClusterNode : AsyncDisposableBase, IClusterNode
     {
+        private const string ClusterNodeIdKey = "ClrCoder:Cluster:NodeId";
+
         private readonly IIxHost _indirectXHost;
+
+        private readonly IConfigurationRoot _configRoot;
 
         private readonly ConditionalWeakTable<object, object> _objectToKey = new ConditionalWeakTable<object, object>();
 
@@ -50,6 +55,7 @@ namespace ClrCoder.Cluster
         private ClusterNode(
             IIxHost indirectXHost,
             IWebHostBuilder webHostBuilder,
+            IConfigurationRoot configRoot,
             IJsonLogger logger)
         {
             Log = new ClassJsonLogger<ClusterNode>(logger);
@@ -57,6 +63,7 @@ namespace ClrCoder.Cluster
             _executeCancellationToken = _executeCts.Token;
 
             _indirectXHost = indirectXHost;
+            _configRoot = configRoot;
 
             Log.Info(_ => _("Starting Asp.Net core..."));
 
@@ -67,8 +74,7 @@ namespace ClrCoder.Cluster
             _webHost.Start();
             _hostLifetimeService = _webHost.Services.GetRequiredService<IApplicationLifetime>();
 
-            // TODO: Implement me.
-            Key = new ClusterNodeKey("single-node");
+            Key = new ClusterNodeKey(_configRoot.GetValue(ClusterNodeIdKey, "single-node"));
 
             var addressesFeature = _webHost.ServerFeatures.Get<IServerAddressesFeature>();
 
