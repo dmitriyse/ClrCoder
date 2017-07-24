@@ -82,7 +82,7 @@ namespace ClrCoder.Cluster
             {
                 Log.Info(
                     addressesFeatureAddress,
-                    (_, addr) => _($"Now listening on: {addr}").Data(new { ListenAddress = addr }));
+                    (_, addr) => _($"NodeId = '{Key.Code}' listening on: {addr}").Data(new { ListenAddress = addr }));
             }
 
             Console.CancelKeyPress += (sender, e) =>
