@@ -61,6 +61,10 @@
     <PackageReference Include="System.AppDomain" Version="2.0.11" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Flurl.Http" Version="1.1.2" />
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <PackageReference Include="Flurl.Http" Version="1.1.2" />
     <Reference Include="System" />

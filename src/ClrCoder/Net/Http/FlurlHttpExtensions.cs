@@ -5,7 +5,7 @@
 
 namespace ClrCoder.Net.Http
 {
-#if NET46 || NETSTANDARD1_6
+#if NET46 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Linq;
     using System.Net;
