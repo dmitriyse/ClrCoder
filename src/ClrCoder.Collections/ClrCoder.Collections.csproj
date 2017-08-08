@@ -1,18 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <AssemblyName>ClrCoder.Collections</AssemblyName>
-    <PackageId>ClrCoder.Collections</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <PackageReleaseNotes>CoreFX extended collections and injection helpers:
+  DictionaryEx,
+  HashSetEx,
+  HashSetExWrapper,
+  ISetEx,
+  SetExWrapper,
+  IReadOnlySet related extention methods.
+    </PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/dmitriyse/ClrCoder</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Collections/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <RootNamespace>System</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.0\ClrCoder.Collections.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.0\ClrCoder.Collections.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClrCoder.Collections.ReadOnlySet\ClrCoder.Collections.ReadOnlySet.csproj" />
     <ProjectReference Include="..\ClrCoder.Private.CoreLib\ClrCoder.Private.CoreLib.csproj" />
   </ItemGroup>
 

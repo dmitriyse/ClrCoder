@@ -7,6 +7,8 @@ namespace System.Collections.Generic
 {
     using JetBrains.Annotations;
 
+    //// ReSharper disable once InheritdocConsiderUsage
+
     /// <summary>
     /// Represents a set of values. Wraps existing <see cref="HashSet{T}"/> and provides implementation of an additional
     /// contracts (<see cref="ISetEx{T}"/>, <see cref="IReadableSet{T}"/> and <see cref="IReadOnlySet{T}"/>).
@@ -31,20 +33,12 @@ namespace System.Collections.Generic
             Inner = new HashSet<T>(hashSet);
         }
 
-        /// <summary>Gets the number of elements that are contained in a set.</summary>
-        /// <returns>The number of elements that are contained in the set.</returns>
+        /// <inheritdoc cref="IReadOnlyCollection{T}.Count"/>
         public int Count => Inner.Count;
 
         bool ICollection<T>.IsReadOnly => ((ICollection<T>)Inner).IsReadOnly;
 
-        /// <summary>
-        /// Gets the <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> object that is used to determine
-        /// equality for the values in the set.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> object that is used to determine equality
-        /// for the values in the set.
-        /// </returns>
+        /// <inheritdoc/>
         public IEqualityComparer<T> Comparer => Inner.Comparer;
 
         /// <summary>
@@ -74,12 +68,7 @@ namespace System.Collections.Generic
             return set == null ? null : new HashSetExWrapper<T>(set);
         }
 
-        /// <summary>Adds the specified element to a set.</summary>
-        /// <returns>
-        /// true if the element is added to the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object; false if the
-        /// element is already present.
-        /// </returns>
-        /// <param name="item">The element to add to the set.</param>
+        /// <inheritdoc/>
         public bool Add([NotNull] T item)
         {
             return Inner.Add(item);
@@ -89,20 +78,12 @@ namespace System.Collections.Generic
         {
         }
 
-        /// <summary>Removes all elements from a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object.</summary>
+        /// <inheritdoc/>
         public void Clear()
         {
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object contains the specified
-        /// element.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object contains the specified element;
-        /// otherwise, false.
-        /// </returns>
-        /// <param name="item">The element to locate in the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object.</param>
+        /// <inheritdoc cref="ICollection{T}.Contains"/>
         public bool Contains([NotNull] T item)
         {
             return false;
@@ -120,40 +101,13 @@ namespace System.Collections.Generic
             return false;
         }
 
-        /// <summary>
-        /// Copies the elements of a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object to an array, starting at
-        /// the specified array index.
-        /// </summary>
-        /// <param name="array">
-        /// The one-dimensional array that is the destination of the elements copied from the
-        /// <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object. The array must have zero-based indexing.
-        /// </param>
-        /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="array"/> is null.
-        /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
-        /// <paramref name="arrayIndex"/> is less than 0.
-        /// </exception>
-        /// <exception cref="T:System.ArgumentException">
-        /// <paramref name="arrayIndex"/> is greater than the length of the destination <paramref name="array"/>.
-        /// </exception>
+        /// <inheritdoc/>
         public void CopyTo([NotNull] T[] array, int arrayIndex)
         {
             Inner.CopyTo(array, arrayIndex);
         }
 
-        /// <summary>
-        /// Removes all elements in the specified collection from the current
-        /// <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object.
-        /// </summary>
-        /// <param name="other">
-        /// The collection of items to remove from the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc/>
         public void ExceptWith([NotNull] IEnumerable<T> other)
         {
             Inner.ExceptWith(other);
@@ -169,180 +123,62 @@ namespace System.Collections.Generic
             return ((IEnumerable)Inner).GetEnumerator();
         }
 
-        /// <summary>
-        /// Modifies the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object to contain only elements that
-        /// are present in that object and in the specified collection.
-        /// </summary>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc/>
         public void IntersectWith([NotNull] IEnumerable<T> other)
         {
             Inner.IntersectWith(other);
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a proper subset of the
-        /// specified collection.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a proper subset of
-        /// <paramref name="other"/>; otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.IsProperSubsetOf"/>
         public bool IsProperSubsetOf([NotNull] IEnumerable<T> other)
         {
             return Inner.IsProperSubsetOf(other);
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a proper superset of the
-        /// specified collection.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a proper superset of
-        /// <paramref name="other"/>; otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.IsProperSupersetOf"/>
         public bool IsProperSupersetOf([NotNull] IEnumerable<T> other)
         {
             return Inner.IsProperSupersetOf(other);
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a subset of the specified
-        /// collection.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a subset of
-        /// <paramref name="other"/>; otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.IsSubsetOf"/>
         public bool IsSubsetOf([NotNull] IEnumerable<T> other)
         {
             return Inner.IsSubsetOf(other);
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a superset of the
-        /// specified collection.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is a superset of
-        /// <paramref name="other"/>; otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.IsSupersetOf"/>
         public bool IsSupersetOf([NotNull] IEnumerable<T> other)
         {
             return Inner.IsSupersetOf(other);
         }
 
-        /// <summary>
-        /// Determines whether the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object and a specified
-        /// collection share common elements.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object and <paramref name="other"/> share at
-        /// least one common element; otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.Overlaps"/>
+        /// />
         public bool Overlaps([NotNull] IEnumerable<T> other)
         {
             return Inner.Overlaps(other);
         }
 
-        /// <summary>Removes the specified element from a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object.</summary>
-        /// <returns>
-        /// true if the element is successfully found and removed; otherwise, false.  This method returns false if
-        /// <paramref name="item"/> is not found in the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object.
-        /// </returns>
-        /// <param name="item">The element to remove.</param>
+        /// <inheritdoc/>
         public bool Remove([NotNull] T item)
         {
             return Inner.Remove(item);
         }
 
-        /// <summary>
-        /// Determines whether a <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object and the specified collection
-        /// contain the same elements.
-        /// </summary>
-        /// <returns>
-        /// true if the <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object is equal to <paramref name="other"/>;
-        /// otherwise, false.
-        /// </returns>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc cref="ISet{T}.SetEquals"/>
         public bool SetEquals([NotNull] IEnumerable<T> other)
         {
             return Inner.SetEquals(other);
         }
 
-        /// <summary>
-        /// Modifies the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object to contain only elements that
-        /// are present either in that object or in the specified collection, but not both.
-        /// </summary>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc/>
         public void SymmetricExceptWith([NotNull] IEnumerable<T> other)
         {
             Inner.SymmetricExceptWith(other);
         }
 
-        /// <summary>
-        /// Modifies the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/> object to contain all elements that
-        /// are present in itself, the specified collection, or both.
-        /// </summary>
-        /// <param name="other">
-        /// The collection to compare to the current <see cref="T:System.Collections.Generic.HashSetExWrapper`1"/>
-        /// object.
-        /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
+        /// <inheritdoc/>
         public void UnionWith([NotNull] IEnumerable<T> other)
         {
             Inner.UnionWith(other);

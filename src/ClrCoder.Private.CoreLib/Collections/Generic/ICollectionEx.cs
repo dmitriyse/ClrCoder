@@ -6,6 +6,7 @@
 namespace System.Collections.Generic
 {
     //// ReSharper disable once PossibleInterfaceMemberAmbiguity
+    //// ReSharper disable once InheritdocConsiderUsage
 
     /// <summary>
     /// Defines methods to manipulate generic collections. <br/>

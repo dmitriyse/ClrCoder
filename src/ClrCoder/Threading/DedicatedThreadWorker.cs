@@ -368,7 +368,9 @@ namespace ClrCoder.Threading
 
         private void HandleException(Exception ex)
         {
-            AppDomainEx.RaiseNonTerminatingUnhandledException(ex);
+#if NET46 || NETSTANDARD2_0
+            ThreadPool.QueueUserWorkItem(state => throw ex);
+#endif
         }
 
         private Exception ReThrowOperationCanceled(OperationCanceledException ex)

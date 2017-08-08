@@ -8,6 +8,7 @@ namespace System.Collections.Generic
     using JetBrains.Annotations;
 
     //// ReSharper disable once PossibleInterfaceMemberAmbiguity
+    //// ReSharper disable once InheritdocConsiderUsage
 
     /// <summary>Provides the base interface for the abstraction of sets.</summary>
     /// <typeparam name="T">The type of elements in the set.</typeparam>

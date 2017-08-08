@@ -1,16 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <AssemblyName>ClrCoder.Private.CoreLib</AssemblyName>
-    <PackageId>ClrCoder.Private.CoreLib</PackageId>
+    <PackageReleaseNotes>Private.CoreLib extensions and polyfills corresponding to several CoreFX proposals:
+https://github.com/dotnet/corefx/issues/16626,
+https://github.com/dotnet/corefx/issues/16818,
+etc.
+    </PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/dmitriyse/ClrCoder</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Private.CoreLib/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>System</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.0\ClrCoder.Private.CoreLib.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.0\ClrCoder.Private.CoreLib.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
