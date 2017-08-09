@@ -7,6 +7,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
 #pragma warning disable 1998
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;

@@ -3,11 +3,9 @@
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace ClrCoder.Threading
+namespace System.Threading
 {
-    using System.Threading.Tasks;
-
-    using Annotations;
+    using Tasks;
 
     /// <summary>
     /// Asynchronously disposable.
@@ -24,7 +22,6 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Initiates async disposing, allowed to be called multiple times. Should never <see langword="throw"/> an exception.
         /// </summary>
-        [Robust]
         void StartDispose();
     }
 }

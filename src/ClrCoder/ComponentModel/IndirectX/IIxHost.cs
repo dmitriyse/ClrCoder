@@ -5,6 +5,8 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    using System.Threading;
+
     using Threading;
 
     public interface IIxHost : IAsyncDisposable

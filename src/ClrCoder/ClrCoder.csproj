@@ -30,6 +30,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClrCoder.Collections.Rich\ClrCoder.Collections.Rich.csproj" />
+    <ProjectReference Include="..\ClrCoder.Threading.AsyncDisposable\ClrCoder.Threading.AsyncDisposable.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,6 +6,7 @@
 namespace ClrCoder.Logging
 {
     using System.Collections.Generic;
+    using System.Threading;
 
     using Annotations;
 

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>0.3.0</VersionPrefix>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <RootNamespace>System</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Threading.Tasks" Version="4.0.10" />
+    <PackageReference Include="JetBrains.Annotations" Version="10.1.4" />
+  </ItemGroup>
+
+</Project>

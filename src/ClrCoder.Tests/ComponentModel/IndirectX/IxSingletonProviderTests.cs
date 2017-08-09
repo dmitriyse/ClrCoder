@@ -6,6 +6,7 @@
 namespace ClrCoder.Tests.ComponentModel.IndirectX
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;

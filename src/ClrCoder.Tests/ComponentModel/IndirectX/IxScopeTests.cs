@@ -8,6 +8,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using ClrCoder.ComponentModel.IndirectX;
