@@ -511,7 +511,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             return type =>
                 {
-                    if (type != null && !typeof(IAsyncDisposable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (type != null && !typeof(IAsyncDisposableEx).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                     {
                         return next(type);
                     }
@@ -519,13 +519,13 @@ namespace ClrCoder.ComponentModel.IndirectX
                     IxDisposeHandlerDelegate nextHandler = next(null);
                     return async obj =>
                         {
-                            if (obj is IAsyncDisposable disposable)
+                            if (obj is IAsyncDisposableEx disposable)
                             {
                                 try
                                 {
                                     try
                                     {
-                                        await disposable.AsyncDispose();
+                                        await disposable.DisposeAsync();
                                     }
                                     catch (Exception ex) when (ex.IsProcessable())
                                     {

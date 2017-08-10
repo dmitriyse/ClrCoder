@@ -1,6 +1,6 @@
 ﻿// <copyright file="IAsyncDisposable.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
-// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace System.Threading
@@ -8,20 +8,16 @@ namespace System.Threading
     using Tasks;
 
     /// <summary>
-    /// Asynchronously disposable.
+    /// Asynchronous disposable. Contract, required for the future "await using" operator (Probably C# 8.0).
+    /// https://github.com/dotnet/roslyn/issues/114
+    /// https://github.com/dotnet/csharplang/issues/43
     /// </summary>
     public interface IAsyncDisposable
     {
         /// <summary>
-        /// Dispose task. Returns valid dispose task even <see cref="StartDispose"/> was not called yet. <br/>
-        /// When something goes wrong and problem cannot be handled - task should be completed with unprocessable exception to hint
-        /// application crash.
-        /// </summary>
-        Task DisposeTask { get; }
-
-        /// <summary>
         /// Initiates async disposing, allowed to be called multiple times. Should never <see langword="throw"/> an exception.
         /// </summary>
-        void StartDispose();
+        /// <returns>Async execution TPL task.</returns>
+        Task DisposeAsync();
     }
 }

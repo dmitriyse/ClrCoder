@@ -14,13 +14,13 @@ namespace ClrCoder.Threading
     using JetBrains.Annotations;
 
     /// <summary>
-    /// Standard implementation of <see cref="IAsyncDisposable"/> pattern suited for basing.
+    /// Standard implementation of <see cref="IAsyncDisposableEx"/> pattern suited for basing.
     /// </summary>
     /// <remarks>
     /// TODO: Add async-initializable optional feature.
     /// </remarks>
     [PublicAPI]
-    public abstract class AsyncDisposableBase : IAsyncDisposable
+    public abstract class AsyncDisposableBase : IAsyncDisposableEx
     {
         /// <summary>
         /// TODO: Replace with CancellationTokenSource.
@@ -96,7 +96,7 @@ namespace ClrCoder.Threading
         public object DisposeSyncRoot { get; }
 
         /// <inheritdoc/>
-        public void StartDispose()
+        public Task DisposeAsync()
         {
             // !!!! This method is reenterant.
             if (!Volatile.Read(ref _isDisposeStarted))
@@ -130,6 +130,8 @@ namespace ClrCoder.Threading
                     // -------Implicit memory barrier here-----------
                 }
             }
+
+            return DisposeTask;
         }
 
         /// <summary>

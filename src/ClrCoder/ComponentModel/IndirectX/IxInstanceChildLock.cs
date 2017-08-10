@@ -64,7 +64,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         public void PulseDispose()
         {
-            Owner.StartDispose();
+            Owner.DisposeAsync();
         }
     }
 }

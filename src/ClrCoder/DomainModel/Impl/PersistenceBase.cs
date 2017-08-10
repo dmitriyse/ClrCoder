@@ -174,7 +174,7 @@ namespace ClrCoder.DomainModel.Impl
             {
                 try
                 {
-                    await plugin.AsyncDispose();
+                    await plugin.DisposeAsync();
                 }
                 catch (Exception ex)
                 {

@@ -12,7 +12,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using Threading;
 
-    public interface IIxInstance : IAsyncDisposable
+    public interface IIxInstance : IAsyncDisposableEx
     {
         [NotNull]
         IxProviderNode ProviderNode { get; }

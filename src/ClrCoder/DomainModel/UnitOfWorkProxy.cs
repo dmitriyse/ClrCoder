@@ -28,9 +28,6 @@ namespace ClrCoder.DomainModel
             Impl = impl;
         }
 
-        /// <inheritdoc/>
-        public Task DisposeTask => Impl.DisposeTask;
-
         /// <summary>
         /// Actual unit of work implementation.
         /// </summary>
@@ -54,9 +51,9 @@ namespace ClrCoder.DomainModel
         }
 
         /// <inheritdoc/>
-        public void StartDispose()
+        public Task DisposeAsync()
         {
-            Impl.StartDispose();
+            return Impl.DisposeAsync();
         }
     }
 

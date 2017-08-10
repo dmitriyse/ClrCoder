@@ -73,9 +73,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         public object InstanceTreeSyncRoot { get; } = new object();
 
         /// <inheritdoc/>
-        public void StartDispose()
+        public Task DisposeAsync()
         {
-            _rootScopeInstance.StartDispose();
+            return _rootScopeInstance.DisposeAsync();
         }
 
         /// <summary>

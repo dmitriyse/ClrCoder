@@ -17,7 +17,7 @@ namespace ClrCoder.Threading
     /// <summary>
     /// Scheduler that uses only one thread for all scheduled task.
     /// </summary>
-    public class DedicatedThreadTaskScheduler : TaskScheduler, IAsyncDisposable
+    public class DedicatedThreadTaskScheduler : TaskScheduler, IAsyncDisposableEx
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
@@ -49,7 +49,7 @@ namespace ClrCoder.Threading
         public Task DisposeTask => _asyncDisposable.DisposeTask;
 
         /// <inheritdoc/>
-        public void StartDispose() => _asyncDisposable.StartDispose();
+        public Task DisposeAsync() => _asyncDisposable.DisposeAsync();
 
         /// <summary>
         /// Disposes <c>object</c>.

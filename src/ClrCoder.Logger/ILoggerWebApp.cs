@@ -15,7 +15,7 @@ namespace ClrCoder.Logging
     /// <summary>
     /// Logger Web application. Provides Vimy media related REST API.
     /// </summary>
-    public interface ILoggerWebApp : IAsyncDisposable
+    public interface ILoggerWebApp : IAsyncDisposableEx
     {
         /// <summary>
         /// Hosting urls.

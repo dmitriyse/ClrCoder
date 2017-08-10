@@ -13,7 +13,7 @@ namespace ClrCoder.ObjectModel
     /// Lock on some <c>object</c> that releases asynchronously.
     /// </summary>
     /// <typeparam name="T">Type of <c>object</c>.</typeparam>
-    public interface IAsyncLocked<out T> : IAsyncDisposable
+    public interface IAsyncLocked<out T> : IAsyncDisposableEx
     {
         /// <summary>
         /// Locked <c>object</c>.

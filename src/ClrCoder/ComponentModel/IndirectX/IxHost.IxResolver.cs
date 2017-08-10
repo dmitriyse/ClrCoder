@@ -5,6 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 #pragma warning disable 618
     using System;
     using System.Collections.Generic;
@@ -90,7 +91,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks => throw new NotSupportedException(
             ////                                                              "This is too virtual.");
-            Task IAsyncDisposable.DisposeTask
+            Task IAsyncDisposableEx.DisposeTask
             {
                 get
                 {
@@ -166,7 +167,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Critical.Assert(false, "This object not intended to have children and children data.");
             }
 
-            public void StartDispose()
+            /// <inheritdoc />
+            public async Task DisposeAsync()
             {
                 Critical.CheckedAssert(false, "This method is too virtual to dispose it.");
             }

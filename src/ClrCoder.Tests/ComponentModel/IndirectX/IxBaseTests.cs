@@ -217,7 +217,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
 
             public void DoDispose()
             {
-                _self.StartDispose();
+                _self.DisposeAsync();
             }
 
             protected override async Task AsyncDispose()

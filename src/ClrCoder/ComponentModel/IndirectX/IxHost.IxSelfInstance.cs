@@ -76,7 +76,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new NotSupportedException();
             }
 
-            public void StartDispose()
+            public Task DisposeAsync()
             {
                 throw new NotSupportedException();
             }

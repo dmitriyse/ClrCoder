@@ -18,7 +18,7 @@ namespace ClrCoder.Cluster
     /// <summary>
     /// Cluster node.
     /// </summary>
-    public interface IClusterNode : IClusterIoObject, IRemoteClusterNode, IAsyncDisposable
+    public interface IClusterNode : IClusterIoObject, IRemoteClusterNode, IAsyncDisposableEx
     {
         /// <summary>
         /// Gets globally unique identifier for the in-process C# promise.

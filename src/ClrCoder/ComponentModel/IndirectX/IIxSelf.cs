@@ -9,7 +9,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using Threading;
 
-    public interface IIxSelf : IAsyncDisposable
+    public interface IIxSelf : IAsyncDisposableEx
     {
     }
 }

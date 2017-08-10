@@ -46,7 +46,7 @@ namespace ClrCoder.AspNetCore
         /// </summary>
         internal void NotifyAutoDispose()
         {
-            _self.StartDispose();
+            _self.DisposeAsync();
         }
 
         /// <inheritdoc/>

@@ -32,7 +32,7 @@ namespace ClrCoder.Tests.Threading
             for (var i = 0; i < 100; i++)
             {
                 var d = new MonkeyAsyncDisposalbe(rnd);
-                d.StartDispose();
+                d.DisposeAsync();
                 if (rnd.NextBool())
                 {
                     await Task.Delay(10);
@@ -40,7 +40,7 @@ namespace ClrCoder.Tests.Threading
 
                 if (rnd.NextBool())
                 {
-                    d.StartDispose();
+                    d.DisposeAsync();
                 }
 
                 if (rnd.NextBool())
@@ -57,7 +57,7 @@ namespace ClrCoder.Tests.Threading
 
                 if (rnd.NextBool())
                 {
-                    d.StartDispose();
+                    d.DisposeAsync();
                 }
 
                 if (rnd.NextBool())
@@ -78,7 +78,7 @@ namespace ClrCoder.Tests.Threading
             Task<Task> tst = Task.Factory.StartNew(
                 async () =>
                     {
-                        awaitable.StartDispose();
+                        awaitable.DisposeAsync();
                         await awaitable.DisposeTask;
                     });
             await tst;
@@ -127,7 +127,7 @@ namespace ClrCoder.Tests.Threading
 
                 if (_rnd.NextBool())
                 {
-                    StartDispose();
+                    DisposeAsync();
                 }
 
                 if (_rnd.NextBool())
@@ -152,12 +152,12 @@ namespace ClrCoder.Tests.Threading
 
                 if (_rnd.NextBool())
                 {
-                    StartDispose();
+                    DisposeAsync();
                 }
 
                 if (_rnd.NextBool())
                 {
-                    StartDispose();
+                    DisposeAsync();
                 }
 
                 SetDisposeSuspended(false);

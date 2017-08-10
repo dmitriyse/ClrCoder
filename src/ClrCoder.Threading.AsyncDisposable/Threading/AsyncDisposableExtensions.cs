@@ -10,28 +10,12 @@ namespace System.Threading
     using Tasks;
 
     /// <summary>
-    /// <see cref="IAsyncDisposable"/> related extension methods.
+    /// <see cref="IAsyncDisposableEx"/> related extension methods.
     /// </summary>
     public static class AsyncDisposableExtensions
     {
         /// <summary>
-        /// Syntaxis sugar for <see cref="IAsyncDisposable"/> interface. Starts dispose and returns dispose task.
-        /// </summary>
-        /// <param name="disposable">Object to dispose.</param>
-        /// <returns>Task that completes after dispose finishes.</returns>
-        public static Task AsyncDispose(this IAsyncDisposable disposable)
-        {
-            if (disposable == null)
-            {
-                throw new ArgumentNullException(nameof(disposable));
-            }
-
-            disposable.StartDispose();
-            return disposable.DisposeTask;
-        }
-
-        /// <summary>
-        /// Using-like operation for <see cref="IAsyncDisposable"/> <c>object</c>.
+        /// Using-like operation for <see cref="IAsyncDisposableEx"/> <c>object</c>.
         /// </summary>
         /// <typeparam name="T">Type of disposable <c>object</c>.</typeparam>
         /// <typeparam name="TResult">Type of async using block result.</typeparam>
@@ -63,7 +47,7 @@ namespace System.Threading
             }
             finally
             {
-                await obj.AsyncDispose();
+                await obj.DisposeAsync();
             }
         }
 
@@ -100,7 +84,7 @@ namespace System.Threading
             }
             finally
             {
-                await obj.AsyncDispose();
+                await obj.DisposeAsync();
             }
         }
 
@@ -137,7 +121,7 @@ namespace System.Threading
             }
             finally
             {
-                await obj.AsyncDispose();
+                await obj.DisposeAsync();
             }
         }
     }
