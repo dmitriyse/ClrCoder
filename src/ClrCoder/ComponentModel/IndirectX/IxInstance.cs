@@ -279,7 +279,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Under tree lock here, until first await.
             EnsureTreeLocked();

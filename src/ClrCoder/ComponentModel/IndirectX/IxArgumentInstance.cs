@@ -87,7 +87,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Do nothing.
         }

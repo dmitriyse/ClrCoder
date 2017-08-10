@@ -44,7 +44,7 @@ namespace ClrCoder.ObjectModel
         public T Target { get; private set; }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             await _disposeAction();
         }

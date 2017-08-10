@@ -220,7 +220,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                 _self.DisposeAsync();
             }
 
-            protected override async Task AsyncDispose()
+            protected override async Task DisposeAsyncCore()
             {
                 DisposeAction?.Invoke();
             }

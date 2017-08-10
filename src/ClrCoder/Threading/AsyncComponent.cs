@@ -31,7 +31,7 @@ namespace ClrCoder.Threading
 
         protected CancellationToken ProcessingCancellationToken { get; }
 
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             _processingCts.Dispose();
         }

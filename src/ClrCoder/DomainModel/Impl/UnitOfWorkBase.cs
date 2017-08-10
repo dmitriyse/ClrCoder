@@ -137,7 +137,7 @@ namespace ClrCoder.DomainModel.Impl
             "StyleCop.CSharp.ReadabilityRules",
             "SA1110:OpeningParenthesisMustBeOnDeclarationLine",
             Justification = "Reviewed. Suppression is OK here.")]
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             List<(PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)> entriesToDispose;
             lock (DisposeSyncRoot)

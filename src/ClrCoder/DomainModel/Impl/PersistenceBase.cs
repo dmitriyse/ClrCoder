@@ -167,7 +167,7 @@ namespace ClrCoder.DomainModel.Impl
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Waiting all plugin dispose.
             foreach (PersistencePluginBase<TPersistence, TUnitOfWork> plugin in _plugins)

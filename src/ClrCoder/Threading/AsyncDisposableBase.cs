@@ -138,14 +138,14 @@ namespace ClrCoder.Threading
         /// Performs actual dispose work. This method is called only once.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
-        protected abstract Task AsyncDispose();
+        protected abstract Task DisposeAsyncCore();
 
         /// <summary>
         /// Allows to handle dispose started event.
         /// This method is called under <c>lock</c> of SyncRoot.
         /// </summary>
         /// <remarks>
-        /// This method is called before call to <see cref="AsyncDispose"/>.
+        /// This method is called before call to <see cref="DisposeAsyncCore"/>.
         /// </remarks>
         protected virtual void OnDisposeStarted()
         {
@@ -154,8 +154,8 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Allow to suspend actual call to <see cref="AsyncDispose"/>. If StartDispose called while in suspended state, actual
-        /// dispose process will not begins untl suspend turn off. It' is impossible to turn on suspend state if AsyncDispose was
+        /// Allow to suspend actual call to <see cref="DisposeAsyncCore"/>. If StartDispose called while in suspended state, actual
+        /// dispose process will not begins untl suspend turn off. It' is impossible to turn on suspend state if DisposeAsyncCore was
         /// already called.
         /// </summary>
         /// <remarks>This method can be called as many times as required until actual dispose was started.</remarks>
@@ -201,7 +201,7 @@ namespace ClrCoder.Threading
             var isAsyncRun = false;
 
             // This line will never throw any exception.
-            Task disposeResult = AsyncDispose();
+            Task disposeResult = DisposeAsyncCore();
 
             try
             {

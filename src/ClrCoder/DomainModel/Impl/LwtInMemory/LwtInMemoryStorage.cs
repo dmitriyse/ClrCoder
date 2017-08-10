@@ -166,7 +166,7 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Do nothing.
         }

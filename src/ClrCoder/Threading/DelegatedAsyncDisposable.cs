@@ -30,7 +30,7 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        protected override Task AsyncDispose()
+        protected override Task DisposeAsyncCore()
         {
             return _disposeAction();
         }

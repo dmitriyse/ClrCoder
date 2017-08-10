@@ -72,7 +72,7 @@ namespace ClrCoder.Threading
         private bool WorkTerminationStarted => _workTerminatedCts != null;
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             lock (_blockerSectionSyncRoot)
             {

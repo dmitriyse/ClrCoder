@@ -82,7 +82,7 @@ namespace ClrCoder.Logging
         private IJsonLogger Log { get; }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             try
             {

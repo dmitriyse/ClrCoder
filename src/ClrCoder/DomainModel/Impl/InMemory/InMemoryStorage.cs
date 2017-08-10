@@ -141,7 +141,7 @@ namespace ClrCoder.DomainModel.Impl.InMemory
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Do nothing.
         }

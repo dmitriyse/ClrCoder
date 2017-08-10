@@ -90,7 +90,7 @@ namespace ClrCoder.Tests.Threading
         {
             public bool IsCalled { get; set; }
 
-            protected override async Task AsyncDispose()
+            protected override async Task DisposeAsyncCore()
             {
                 IsCalled = true;
             }
@@ -109,7 +109,7 @@ namespace ClrCoder.Tests.Threading
                 _rnd = rnd;
             }
 
-            protected override async Task AsyncDispose()
+            protected override async Task DisposeAsyncCore()
             {
                 if (_disposeCalled)
                 {

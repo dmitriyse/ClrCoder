@@ -50,7 +50,7 @@ namespace ClrCoder.AspNetCore
         }
 
         /// <inheritdoc/>
-        protected override async Task AsyncDispose()
+        protected override async Task DisposeAsyncCore()
         {
             // Do nothing.
         }
