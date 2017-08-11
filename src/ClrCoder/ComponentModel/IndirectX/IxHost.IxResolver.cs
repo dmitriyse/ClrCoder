@@ -91,7 +91,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
             ////IReadOnlyCollection<IIxInstanceLock> IIxInstance.Locks => throw new NotSupportedException(
             ////                                                              "This is too virtual.");
-            Task IAsyncDisposableEx.DisposeTask
+            Task IAsyncDisposableEx.Disposed
             {
                 get
                 {

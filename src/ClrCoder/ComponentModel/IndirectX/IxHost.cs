@@ -236,7 +236,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <inheritdoc/>
-        public Task DisposeTask => _rootScopeInstance.DisposeTask;
+        public Task Disposed => _rootScopeInstance.Disposed;
     }
 
     /// <summary>

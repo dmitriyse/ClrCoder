@@ -152,7 +152,7 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
                                 wasCalled.Should().BeFalse();
                             }
 
-                            dummyTmp.DisposeTask.Wait(TimeSpan.FromSeconds(5));
+                            dummyTmp.Disposed.Wait(TimeSpan.FromSeconds(5));
 
                             wasCalled.Should().BeTrue();
 

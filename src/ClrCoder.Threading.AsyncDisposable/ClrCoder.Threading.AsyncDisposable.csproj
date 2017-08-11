@@ -3,13 +3,27 @@
   <PropertyGroup>
     <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
+    <PackageReleaseNotes>IAsyncDisposable interface implementation and AsyncUsing polifill for the future "async using" operator. See Proposal champion https://github.com/dotnet/csharplang/issues/43.</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/dmitriyse/ClrCoder</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Threading.AsyncDisposable/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>System</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.0\ClrCoder.Threading.AsyncDisposable.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.0\ClrCoder.Threading.AsyncDisposable.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks" Version="4.0.10" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="10.1.4" />
   </ItemGroup>
 

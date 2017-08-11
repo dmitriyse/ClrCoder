@@ -1,11 +1,11 @@
 ﻿// <copyright file="IAbortableAsyncDisposable.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
-// Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace System.Threading
 {
-    using System;
+    //// ReSharper disable once InheritdocConsiderUsage
 
     /// <summary>
     /// Allows to detect and exception that was raised inside AsyncUsing block.

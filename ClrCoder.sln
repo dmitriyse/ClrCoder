@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder.Logger", "src\ClrC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder.UniformPath", "src\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj", "{1314E37F-C5DD-4745-8AD1-3C5351DF2027}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrCoder.Threading.AsyncDisposable", "src\ClrCoder.Threading.AsyncDisposable\ClrCoder.Threading.AsyncDisposable.csproj", "{6AB7131D-6F35-45B8-9C55-F6A370EF9DA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{1314E37F-C5DD-4745-8AD1-3C5351DF2027}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1314E37F-C5DD-4745-8AD1-3C5351DF2027}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1314E37F-C5DD-4745-8AD1-3C5351DF2027}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AB7131D-6F35-45B8-9C55-F6A370EF9DA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AB7131D-6F35-45B8-9C55-F6A370EF9DA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AB7131D-6F35-45B8-9C55-F6A370EF9DA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AB7131D-6F35-45B8-9C55-F6A370EF9DA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

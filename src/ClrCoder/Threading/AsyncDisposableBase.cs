@@ -59,7 +59,7 @@ namespace ClrCoder.Threading
 
         /// <inheritdoc/>
         [DebuggerHidden]
-        public Task DisposeTask
+        public Task Disposed
         {
             get
             {
@@ -83,7 +83,7 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
-        /// Shows that dispose was started. Monitor <see cref="DisposeTask"/> to know dispose status.
+        /// Shows that dispose was started. Monitor <see cref="Disposed"/> to know dispose status.
         /// </summary>
         /// <remarks>
         /// This value can be outdated, but never returns true when object fully switched to disposing state.
@@ -131,7 +131,7 @@ namespace ClrCoder.Threading
                 }
             }
 
-            return DisposeTask;
+            return Disposed;
         }
 
         /// <summary>

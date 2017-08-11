@@ -22,7 +22,7 @@ namespace System.Threading
         /// <param name="obj">Task that provides disposable <c>object</c>.</param>
         /// <param name="action">Action that should be performed on <c>object</c>.</param>
         /// <returns>All operation completion task.</returns>
-        public static async Task<TResult> AsyncUsing<T, TResult>(this T obj, Func<T, Task<TResult>> action)
+        public static async ValueTask<TResult> AsyncUsing<T, TResult>(this T obj, Func<T, Task<TResult>> action)
             where T : IAsyncDisposable
         {
             if (obj == null)

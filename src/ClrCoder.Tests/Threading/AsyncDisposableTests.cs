@@ -48,7 +48,7 @@ namespace ClrCoder.Tests.Threading
                     await Task.Delay(0);
                 }
 
-                await d.DisposeTask;
+                await d.Disposed;
 
                 if (rnd.NextBool())
                 {
@@ -68,7 +68,7 @@ namespace ClrCoder.Tests.Threading
         }
 
         /// <summary>
-        /// Tests with <c>true</c> asynchronous await of <see cref="AsyncDisposableBase.DisposeTask"/>.
+        /// Tests with <c>true</c> asynchronous await of <see cref="AsyncDisposableBase.Disposed"/>.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
         [Test]
@@ -79,7 +79,7 @@ namespace ClrCoder.Tests.Threading
                 async () =>
                     {
                         awaitable.DisposeAsync();
-                        await awaitable.DisposeTask;
+                        await awaitable.Disposed;
                     });
             await tst;
 

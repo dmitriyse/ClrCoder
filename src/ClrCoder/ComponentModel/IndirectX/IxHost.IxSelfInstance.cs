@@ -29,7 +29,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Object = self;
             }
 
-            public Task DisposeTask => throw new NotSupportedException();
+            public Task Disposed => throw new NotSupportedException();
 
             /// <inheritdoc/>
             public IxProviderNode ProviderNode { get; }

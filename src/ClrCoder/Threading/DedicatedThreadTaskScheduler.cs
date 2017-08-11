@@ -46,7 +46,7 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public Task DisposeTask => _asyncDisposable.DisposeTask;
+        public Task Disposed => _asyncDisposable.Disposed;
 
         /// <inheritdoc/>
         public Task DisposeAsync() => _asyncDisposable.DisposeAsync();
