@@ -49,7 +49,7 @@ namespace ClrCoder.Tests.AspNetCore.Hosting
         private class RightController
         {
             [HttpGet]
-            public async Task<string> Get()
+            public async ValueTask<string> Get()
             {
                 return "RightController";
             }
@@ -59,7 +59,7 @@ namespace ClrCoder.Tests.AspNetCore.Hosting
         private class WrongController
         {
             [HttpGet]
-            public async Task<string> Get()
+            public async ValueTask<string> Get()
             {
                 return "WrongController";
             }

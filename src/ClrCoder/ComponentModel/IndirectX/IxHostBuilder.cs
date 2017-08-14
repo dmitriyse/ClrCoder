@@ -32,7 +32,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IIxBuilder<ICollection<IIxProviderNodeConfig>> Nodes { get; }
 
         /// <inheritdoc/>
-        public async Task<IIxHost> Build()
+        public async ValueTask<IIxHost> Build()
         {
             var host = new IxHost();
             await host.Initialize(Config);

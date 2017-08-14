@@ -41,7 +41,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         }
 
         /// <inheritdoc/>
-        public override async Task<IIxInstanceLock> GetInstance(
+        public override async ValueTask<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
             IxIdentifier identifier,
             IxHost.IxResolveContext context,

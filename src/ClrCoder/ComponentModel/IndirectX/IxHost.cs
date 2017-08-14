@@ -207,7 +207,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         private readonly IxArgumentProvider _argumentProvider;
 
-        private async Task<IIxInstanceLock> Resolve(
+        private async ValueTask<IIxInstanceLock> Resolve(
             IIxInstance originInstance,
             IxIdentifier identifier,
             IxResolveContext context,
@@ -262,7 +262,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="frame">The resolve frame in the dependency sequence.</param>
     /// <param name="resolveBound">Handler that resolves instance when scope resolved.</param>
     /// <returns>Resolved instance temp <c>lock</c>.</returns>
-    public delegate Task<IIxInstanceLock> IxScopeBinderDelegate(
+    public delegate ValueTask<IIxInstanceLock> IxScopeBinderDelegate(
         IIxInstance originInstance,
         IxResolvePath resolvePath,
         IxHost.IxResolveContext context,
@@ -276,7 +276,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="provider">Provider node that should resolve instance.</param>
     /// <param name="context">Resolve <c>context</c>.</param>
     /// <returns>Resolved instance temp <c>lock</c>.</returns>
-    public delegate Task<IIxInstanceLock> IxResolveBoundDelegate(
+    public delegate ValueTask<IIxInstanceLock> IxResolveBoundDelegate(
         IIxInstance parentInstance,
         IxProviderNode provider,
         IxHost.IxResolveContext context);

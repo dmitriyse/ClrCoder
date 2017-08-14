@@ -25,34 +25,34 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public Delegate Func { get; }
 
-        public static IxDelegateInstanceBuilderConfig New<T, TResult>(Func<T, Task<TResult>> func)
+        public static IxDelegateInstanceBuilderConfig New<T, TResult>(Func<T, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);
         }
 
-        public static IxDelegateInstanceBuilderConfig New<T1, T2, TResult>(Func<T1, T2, Task<TResult>> func)
+        public static IxDelegateInstanceBuilderConfig New<T1, T2, TResult>(Func<T1, T2, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);
         }
 
         public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, TResult>(
-            Func<T1, T2, T3, Task<TResult>> func)
+            Func<T1, T2, T3, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);
         }
 
         public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, T4, TResult>(
-            Func<T1, T2, T3, T4, Task<TResult>> func)
+            Func<T1, T2, T3, T4, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);
         }
 
         public static IxDelegateInstanceBuilderConfig New<T1, T2, T3, T4, T5, TResult>(
-            Func<T1, T2, T3, T4, T5, Task<TResult>> func)
+            Func<T1, T2, T3, T4, T5, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
             return new IxDelegateInstanceBuilderConfig(func);

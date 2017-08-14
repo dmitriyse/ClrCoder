@@ -5,6 +5,7 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
+    using System;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -26,7 +27,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             out IIxInstanceLock creatorTempLock)
             : base(providerNode, parentInstance, out creatorTempLock)
         {
-            SetObjectCreationTask(Task.FromResult((object)providerNode));
+            SetObjectCreationTask(new ValueTask<object>(providerNode));
         }
 
         /// <inheritdoc/>

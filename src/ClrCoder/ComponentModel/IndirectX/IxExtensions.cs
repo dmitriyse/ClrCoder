@@ -145,7 +145,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="resolver">Resolver that should be used.</param>
         /// <param name="name">Name of registration.</param>
         /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
-        public static async Task<IxLock<T>> Get<T>(this IIxResolver resolver, string name = null)
+        public static async ValueTask<IxLock<T>> Get<T>(this IIxResolver resolver, string name = null)
         {
             if (resolver == null)
             {
@@ -164,7 +164,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="name">Name of registration.</param>
         /// <param name="arg1">The argument for current resolve operation.</param>
         /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
-        public static async Task<IxLock<T>> Get<T, TArg1>(
+        public static async ValueTask<IxLock<T>> Get<T, TArg1>(
             this IIxResolver resolver,
             [CanBeNull] string name,
             TArg1 arg1)
@@ -194,7 +194,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="arg1">The first argument for current resolve operation.</param>
         /// <param name="arg2">The second argument for current resolve operation.</param>
         /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
-        public static async Task<IxLock<T>> Get<T, TArg1, TArg2>(
+        public static async ValueTask<IxLock<T>> Get<T, TArg1, TArg2>(
             this IIxResolver resolver,
             [CanBeNull] string name,
             TArg1 arg1,
@@ -228,7 +228,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="arg2">The second argument for current resolve operation.</param>
         /// <param name="arg3">The third argument for current resolve operation.</param>
         /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
-        public static async Task<IxLock<T>> Get<T, TArg1, TArg2, TArg3>(
+        public static async ValueTask<IxLock<T>> Get<T, TArg1, TArg2, TArg3>(
             this IIxResolver resolver,
             [CanBeNull] string name,
             TArg1 arg1,
@@ -266,7 +266,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="arg3">The third argument for current resolve operation.</param>
         /// <param name="arg4">The fourth argument for current resolve operation.</param>
         /// <returns>Temp <c>lock</c> on the <c>object</c>.</returns>
-        public static async Task<IxLock<T>> Get<T, TArg1, TArg2, TArg3, TArg4>(
+        public static async ValueTask<IxLock<T>> Get<T, TArg1, TArg2, TArg3, TArg4>(
             this IIxResolver resolver,
             [CanBeNull] string name,
             TArg1 arg1,

@@ -20,7 +20,7 @@ namespace ClrCoder.Threading
         /// <param name="task"></param>
         /// <param name="workItem"></param>
         /// <returns></returns>
-        public static async Task<T> WithBlocker<T>(this IActiveWorkItem workItem, Func<Task<T>> action)
+        public static async ValueTask<T> WithBlocker<T>(this IActiveWorkItem workItem, Func<ValueTask<T>> action)
         {
             if (action == null)
             {

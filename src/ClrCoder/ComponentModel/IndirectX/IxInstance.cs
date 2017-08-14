@@ -38,7 +38,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         private Dictionary<IxProviderNode, object> _childrenData;
 
         [CanBeNull]
-        private Task<object> _objectCreationTask;
+        private ValueTask<object>? _objectCreationTask;
 
         [CanBeNull]
         private IIxInstanceLock _initTempLock;
@@ -89,7 +89,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 // This should never happened even if schema have errors. Cycle detector should save us.
                 Critical.Assert(_objectCreationTask != null, "You cannot use not properly initialized object.");
 
-                return _objectCreationTask;
+                return _objectCreationTask.Value.AsTask();
             }
         }
 
@@ -100,9 +100,9 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 Critical.Assert(_objectCreationTask != null, "Object creation task was not initialized.");
                 Critical.Assert(
-                    _objectCreationTask.IsCompleted,
+                    _objectCreationTask.Value.IsCompleted,
                     "You cannot get instance object if instantiation is not yet completed.");
-                return _objectCreationTask.Result;
+                return _objectCreationTask.Value.Result;
             }
         }
 
@@ -215,7 +215,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     _objectCreationTask != null,
                     "You need to setup instance object factory before releasing creator lock.");
                 Critical.Assert(
-                    _objectCreationTask.IsCompleted,
+                    _objectCreationTask.Value.IsCompleted,
                     "Creator lock should be removed only after object instantiation completes.");
             }
 
@@ -366,7 +366,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// Initializes object creation task.
         /// </summary>
         /// <param name="objectCreateTask">The object creation task.</param>
-        protected void SetObjectCreationTask(Task<object> objectCreateTask)
+        protected void SetObjectCreationTask(ValueTask<object> objectCreateTask)
         {
             // If everything fine this method will be called from one thread and only once.
             // We can skip thread safety check for this method.
@@ -381,10 +381,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                 _objectCreationTask == null,
                 "Instance already initialized, you cannot init Object property twice.");
 
-            _objectCreationTask = ObjectFactoryProxy(objectCreateTask).EnsureStarted();
+            _objectCreationTask = ObjectFactoryProxy(objectCreateTask);
         }
 
-        private async Task<object> ObjectFactoryProxy(Task<object> objectFactory)
+        private async ValueTask<object> ObjectFactoryProxy(ValueTask<object> objectFactory)
         {
             try
             {

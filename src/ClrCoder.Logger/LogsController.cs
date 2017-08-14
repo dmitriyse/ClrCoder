@@ -42,7 +42,7 @@ namespace ClrCoder.Logger
         /// Returns all video entries.
         /// </returns>
         [HttpGet]
-        public async Task<IActionResult> Get(
+        public async ValueTask<IActionResult> Get(
             [FromQuery] string start,
             [FromQuery] string end)
         {

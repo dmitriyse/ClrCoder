@@ -57,7 +57,7 @@ namespace ClrCoder.ComponentModel.IndirectX
     /// <param name="context"><c>Resolve</c> <c>context</c>.</param>
     /// <param name="frame">The resolve frame in the dependency sequence.</param>
     /// <returns>Async execution task result.</returns>
-    public delegate Task<object> IxInstanceFactoryDelegate(
+    public delegate ValueTask<object> IxInstanceFactoryDelegate(
         IIxInstance instance,
         IIxInstance parentInstance,
         IxHost.IxResolveContext context,

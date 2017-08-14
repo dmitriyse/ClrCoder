@@ -24,7 +24,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         identifier);
                 });
 
-        public delegate Task<IIxInstanceLock> ResolveDelegate(
+        public delegate ValueTask<IIxInstanceLock> ResolveDelegate(
             IIxInstance originInstance,
             IxIdentifier identifier,
             IxResolveContext context,
@@ -41,12 +41,12 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="frame">The resolve sequence frame.</param>
         /// <param name="targetOperation">Operation that should be performed with resolved <c>dependencies</c>.</param>
         /// <returns>Result of target opration.</returns>
-        public async Task<TResult> ResolveList<TResult>(
+        public async ValueTask<TResult> ResolveList<TResult>(
             IIxInstance originInstance,
             HashSet<IxIdentifier> dependencies,
             IxResolveContext context,
             [CanBeNull] IxResolveFrame frame,
-            Func<Dictionary<IxIdentifier, IIxInstance>, Task<TResult>> targetOperation)
+            Func<Dictionary<IxIdentifier, IIxInstance>, ValueTask<TResult>> targetOperation)
         {
             if (originInstance == null)
             {
@@ -72,7 +72,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             {
                 var result = new Dictionary<IxIdentifier, IIxInstance>();
 
-                async Task<TResult> ResolveItem()
+                async ValueTask<TResult> ResolveItem()
                 {
                     // ReSharper disable once AccessToDisposedClosure
                     if (!enumerator.MoveNext())
@@ -101,7 +101,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             }
         }
 
-        private async Task<IIxInstanceLock> RegistrationScopeBinder(
+        private async ValueTask<IIxInstanceLock> RegistrationScopeBinder(
             IIxInstance originInstance,
             IxResolvePath resolvePath,
             IxResolveContext context,
@@ -130,7 +130,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 throw new InvalidOperationException("Resolve algorithms problems");
             }
 
-            Func<IIxInstance, int, Task<IIxInstanceLock>> resolvePathElements = null;
+            Func<IIxInstance, int, ValueTask<IIxInstanceLock>> resolvePathElements = null;
 
             resolvePathElements = async (parentInstance, index) =>
                 {

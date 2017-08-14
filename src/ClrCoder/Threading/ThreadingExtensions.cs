@@ -151,7 +151,7 @@ namespace ClrCoder.Threading
         public static Task<TValue> GetOrCreateAsync<TKey, TValue>(
             this IDictionary<TKey, Task<TValue>> asyncResultsDictionary,
             TKey key,
-            Func<TKey, Task<TValue>> createFunc,
+            Func<TKey, ValueTask<TValue>> createFunc,
             bool allowRetry = true)
         {
             if (key == null)
@@ -372,7 +372,7 @@ namespace ClrCoder.Threading
         /// </summary>
         /// <param name="task">Task that will be awaited.</param>
         /// <returns>Returns synchronous run flags (true for sync, false for async).</returns>
-        public static async Task<bool> WithSyncDetection(this Task task)
+        public static async ValueTask<bool> WithSyncDetection(this Task task)
         {
             if (task == null)
             {

@@ -105,7 +105,7 @@ namespace ClrCoder.Cluster
         private ClassJsonLogger<ClusterNode> Log { get; }
 
         /// <inheritdoc/>
-        public Int128 GetPromiseId<T>(Task<T> task)
+        public Int128 GetPromiseId<T>(ValueTask<T> task)
         {
             return (Int128)_objectToKey.GetValue(task, k => Guid.NewGuid().ToInt());
         }
@@ -126,7 +126,7 @@ namespace ClrCoder.Cluster
         }
 
         /// <inheritdoc/>
-        public Task<T> RestoreFuture<T>(Int128 promiseId)
+        public ValueTask<T> RestoreFuture<T>(Int128 promiseId)
         {
             throw new NotImplementedException();
         }
@@ -138,7 +138,7 @@ namespace ClrCoder.Cluster
         }
 
         /// <inheritdoc/>
-        public async Task<int> WaitTermination()
+        public async ValueTask<int> WaitTermination()
         {
             await _executeCancellationToken;
             Log.Trace(_ => _("Termination started..."));

@@ -23,7 +23,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <param name="identifier">Dependency <c>identifier</c>.</param>
         /// <param name="arguments">Resolve arguments.</param>
         /// <returns>Required <c>object</c>.</returns>
-        Task<IIxInstanceLock> Resolve(
+        ValueTask<IIxInstanceLock> Resolve(
             IxIdentifier identifier,
             IReadOnlyDictionary<IxIdentifier, object> arguments = null);
     }

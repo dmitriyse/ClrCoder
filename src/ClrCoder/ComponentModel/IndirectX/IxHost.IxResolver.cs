@@ -100,7 +100,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 }
             }
 
-            public Task<object> ObjectTask { get; }
+            public ValueTask<object> ObjectTask { get; }
 
             [Obsolete("Try remove me")]
             public IxHost Host { get; }
@@ -147,7 +147,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Critical.Assert(false, "This is completely virtual object and cannot own locks.");
             }
 
-            public async Task<IIxInstanceLock> Resolve(
+            public async ValueTask<IIxInstanceLock> Resolve(
                 IxIdentifier identifier,
                 IReadOnlyDictionary<IxIdentifier, object> arguments = null)
             {

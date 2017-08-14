@@ -42,7 +42,7 @@ namespace ClrCoder.Cluster
         }
 
         /// <inheritdoc/>
-        public Int128 GetPromiseId<T>(Task<T> task)
+        public Int128 GetPromiseId<T>(ValueTask<T> task)
         {
             throw new NotImplementedException();
         }
@@ -59,7 +59,7 @@ namespace ClrCoder.Cluster
         }
 
         /// <inheritdoc/>
-        public Task<T> RestoreFuture<T>(Int128 promiseId)
+        public ValueTask<T> RestoreFuture<T>(Int128 promiseId)
         {
             throw new NotImplementedException();
         }
@@ -71,9 +71,9 @@ namespace ClrCoder.Cluster
         }
 
         /// <inheritdoc/>
-        public Task<int> WaitTermination()
+        public ValueTask<int> WaitTermination()
         {
-            return _resultCompletionSource.Task;
+            return new ValueTask<int>(_resultCompletionSource.Task);
         }
 
         /// <summary>

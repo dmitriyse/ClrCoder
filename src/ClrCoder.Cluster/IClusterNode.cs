@@ -26,7 +26,7 @@ namespace ClrCoder.Cluster
         /// <typeparam name="T">The type of the promise result.</typeparam>
         /// <param name="task">The TPL task, that will be passed across cluster nodes.</param>
         /// <returns>The permanent globally unique identifier for the specified promise.</returns>
-        Int128 GetPromiseId<T>(Task<T> task);
+        Int128 GetPromiseId<T>(ValueTask<T> task);
 
         /// <summary>
         /// Gets globally unique identifier for the in-process C# promise.
@@ -43,7 +43,7 @@ namespace ClrCoder.Cluster
         /// <param name="promiseId">The promise unique identifier.</param>
         /// <returns>The promise object corresponding to the .</returns>
         /// <exception cref="KeyNotFoundException">Specified identifier is unknown for the communication subsystem.</exception>
-        Task<T> RestoreFuture<T>(Int128 promiseId);
+        ValueTask<T> RestoreFuture<T>(Int128 promiseId);
 
         /// <summary>
         /// Restores C# promise from the identifier obtained in the previous node run.
@@ -58,6 +58,6 @@ namespace ClrCoder.Cluster
         /// Waits termination events.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
-        Task<int> WaitTermination();
+        ValueTask<int> WaitTermination();
     }
 }

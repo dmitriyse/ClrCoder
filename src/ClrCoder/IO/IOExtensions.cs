@@ -88,7 +88,7 @@ namespace ClrCoder.IO
         /// </summary>
         /// <param name="stream">Stream to read.</param>
         /// <returns>Read bytes.</returns>
-        public static async Task<byte[]> ReadAllBytesAsync(this Stream stream)
+        public static async ValueTask<byte[]> ReadAllBytesAsync(this Stream stream)
         {
             if (stream == null)
             {

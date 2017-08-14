@@ -22,6 +22,6 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// Performs actual build.
         /// </summary>
         /// <returns>Configured IndirectX host.</returns>
-        Task<IIxHost> Build();
+        ValueTask<IIxHost> Build();
     }
 }

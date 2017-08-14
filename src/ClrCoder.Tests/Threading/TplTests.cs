@@ -72,7 +72,7 @@ namespace ClrCoder.Tests.Threading
             await Task.Delay(1000);
         }
 
-        private async Task<int> GiveMeTheAnswer()
+        private async ValueTask<int> GiveMeTheAnswer()
         {
             await Task.Delay(200);
             return 42;

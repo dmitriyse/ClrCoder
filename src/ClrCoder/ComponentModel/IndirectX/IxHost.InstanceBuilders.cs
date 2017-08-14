@@ -27,7 +27,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
 
                     if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassInstanceBuilderConfig<>))
+                        && (configTypeInfo.GetGenericTypeDefinition() == typeof(IxClassInstanceBuilderConfig<>)))
                     {
                         TypeInfo instanceClass = configTypeInfo.GenericTypeArguments[0].GetTypeInfo();
                         ConstructorInfo[] constructors =
@@ -124,7 +124,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     TypeInfo configTypeInfo = factoryConfig.GetType().GetTypeInfo();
 
                     if (configTypeInfo.IsGenericType
-                        && configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>))
+                        && (configTypeInfo.GetGenericTypeDefinition() == typeof(IxExistingInstanceFactoryConfig<>)))
                     {
                         object instanceObj = configTypeInfo.GetDeclaredProperty("Instance").GetValue(factoryConfig);
                         if (instanceObj == null)
@@ -193,21 +193,25 @@ namespace ClrCoder.ComponentModel.IndirectX
                                                 resolvedDependencies[new IxIdentifier(x.ParameterType)].Object)
                                         .ToArray();
 
-                                    Task instanceObjTask;
+                                    object instanceObjTask;
+                                    Task instanceObjTaskCasted;
                                     try
                                     {
-                                        instanceObjTask = (Task)methodInfo.Invoke(
+                                        // TODO: Optimize me.
+                                        instanceObjTask = methodInfo.Invoke(
                                             delegateInstanceBuilderConfig.Func,
                                             arguments);
-
-                                        await instanceObjTask;
+                                        instanceObjTaskCasted = (Task)instanceObjTask.GetType().GetTypeInfo()
+                                            .GetDeclaredMethod("AsTask")
+                                            .Invoke(instanceObjTask, new object[] { });
+                                        await instanceObjTaskCasted;
                                     }
                                     catch (TargetInvocationException ex)
                                     {
                                         throw ex.InnerException;
                                     }
 
-                                    object instanceObj = instanceObjTask.GetResult();
+                                    object instanceObj = instanceObjTaskCasted.GetResult();
 
                                     // TODO: TryCast, 
                                     // TODO: Allow null result.

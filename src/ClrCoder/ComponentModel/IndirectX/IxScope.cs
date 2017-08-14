@@ -40,7 +40,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
         /// <inheritdoc/>
-        public override async Task<IIxInstanceLock> GetInstance(
+        public override async ValueTask<IIxInstanceLock> GetInstance(
             IIxInstance parentInstance,
             IxIdentifier identifier,
             IxHost.IxResolveContext context,
