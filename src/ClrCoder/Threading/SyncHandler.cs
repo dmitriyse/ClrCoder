@@ -6,7 +6,7 @@
 namespace ClrCoder.Threading
 {
     using System;
-    using System.Threading;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -200,9 +200,8 @@ namespace ClrCoder.Threading
 
         private void HandleException(Exception ex)
         {
-#if NETSTANDARD2_0
-            ThreadPool.QueueUserWorkItem(state => throw ex);
-#endif
+            // Fire and forget.
+            Task.Factory.StartNew(() => throw ex);
         }
     }
 }

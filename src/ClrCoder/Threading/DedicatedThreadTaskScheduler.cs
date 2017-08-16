@@ -9,6 +9,7 @@ namespace ClrCoder.Threading
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -32,7 +33,7 @@ namespace ClrCoder.Threading
 
         private readonly ThreadLocal<Guid?> _currentThreadId = new ThreadLocal<Guid?>();
 
-        private readonly ManualResetEventSlim _newTaskAvailableEvent = new ManualResetEventSlim();
+        private readonly AutoResetEvent _newTaskAvailableEvent = new AutoResetEvent(false);
 
         private ImmutableQueue<Task> _queuedTasks = ImmutableQueue<Task>.Empty;
 
@@ -65,6 +66,7 @@ namespace ClrCoder.Threading
         protected override void QueueTask([NotNull] Task task)
         {
             InterlockedEx.InterlockedUpdate(ref _queuedTasks, (q, t) => q.Enqueue(t), task);
+            _newTaskAvailableEvent.Set();
         }
 
         /// <inheritdoc/>
@@ -102,13 +104,33 @@ namespace ClrCoder.Threading
                 {
                     for (;;)
                     {
+                        _ct.ThrowIfCancellationRequested();
                         Task dequeuedTask = InterlockedEx.InterlockedUpdate(
                             ref _queuedTasks,
-                            q => (q.Dequeue(out Task t), t));
+                            q =>
+                                {
+                                    Task t = null;
+                                    if (q.Any())
+                                    {
+                                        var nq = q.Dequeue(out t);
+                                        return (nq, t);
+                                    }
+                                    else
+                                    {
+                                        return (q, null);
+                                    }
+                                });
 
                         if (dequeuedTask == null)
                         {
-                            _newTaskAvailableEvent.Wait(_ct);
+                            // TODO: Add spinwait
+                            _newTaskAvailableEvent.WaitOne(TimeSpan.FromSeconds(1));
+                        }
+                        else
+                        {
+                            // This is synchronous execution.
+                            bool taskExecuted = TryExecuteTask(dequeuedTask);
+                            Debug.Assert(taskExecuted, "DedicatedThread task have some problem.");
                         }
                     }
                 }

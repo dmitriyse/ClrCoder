@@ -369,9 +369,9 @@ namespace ClrCoder.Threading
 
         private void HandleException(Exception ex)
         {
-#if NETSTANDARD2_0
-            ThreadPool.QueueUserWorkItem(state => throw ex);
-#endif
+            // Fire and forget.
+            // ReSharper disable once MethodSupportsCancellation
+            Task.Factory.StartNew(() => throw ex);
         }
 
         private Exception ReThrowOperationCanceled(OperationCanceledException ex)
