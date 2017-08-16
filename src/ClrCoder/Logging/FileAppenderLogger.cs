@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Logging
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.IO;
 
@@ -52,12 +53,12 @@ namespace ClrCoder.Logging
                 throw new ArgumentNullException(nameof(asyncHandler));
             }
 
-            var directoryName = Path.GetDirectoryName(fileName);
+            string directoryName = Path.GetDirectoryName(fileName);
             if (!Directory.Exists(directoryName))
             {
                 Directory.CreateDirectory(directoryName);
             }
-            
+
             // ReSharper restore JoinNullCheckWithUsage
             _fileName = fileName;
             AsyncHandler = asyncHandler;
@@ -100,4 +101,5 @@ namespace ClrCoder.Logging
             File.AppendAllLines(_fileName, new[] { entryString }, EncodingEx.UTF8NoBom);
         }
     }
+#endif
 }

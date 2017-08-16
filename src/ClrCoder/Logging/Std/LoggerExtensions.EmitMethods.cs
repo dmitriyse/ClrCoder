@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Logging.Std
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Runtime.CompilerServices;
 
@@ -803,4 +804,5 @@ namespace ClrCoder.Logging.Std
             // ReSharper restore AssignNullToNotNullAttribute
         }
     }
+#endif
 }

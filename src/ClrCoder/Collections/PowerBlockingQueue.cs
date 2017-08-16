@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Collections
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -128,12 +129,14 @@ namespace ClrCoder.Collections
                         {
                             lock (_syncRoot)
                             {
-                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node = listToRemovePendingAction.First;
+                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+= listToRemovePendingAction.First;
                                 while (node != null)
                                 {
                                     if (ReferenceEquals(node.Value.Tcs, completionSource))
                                     {
-                                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete = node;
+                                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+= node;
                                         node = node.Next;
                                         listToRemovePendingAction.Remove(nodeToDelete);
                                     }
@@ -164,7 +167,8 @@ namespace ClrCoder.Collections
                     do
                     {
                         hasEnqueueChanges = false;
-                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node = _pendingEnqueueActions.First;
+                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+= _pendingEnqueueActions.First;
                         while (node != null)
                         {
                             if (node.Value.PendingAction(_items))
@@ -172,7 +176,8 @@ namespace ClrCoder.Collections
                                 hasEnqueueChanges = true;
                                 hasChanges = true;
                                 node.Value.Tcs.SetResult(default(ValueVoid));
-                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete = node;
+                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+= node;
                                 node = node.Next;
                                 _pendingEnqueueActions.Remove(nodeToDelete);
                             }
@@ -189,7 +194,8 @@ namespace ClrCoder.Collections
                 do
                 {
                     hasDequeueChanges = false;
-                    LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node = _pendingDequeueActions.First;
+                    LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+= _pendingDequeueActions.First;
                     while (node != null)
                     {
                         if (node.Value.PendingAction(_items))
@@ -197,7 +203,8 @@ namespace ClrCoder.Collections
                             hasChanges = true;
                             hasDequeueChanges = true;
                             node.Value.Tcs.SetResult(default(ValueVoid));
-                            LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete = node;
+                            LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+= node;
                             node = node.Next;
                             _pendingDequeueActions.Remove(nodeToDelete);
                         }
@@ -214,4 +221,5 @@ namespace ClrCoder.Collections
             while (hasChanges);
         }
     }
+#endif
 }

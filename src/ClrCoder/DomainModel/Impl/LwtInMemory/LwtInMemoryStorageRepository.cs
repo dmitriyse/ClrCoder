@@ -6,6 +6,7 @@
 namespace ClrCoder.DomainModel.Impl.LwtInMemory
 {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -61,4 +62,5 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
             // Do nothing.
         }
     }
+#endif
 }

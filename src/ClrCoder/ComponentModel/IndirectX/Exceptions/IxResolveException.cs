@@ -9,7 +9,7 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
-#if NET46
+#if NETSTANDARD2_0
     using System.Runtime.Serialization;
 #endif
 
@@ -39,7 +39,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
         }
 
-#if NET46
+#if NETSTANDARD2_0
 
 /// <summary>
 /// Initializes a new instance of the <see cref="IxResolveException"/> class with serialization data.

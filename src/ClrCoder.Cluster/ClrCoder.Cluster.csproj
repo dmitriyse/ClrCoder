@@ -1,26 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+    <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
+    <VersionPrefix>0.3.0</VersionPrefix>
   </PropertyGroup>
-
-  <!--Fix for the bug https://github.com/dotnet/sdk/issues/826-->
-  <PropertyGroup Condition="'IsWindows'=='true'">
-    <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'IsWindows'!='true'">
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
-    <AssemblyName>ClrCoder.Cluster</AssemblyName>
-    <PackageId>ClrCoder.Cluster</PackageId>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);dotnet</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ClrCoder\ClrCoder.csproj" />
@@ -28,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="10.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.0" />
@@ -37,12 +21,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

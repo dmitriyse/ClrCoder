@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Threading
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
@@ -368,7 +369,7 @@ namespace ClrCoder.Threading
 
         private void HandleException(Exception ex)
         {
-#if NET46 || NETSTANDARD2_0
+#if NETSTANDARD2_0
             ThreadPool.QueueUserWorkItem(state => throw ex);
 #endif
         }
@@ -406,4 +407,5 @@ namespace ClrCoder.Threading
             }
         }
     }
+#endif
 }

@@ -46,7 +46,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             set => Critical.Assert(false, "Unsupported");
         }
 
-        Task IIxInstance.ObjectCreationTask => Task.CompletedTask;
+        Task IIxInstance.ObjectCreationTask => TaskEx.CompletedTask;
 
         /// <inheritdoc/>
         public object Object { get; }

@@ -5,6 +5,7 @@
 
 namespace ClrCoder
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -52,4 +53,5 @@ namespace ClrCoder
             }
         }
     }
+#endif
 }

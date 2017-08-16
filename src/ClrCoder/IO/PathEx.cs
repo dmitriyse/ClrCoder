@@ -5,6 +5,7 @@
 
 namespace ClrCoder.IO
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.IO;
 
@@ -56,4 +57,5 @@ namespace ClrCoder.IO
             return resultPath;
         }
     }
+#endif
 }

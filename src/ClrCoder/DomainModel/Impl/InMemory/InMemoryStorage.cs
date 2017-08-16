@@ -6,6 +6,7 @@
 namespace ClrCoder.DomainModel.Impl.InMemory
 {
 #pragma warning disable 1998
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
@@ -185,4 +186,5 @@ namespace ClrCoder.DomainModel.Impl.InMemory
             uow.SetPluginEntry(this, CreateRepository(_data));
         }
     }
+#endif
 }

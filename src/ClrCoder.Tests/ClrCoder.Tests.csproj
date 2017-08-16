@@ -1,34 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
-  </PropertyGroup>
-
-  <!--Fix for the bug https://github.com/dotnet/sdk/issues/826-->
-  <PropertyGroup Condition="'IsWindows'=='true'">
-    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0;net46</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'IsWindows'!='true'">
-    <TargetFrameworks>netcoreapp1.1;netcoreapp1.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <VersionPrefix>0.1.1</VersionPrefix>
-    <AssemblyName>ClrCoder.Tests</AssemblyName>
-    <PackageId>ClrCoder.Tests</PackageId>
+    <TargetFrameworks>netcoreapp1.0;netcoreapp1.1;netcoreapp2.0;net461</TargetFrameworks>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <GenerateProgramFile>false</GenerateProgramFile>
     <OutputType>exe</OutputType>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">$(PackageTargetFallback);dotnet</PackageTargetFallback>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">$(PackageTargetFallback);dotnet</PackageTargetFallback>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ClrCoder.Testing\ClrCoder.Testing.csproj" />
@@ -39,31 +19,14 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.3" />
-    <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
     <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="NUnitLite" Version="3.7.2" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
-    <PackageReference Include="NUnit3TestAdapter">
-      <Version>4.0.0-alpha1</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.1'">
-    <PackageReference Include="NUnit3TestAdapter">
-      <Version>3.8.0-alpha1</Version>
-    </PackageReference>
-  </ItemGroup>
-
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

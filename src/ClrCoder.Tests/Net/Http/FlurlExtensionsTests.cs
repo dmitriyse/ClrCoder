@@ -5,6 +5,8 @@
 
 namespace ClrCoder.Tests.Net.Http
 {
+    // TODO: Add NETCOREAPP1_1, msbuild have bug and currently can't build the project.
+#if NETCOREAPP2_0 || NET461
     using System.Threading.Tasks;
 
     using ClrCoder.AspNetCore.Hosting;
@@ -127,4 +129,5 @@ namespace ClrCoder.Tests.Net.Http
             }
         }
     }
+#endif
 }

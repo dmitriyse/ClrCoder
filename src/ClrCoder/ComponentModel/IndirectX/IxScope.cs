@@ -10,6 +10,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     public class IxScope : IxProviderNode
     {
         [CanBeNull]
@@ -31,7 +33,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 host.ScopeBinderBuilder.Delegate(new IxRegistrationScopeBindingConfig()),
-                obj => Task.CompletedTask)
+                obj => TaskEx.CompletedTask)
         {
             // Adding self provided as default for children.
             VisibleNodes.Add(new IxIdentifier(Identifier.Type), new IxResolvePath(this, new IxProviderNode[] { }));

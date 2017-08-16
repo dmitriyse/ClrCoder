@@ -5,6 +5,7 @@
 
 namespace ClrCoder
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Security.Cryptography;
 
@@ -62,7 +63,6 @@ namespace ClrCoder
 
             return new Guid(_md5Variables.Md5.ComputeHash(data));
         }
-
         /// <summary>
         /// Calculates MD5 hash for the provided binary data.
         /// </summary>
@@ -95,4 +95,5 @@ namespace ClrCoder
             public MD5 Md5 { get; private set; }
         }
     }
+#endif
 }

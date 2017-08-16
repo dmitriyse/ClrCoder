@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
-    <AssemblyName>ClrCoder.Collections.Rich</AssemblyName>
-    <PackageId>ClrCoder.Collections.Rich</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>System</RootNamespace>
   </PropertyGroup>
-
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClrCoder.Collections\ClrCoder.Collections.csproj" />
     <ProjectReference Include="..\ClrCoder.Runtime.Immutability\ClrCoder.Runtime.Immutability.csproj" />

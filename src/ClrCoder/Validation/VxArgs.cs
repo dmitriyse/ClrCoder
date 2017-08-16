@@ -7,7 +7,9 @@ namespace ClrCoder.Validation
 {
     using System;
     using System.Collections.Generic;
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System.Drawing;
+#endif
     using System.Reflection;
 
     using JetBrains.Annotations;
@@ -60,6 +62,21 @@ namespace ClrCoder.Validation
         }
 
         /// <summary>
+        /// Validates that value typed argument is initialized (not equals to the default value).
+        /// </summary>
+        /// <typeparam name="T">The value type.</typeparam>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="name">The argument name.</param>
+        public static void NonDefault<T>(T value, [InvokerParameterName] string name)
+            where T : struct, IEquatable<T>
+        {
+            if (value.Equals(default(T)))
+            {
+                throw new ArgumentException("Argument should not be equal to the default value.", name);
+            }
+        }
+
+        /// <summary>
         /// Validates that argument is non negative.
         /// </summary>
         /// <param name="value">Argument <c>value</c>.</param>
@@ -71,6 +88,8 @@ namespace ClrCoder.Validation
                 throw new ArgumentOutOfRangeException($"{name} should not be negative.", name);
             }
         }
+
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
 
         /// <summary>
         /// Validates that Width and Height are both non negative.
@@ -84,6 +103,7 @@ namespace ClrCoder.Validation
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non negative");
             }
         }
+#endif
 
         /// <summary>
         /// Validates argument string is not empty.
@@ -199,11 +219,11 @@ namespace ClrCoder.Validation
             }
         }
 
-        /// <summary>
-        /// Validates that Width and Height are both non zero positive.
-        /// </summary>
-        /// <param name="size">Size to validate.</param>
-        /// <param name="name">Argument <c>name</c>.</param>
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0 /// <summary>
+/// Validates that Width and Height are both non zero positive.
+/// </summary>
+/// <param name="size">Size to validate.</param>
+/// <param name="name">Argument <c>name</c>.</param>
         public static void PositiveSize(Size size, [InvokerParameterName] string name)
         {
             if ((size.Width <= 0) || (size.Height <= 0))
@@ -224,6 +244,7 @@ namespace ClrCoder.Validation
                 throw new ArgumentOutOfRangeException(name, "Both Width and Height should be non-zero positive");
             }
         }
+#endif
 
         /// <summary>
         /// Validates that the specified value fits into TypeChoice. Validation success for <see langword="null"/> value.
@@ -256,10 +277,17 @@ namespace ClrCoder.Validation
                     throw new ArgumentException($"{name} should use http/https", name);
                 }
             }
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
             catch (UriFormatException ex)
             {
                 throw new ArgumentException(ex.Message, name, ex);
             }
+#else
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message, name, ex);
+            }
+#endif
         }
 
         /// <summary>
@@ -276,25 +304,17 @@ namespace ClrCoder.Validation
                 // ReSharper disable once ObjectCreationAsStatement
                 new Uri(uri, UriKind.Absolute);
             }
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
             catch (UriFormatException ex)
             {
                 throw new ArgumentException(ex.Message, name, ex);
             }
-        }
-
-        /// <summary>
-        /// Validates that value typed argument is initialized (not equals to the default value).
-        /// </summary>
-        /// <typeparam name="T">The value type.</typeparam>
-        /// <param name="value">The value to validate.</param>
-        /// <param name="name">The argument name.</param>
-        public static void NonDefault<T>(T value, [InvokerParameterName] string name)
-            where T:struct, IEquatable<T>
-        {
-            if (value.Equals(default(T)))
+#else
+            catch (Exception ex)
             {
-                throw new ArgumentException("Argument should not be equal to the default value.", name);
+                throw new ArgumentException(ex.Message, name, ex);
             }
+#endif
         }
     }
 }

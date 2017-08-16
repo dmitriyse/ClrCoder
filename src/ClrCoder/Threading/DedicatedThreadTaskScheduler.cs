@@ -6,8 +6,8 @@
 namespace ClrCoder.Threading
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
@@ -21,18 +21,22 @@ namespace ClrCoder.Threading
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
-        private readonly BlockingCollection<Task> _queuedTasks = new BlockingCollection<Task>();
-
         private readonly DelegatedAsyncDisposable _asyncDisposable;
 
         private readonly CancellationToken _ct;
 
         private readonly Task _workerTask;
 
-        private readonly TaskCompletionSource<Thread> _workerThreadCompletionSource =
-            new TaskCompletionSource<Thread>();
+        private readonly TaskCompletionSource<Guid> _workerThreadCompletionSource =
+            new TaskCompletionSource<Guid>();
 
-        private readonly Thread _workerThread;
+        private readonly ThreadLocal<Guid?> _currentThreadId = new ThreadLocal<Guid?>();
+
+        private readonly ManualResetEventSlim _newTaskAvailableEvent = new ManualResetEventSlim();
+
+        private ImmutableQueue<Task> _queuedTasks = ImmutableQueue<Task>.Empty;
+
+        private Guid _workerThreadId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DedicatedThreadTaskScheduler"/> class.
@@ -41,7 +45,7 @@ namespace ClrCoder.Threading
         {
             _asyncDisposable = new DelegatedAsyncDisposable(AsyncDisposeImpl);
             _workerTask = Task.Factory.StartNew(WorkerThreadProc, TaskCreationOptions.LongRunning);
-            _workerThread = _workerThreadCompletionSource.Task.Result;
+            _workerThreadId = _workerThreadCompletionSource.Task.Result;
             _ct = _cts.Token;
         }
 
@@ -50,18 +54,6 @@ namespace ClrCoder.Threading
 
         /// <inheritdoc/>
         public Task DisposeAsync() => _asyncDisposable.DisposeAsync();
-
-        /// <summary>
-        /// Disposes <c>object</c>.
-        /// </summary>
-        /// <returns>Async execution TPL task.</returns>
-        protected virtual async Task AsyncDisposeImpl()
-        {
-            _cts.Cancel();
-
-            // ReSharper disable once MethodSupportsCancellation
-            await _workerTask;
-        }
 
         /// <inheritdoc/>
         protected override IEnumerable<Task> GetScheduledTasks()
@@ -72,13 +64,13 @@ namespace ClrCoder.Threading
         /// <inheritdoc/>
         protected override void QueueTask([NotNull] Task task)
         {
-            _queuedTasks.Add(task, _ct);
+            InterlockedEx.InterlockedUpdate(ref _queuedTasks, (q, t) => q.Enqueue(t), task);
         }
 
         /// <inheritdoc/>
         protected override bool TryExecuteTaskInline([NotNull] Task task, bool taskWasPreviouslyQueued)
         {
-            if (Thread.CurrentThread == _workerThread)
+            if (_currentThreadId.Value == _workerThreadId)
             {
                 return TryExecuteTask(task);
             }
@@ -86,25 +78,49 @@ namespace ClrCoder.Threading
             return false;
         }
 
+        /// <summary>
+        /// Disposes <c>object</c>.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        private async Task AsyncDisposeImpl()
+        {
+            _cts.Cancel();
+
+            // ReSharper disable once MethodSupportsCancellation
+            await _workerTask;
+        }
+
         private void WorkerThreadProc()
         {
-            _workerThreadCompletionSource.SetResult(Thread.CurrentThread);
+            Debug.Assert(_currentThreadId.Value == null);
             try
             {
-                for (;;)
+                _currentThreadId.Value = Guid.NewGuid();
+                _workerThreadCompletionSource.SetResult(_currentThreadId.Value.Value);
+
+                try
                 {
-                    Task task;
-                    if (_queuedTasks.TryTake(out task, -1, _ct))
+                    for (;;)
                     {
-                        // This is synchronous execution.
-                        bool taskExecuted = TryExecuteTask(task);
-                        Debug.Assert(taskExecuted, "DedicatedThread task have some problem.");
+                        Task dequeuedTask = InterlockedEx.InterlockedUpdate(
+                            ref _queuedTasks,
+                            q => (q.Dequeue(out Task t), t));
+
+                        if (dequeuedTask == null)
+                        {
+                            _newTaskAvailableEvent.Wait(_ct);
+                        }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    // This is normal behavior on scheduler disposing.
+                }
             }
-            catch (OperationCanceledException)
+            finally
             {
-                // This is normal behavior on scheduler disposing.
+                _newTaskAvailableEvent.Dispose();
+                _currentThreadId.Value = null;
             }
         }
     }

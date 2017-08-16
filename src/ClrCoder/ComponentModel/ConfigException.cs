@@ -9,7 +9,7 @@ namespace ClrCoder.ComponentModel
 
     using JetBrains.Annotations;
 
-#if NET46
+#if NETSTANDARD2_0
     using System.Runtime.Serialization;
 #endif
 
@@ -47,7 +47,7 @@ namespace ClrCoder.ComponentModel
         {
         }
 
-#if NET46
+#if NETSTANDARD2_0
 
 /// <summary>
 /// Initializes a new instance of the <see cref="ConfigException"/> class with serialization data.

@@ -5,7 +5,7 @@
 
 namespace ClrCoder
 {
-#if NET46
+#if NETSTANDARD2_0
     using System.Runtime.Serialization;
 #endif
 
@@ -29,7 +29,7 @@ namespace ClrCoder
             CallerInfo = callerInfo;
         }
 
-#if NET46
+#if NETSTANDARD2_0
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CriticalAssertionFaultException"/> class with serialization data.

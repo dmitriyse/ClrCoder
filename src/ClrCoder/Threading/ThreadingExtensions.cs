@@ -206,7 +206,7 @@ namespace ClrCoder.Threading
         {
             return task ?? Task.FromResult(default(T));
         }
-
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
         /// <summary>
         /// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
         /// </summary>
@@ -216,7 +216,20 @@ namespace ClrCoder.Threading
         {
             return task ?? Task.CompletedTask;
         }
-
+#else
+        /// <summary>
+        /// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
+        /// </summary>
+        /// <param name="task">Task that can be null.</param>
+        /// <returns>Always not null awaitable task.</returns>
+        public static async Task GetOrDefault([CanBeNull] this Task task)
+        {
+            if (task != null)
+            {
+                await task;
+            }
+        }
+#endif
         /// <summary>
         /// Gets result of task, from unknown final type task. CoreFX Proposal: https://github.com/dotnet/corefx/issues/17094.
         /// </summary>
@@ -367,6 +380,7 @@ namespace ClrCoder.Threading
             return new WithSyncDetectionFromTaskAwaitable(task.GetAwaiter(), handleDetectionResult);
         }
 
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
         /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
@@ -384,6 +398,7 @@ namespace ClrCoder.Threading
 
             return threadId == Thread.CurrentThread.ManagedThreadId;
         }
+#endif
 
         /// <summary>
         /// Allows awaits on cancellation token.

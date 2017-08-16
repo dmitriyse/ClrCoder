@@ -5,6 +5,7 @@
 
 namespace ClrCoder.Logging.Std
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Linq;
 
@@ -160,4 +161,5 @@ namespace ClrCoder.Logging.Std
             throw new ArgumentException("Log entry should be string, JLogEntry or JObject");
         }
     }
+#endif
 }

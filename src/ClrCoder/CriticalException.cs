@@ -9,7 +9,7 @@ namespace ClrCoder
 
     using JetBrains.Annotations;
 
-#if NET46
+#if NETSTANDARD2_0
     using System.Runtime.Serialization;
 #endif
 
@@ -47,7 +47,7 @@ namespace ClrCoder
         {
         }
 
-#if NET46
+#if NETSTANDARD2_0
 
 /// <summary>
 /// Initializes a new instance of the <see cref="CriticalException"/> class with serialization data.

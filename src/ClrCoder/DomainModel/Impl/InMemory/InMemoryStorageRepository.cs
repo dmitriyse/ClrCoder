@@ -8,6 +8,7 @@
 
 namespace ClrCoder.DomainModel.Impl.InMemory
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
@@ -359,4 +360,5 @@ namespace ClrCoder.DomainModel.Impl.InMemory
             return result;
         }
     }
+#endif
 }

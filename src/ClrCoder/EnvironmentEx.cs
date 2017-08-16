@@ -5,6 +5,7 @@
 
 namespace ClrCoder
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.IO;
 
@@ -55,11 +56,7 @@ namespace ClrCoder
         {
             get
             {
-#if NET46
-                return 244;
-#else
-                return 255;
-#endif
+                return 255; // 244 for .Net Framework 4.6
             }
         }
 
@@ -71,11 +68,7 @@ namespace ClrCoder
         {
             get
             {
-#if NET46
-                return 197;
-#else
-                return 255;
-#endif
+                return 255; // 197 for .Net Framework 4.6
             }
         }
 
@@ -86,11 +79,7 @@ namespace ClrCoder
         {
             get
             {
-#if NET46
-                return 247;
-#else
-                return (OSFamily & OSFamilyTypes.Posix) != 0 ? 4095 : 32739;
-#endif
+                return (OSFamily & OSFamilyTypes.Posix) != 0 ? 4095 : 32739; //247 For .Net Framework 4.6
             }
         }
 
@@ -132,4 +121,5 @@ namespace ClrCoder
             return result;
         }
     }
+#endif
 }

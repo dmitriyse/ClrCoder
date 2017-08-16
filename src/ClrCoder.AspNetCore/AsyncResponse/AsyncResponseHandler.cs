@@ -86,7 +86,6 @@ namespace ClrCoder.AspNetCore.AsyncResponse
         /// <returns>Async execution TPL task.</returns>
         public async Task RequestHandler(HttpContext httpContext)
         {
-            // Exceptions from this method are processed by 
             var ms = new MemoryStream();
             if (_useRequestBodyBuffering)
             {
@@ -186,7 +185,8 @@ namespace ClrCoder.AspNetCore.AsyncResponse
                 _key = key;
             }
 
-            public TaskCompletionSource<(Func<TResponseKey, HttpContext, Task> handler, TimeSpan responseWaitTimeout)> HandlerRegistrationPromise { get; } =
+            public TaskCompletionSource<(Func<TResponseKey, HttpContext, Task> handler, TimeSpan responseWaitTimeout)>
+                HandlerRegistrationPromise { get; } =
                 new TaskCompletionSource<(Func<TResponseKey, HttpContext, Task> handler, TimeSpan responseWaitTimeout)
                 >();
 

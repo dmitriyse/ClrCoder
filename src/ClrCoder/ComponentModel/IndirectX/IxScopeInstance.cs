@@ -5,10 +5,11 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using System;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
+
+    using Threading;
 
     /// <summary>
     /// Scope instance. TODO: Scope should be instance less.
@@ -33,7 +34,7 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// <inheritdoc/>
         protected override Task SelfDispose()
         {
-            return Task.CompletedTask;
+            return TaskEx.CompletedTask;
         }
     }
 }

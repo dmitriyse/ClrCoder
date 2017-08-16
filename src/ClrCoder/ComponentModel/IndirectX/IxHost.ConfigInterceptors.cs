@@ -72,7 +72,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 type =>
                     {
                         // By default no any dispose action required on object.
-                        return obj => Task.CompletedTask;
+                        return async obj => { };
                     });
 
         #region Provider Node Builders

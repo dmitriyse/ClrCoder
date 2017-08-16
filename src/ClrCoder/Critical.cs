@@ -107,10 +107,15 @@ namespace ClrCoder
                     {
                         DefaultAssertionHandler(msg, details, callerInfo);
                     }
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
                     catch (Exception ex)
                     {
                         logger.Critical(_ => _("Critical assertion.").Details(msg).Exception(ex));
                         throw;
+                    }
+#endif
+                    finally
+                    {
                     }
                 };
         }
@@ -118,7 +123,11 @@ namespace ClrCoder
         private static void DefaultAssertionHandler(string message, string detailMessage, CallerInfo callerInfo)
         {
 #if DEBUG
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
             Debug.Assert(false, message, detailMessage);
+#else
+            Debug.Assert(false, message);
+#endif
 #else
             throw new CriticalAssertionFaultException(message, detailMessage, callerInfo);
 #endif

@@ -5,6 +5,7 @@
 
 namespace ClrCoder
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -359,4 +360,5 @@ namespace ClrCoder
                 new ConcurrentDictionary<(Type, string), Action<TObject, TValue>>();
         }
     }
+#endif
 }

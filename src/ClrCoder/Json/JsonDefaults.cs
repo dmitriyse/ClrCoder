@@ -15,10 +15,12 @@ namespace ClrCoder.Json
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
+    using Validation;
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using NodaTime;
     using NodaTime.Serialization.JsonNet;
 
-    using Validation;
+#endif
 
     /// <summary>
     /// Default Json.Net serializer settings for different cases.
@@ -36,9 +38,11 @@ namespace ClrCoder.Json
                 // Ignoring non specified properties from output.
                 settings.NullValueHandling = NullValueHandling.Ignore;
 
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
+
                 // Using IANA tokens for time zones for better compatibility with all world (non only ms-*).
                 settings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
-
+#endif
                 settings.Converters.Add(new StringEnumConverter { CamelCaseText = true });
 
                 return settings;

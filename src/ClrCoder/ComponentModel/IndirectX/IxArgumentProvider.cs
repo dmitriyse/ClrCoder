@@ -10,6 +10,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     /// <summary>
     /// Provider node emulator for special instances (<see cref="IxArgumentInstance"/>) that wraps resolve arguments.
     /// </summary>
@@ -36,7 +38,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         Critical.Assert(false, "Not supported.");
                         return null;
                     },
-                obj => Task.CompletedTask)
+                obj => TaskEx.CompletedTask)
         {
         }
 

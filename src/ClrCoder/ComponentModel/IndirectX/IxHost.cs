@@ -13,6 +13,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     /// <summary>
     /// IndirectX host.
     /// </summary>
@@ -92,7 +94,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                     {
                         Identifier = new IxIdentifier(typeof(IIxHost)),
                         InstanceBuilder = new IxExistingInstanceFactoryConfig<IIxHost>(this),
-                        DisposeHandler = obj => Task.CompletedTask
+                        DisposeHandler = obj => TaskEx.CompletedTask
                     });
 
             Action<IIxProviderNodeConfig, IxProviderNode> buildNodeAction = null;

@@ -5,15 +5,16 @@
 
 namespace ClrCoder.Logging.Std
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Logic;
-
     using NodaTime;
 
     public interface ILogReader
     {
         ValueTask<IReadOnlyList<LogEntry>> GetLogs(Interval<Instant> interval);
     }
+#endif
 }

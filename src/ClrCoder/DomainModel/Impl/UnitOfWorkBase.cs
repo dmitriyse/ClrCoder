@@ -8,6 +8,7 @@
 
 namespace ClrCoder.DomainModel.Impl
 {
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
@@ -171,4 +172,5 @@ namespace ClrCoder.DomainModel.Impl
             Persistence.OnUowDisposed((TUnitOfWork)this);
         }
     }
+#endif
 }

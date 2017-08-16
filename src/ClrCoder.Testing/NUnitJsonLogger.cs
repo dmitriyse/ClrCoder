@@ -16,7 +16,6 @@ namespace ClrCoder.Testing
     using NodaTime;
 
     using NUnit.Framework;
-    using NUnit.Framework.Internal;
 
     using Runtime.Serialization;
 
@@ -28,8 +27,6 @@ namespace ClrCoder.Testing
     public class NUnitJsonLogger : IJsonLogger
     {
         private readonly DateTimeZone _localZone;
-
-        private TestExecutionContext testExecutionContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
@@ -43,7 +40,6 @@ namespace ClrCoder.Testing
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
         /// <param name="asyncHandler">Asynchronous log write handler.</param>
-        /// <param name="context">Test execution context, temporary required to workaround NUnit bug.</param>
         /// <param name="serializerSource">The serializer source.</param>
         public NUnitJsonLogger(
             IAsyncHandler asyncHandler,
@@ -100,6 +96,7 @@ namespace ClrCoder.Testing
                     intent += "    ";
                 }
                 while (curException != null);
+
                 Write(baseIntent);
                 WriteLine(
                     "---------------------------------------------------------------------------------------");

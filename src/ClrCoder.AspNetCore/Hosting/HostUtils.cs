@@ -6,11 +6,13 @@
 namespace ClrCoder.AspNetCore.Hosting
 {
 #pragma warning disable 1998
-#if NET46 || NETSTANDARD1_6
+#if NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.IO;
     using System.Net;
     using System.Threading.Tasks;
+
+    using JetBrains.Annotations;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
@@ -20,6 +22,7 @@ namespace ClrCoder.AspNetCore.Hosting
     /// <summary>
     /// Asp.Net core hosting utils.
     /// </summary>
+    [PublicAPI]
     public static class HostUtils
     {
         /// <summary>
@@ -69,7 +72,7 @@ namespace ClrCoder.AspNetCore.Hosting
                                                                         var errorFeature = context
                                                                             .Features
                                                                             .Get<IExceptionHandlerFeature>();
-                                                                        
+
                                                                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                                                                         if (errorFeature != null)
                                                                         {

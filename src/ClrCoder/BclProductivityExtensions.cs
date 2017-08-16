@@ -15,8 +15,8 @@ namespace ClrCoder
 
     using JetBrains.Annotations;
 
-#if NET46
-    using System.Threading;    
+#if NETSTANDARD2_0
+    using System.Threading;
 #endif
 
     /// <summary>
@@ -195,7 +195,7 @@ namespace ClrCoder
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
         /// <see cref="CriticalException"/>,
-#if NET46 /// <see cref="StackOverflowException"/>,
+#if NETSTANDARD2_0 /// <see cref="StackOverflowException"/>,
 /// <see cref="ThreadAbortException"/>.
 #endif
 
@@ -212,7 +212,7 @@ namespace ClrCoder
             }
 
 #endif
-#if NET46
+#if NETSTANDARD2_0
             if (ex is StackOverflowException 
                 || ex is ThreadAbortException
                 || ex is AppDomainUnloadedException
@@ -220,12 +220,18 @@ namespace ClrCoder
             {
                 return false;
             }
-
-#endif
+            
+            return true;
+#elif NETSTANDARD1_3 || NETSTANDARD1_6
             return !(ex is OutOfMemoryException
                      || ex is CriticalException
                      || ex is BadImageFormatException
                      || ex is InvalidProgramException);
+#else
+            return !(ex is OutOfMemoryException
+                     || ex is CriticalException
+                     || ex is BadImageFormatException);
+#endif
         }
 
         /// <summary>
@@ -381,7 +387,7 @@ namespace ClrCoder
         /// <remarks>
         /// Next exceptions cannot be processed:
         /// <see cref="OutOfMemoryException"/>,
-#if NET46 /// <see cref="StackOverflowException"/>,
+#if NETSTANDARD2_0 /// <see cref="StackOverflowException"/>,
 /// <see cref="ThreadAbortException"/>.
 #endif
 
@@ -390,7 +396,7 @@ namespace ClrCoder
         public static void RethrowUnprocessable([NotNull] this Exception ex)
         {
 #if DEBUG
-#if NET46
+#if NETSTANDARD2_0
             if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException
                 || ex is NotImplementedException)
             {
@@ -404,7 +410,7 @@ namespace ClrCoder
 
 #endif
 #else
-#if NET46
+#if NETSTANDARD2_0
             if (ex is StackOverflowException || ex is OutOfMemoryException || ex is ThreadAbortException)
             {
                 throw ex;

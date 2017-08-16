@@ -10,9 +10,10 @@ namespace ClrCoder
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using NodaTime;
     using NodaTime.Serialization.JsonNet;
-
+#endif
     /// <summary>
     /// Conversion utilities.
     /// </summary>
@@ -27,7 +28,9 @@ namespace ClrCoder
                                            Formatting = Formatting.Indented,
                                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                                        };
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
             DefaultTraceSettings.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+#endif
             DefaultTraceSettings.Converters.Add(new StringEnumConverter { CamelCaseText = false });
         }
 

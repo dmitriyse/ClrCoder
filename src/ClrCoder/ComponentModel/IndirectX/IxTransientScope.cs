@@ -10,6 +10,8 @@ namespace ClrCoder.ComponentModel.IndirectX
 
     using JetBrains.Annotations;
 
+    using Threading;
+
     /// <summary>
     /// Transient dependencies should be bound to this transient scope which in turn bound to root scope.
     /// Transient scopes have unlimited multiplicity.
@@ -34,7 +36,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 (a, b, c, d, e) => { throw new NotImplementedException(); },
-                obj => Task.CompletedTask)
+                obj => TaskEx.CompletedTask)
         {
         }
 

@@ -9,7 +9,6 @@ namespace ClrCoder.Runtime.Serialization
     using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
 
@@ -18,6 +17,10 @@ namespace ClrCoder.Runtime.Serialization
     using MoreLinq;
 
     using Newtonsoft.Json;
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
+    using System.Diagnostics;
+
+#endif
 
     /// <summary>
     /// Data transferring <c>object</c> for <see cref="Exception"/>.
@@ -60,14 +63,18 @@ namespace ClrCoder.Runtime.Serialization
 
                     var dto = dump as ExceptionDto;
 
-                    var stackTrace = new StackTrace(ex, true);
-
                     dto.TypeFullName = ex.GetType().FullName;
                     dto.Message = ex.Message;
                     dto.ToStringOutput = ex.ToString();
-                    dto.StackTrace = stackTrace.GetFrames().Select(StackFrameDto.FromStackFrame).ToList();
                     dto.HResult = ex.HResult;
                     dto.HelpLink = ex.HelpLink;
+
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
+                    var stackTrace = new StackTrace(ex, true);
+                    dto.StackTrace = stackTrace.GetFrames().Select(StackFrameDto.FromStackFrame).ToList();
+#else
+                    dto.StackTrace = ex.StackTrace;
+#endif
 
                     foreach (DictionaryEntry dataentry in ex.Data)
                     {
@@ -125,13 +132,20 @@ namespace ClrCoder.Runtime.Serialization
         [DefaultValue(0)]
         public int HResult { get; set; }
 
+#if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
         /// <summary>
         /// Exception stack trace.
         /// </summary>
         [CanBeNull]
         [ItemNotNull]
         public List<StackFrameDto> StackTrace { get; set; }
-
+#else /// <summary>
+/// Exception stack trace.
+/// </summary>
+        [CanBeNull]
+        [ItemNotNull]
+        public string StackTrace { get; set; }
+#endif
         /// <summary>
         /// Copy of <see cref="Exception.HelpLink"/>.
         /// </summary>

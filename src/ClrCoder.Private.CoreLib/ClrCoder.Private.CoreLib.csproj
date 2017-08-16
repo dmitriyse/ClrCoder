@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>0.3.0</VersionPrefix>
+    <VersionPrefix>0.3.1</VersionPrefix>
     <TargetFramework>netstandard1.0</TargetFramework>
     <PackageReleaseNotes>Private.CoreLib extensions and polyfills corresponding to several CoreFX proposals:
 https://github.com/dotnet/corefx/issues/16626,
@@ -12,10 +12,12 @@ etc.
     <PackageLicenseUrl>https://github.com/dmitriyse/ClrCoder/blob/master/src/ClrCoder.Private.CoreLib/LICENSE.md</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>System</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.0\ClrCoder.Private.CoreLib.xml</DocumentationFile>
@@ -26,7 +28,7 @@ etc.
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="10.1.4" />
+    <PackageReference Include="JetBrains.Annotations" Version="10.2.0" />
     <PackageReference Include="System.Collections" Version="4.0.11" />
   </ItemGroup>
 
