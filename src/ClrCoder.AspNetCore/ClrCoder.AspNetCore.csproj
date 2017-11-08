@@ -27,5 +27,8 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.0.0" />
+    <!--4.4.0 assemblies are required to fight with msb3277-->
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.4.0" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="4.4.0" />  
   </ItemGroup>
 </Project>

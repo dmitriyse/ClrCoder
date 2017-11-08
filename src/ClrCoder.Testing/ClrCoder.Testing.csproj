@@ -15,5 +15,10 @@
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.6.0" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <!--4.4.0 or 2.0.0 assemblies are required to fight with msb3277-->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
+  </ItemGroup>
 
+  
 </Project>
