@@ -218,7 +218,7 @@ namespace ClrCoder.Net.Http
         /// <param name="cancellationToken">Send cancellation token.</param>
         /// <returns></returns>
         public static Task<HttpResponseMessage> PostBytesAsync(
-            this IFlurlClient client,
+            this IFlurlRequest client,
             byte[] content,
             Action<HttpContentHeaders> setHeadersAction = null,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -250,18 +250,18 @@ namespace ClrCoder.Net.Http
             VxArgs.NotNull(url, nameof(url));
             VxArgs.NotNull(content, nameof(content));
 
-            return PostBytesAsync(new FlurlClient(url), content, setHeadersAction, cancellationToken);
+            return PostBytesAsync(new FlurlRequest(url), content, setHeadersAction, cancellationToken);
         }
 
         /// <summary>
         /// Enables request/response dumping to the provided logger.
         /// </summary>
-        /// <param name="flurlClient">Flurl fluent syntax.</param>
+        /// <param name="flurlRequest">Flurl fluent syntax.</param>
         /// <param name="logger">The logger.</param>
         /// <returns></returns>
-        public static IFlurlClient WithDump(this IFlurlClient flurlClient, IJsonLogger logger)
+        public static IFlurlClient WithDump(this IFlurlClient flurlRequest, IJsonLogger logger)
         {
-            return flurlClient.ConfigureClient(
+            return flurlRequest.Configure(
                 client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger));
         }
 
@@ -271,9 +271,12 @@ namespace ClrCoder.Net.Http
         /// <param name="url">Flurl url.</param>
         /// <param name="logger">The logger.</param>
         /// <returns></returns>
-        public static IFlurlClient WithDump(this Url url, IJsonLogger logger)
+        public static IFlurlRequest WithDump(this Url url, IJsonLogger logger)
         {
-            return url.ConfigureClient(client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger));
+            // TODO: Improve me.
+            return new FlurlRequest().WithClient(
+                new FlurlClient().Configure(
+                    client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger)));
         }
 
         private class DumpHandler : DelegatingHandler
@@ -406,9 +409,13 @@ namespace ClrCoder.Net.Http
                 _logger = logger;
             }
 
-            public HttpClient CreateClient(Url url, HttpMessageHandler handler)
+            public HttpClient CreateHttpClient(HttpMessageHandler handler)
             {
-                return new HttpClient(new FlurlMessageHandler(handler));
+                // Default implementation.
+                var httpClient = new HttpClient(handler);
+                TimeSpan infiniteTimeSpan = Timeout.InfiniteTimeSpan;
+                httpClient.Timeout = infiniteTimeSpan;
+                return httpClient;
             }
 
             public HttpMessageHandler CreateMessageHandler()
