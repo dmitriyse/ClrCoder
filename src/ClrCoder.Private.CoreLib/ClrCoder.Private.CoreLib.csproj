@@ -14,7 +14,13 @@ etc.
     <RepositoryUrl>https://github.com/dmitriyse/ClrCoder</RepositoryUrl>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <RootNamespace>System</RootNamespace>
+    <FrameworkPathOverride Condition=" '$(OS)' != 'Windows_NT' ">$(NuGetPackageRoot)\microsoft.targetingpack.netframework.v4.6.1\1.0.1\lib\net461\</FrameworkPathOverride>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(OS)' != 'Windows_NT' ">
+    <PackageReference Include="Microsoft.TargetingPack.NETFramework.v4.6.1" Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
