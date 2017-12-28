@@ -5,16 +5,12 @@
 
 namespace ClrCoder.ComponentModel.IndirectX
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// Base configuration for any provider node.
     /// </summary>
-    /// <remarks>
-    /// TODO: Implement freezable behavior.
-    /// </remarks>
-    public class IxProviderNodeConfig : IIxProviderNodeConfig, IFreezable<IxProviderNodeConfig>, IFreezable
+    public class IxProviderNodeConfig : IIxProviderNodeConfig
     {
         /// <inheritdoc/>
         public virtual IxIdentifier? Identifier { get; set; }
@@ -31,23 +27,5 @@ namespace ClrCoder.ComponentModel.IndirectX
 
         /// <inheritdoc/>
         public virtual IIxVisibilityFilterConfig ExportFilter { get; set; }
-
-        /// <inheritdoc/>
-        public virtual bool IsImmutable { get; protected set; }
-
-        /// <inheritdoc/>
-        public bool IsShallowImmutable => IsImmutable;
-
-        /// <inheritdoc/>
-        public void Freeze()
-        {
-            // TODO: Implement me.
-        }
-
-        /// <inheritdoc/>
-        public void ShallowFreeze()
-        {
-            throw new NotSupportedException("User Freeze instead.");
-        }
     }
 }

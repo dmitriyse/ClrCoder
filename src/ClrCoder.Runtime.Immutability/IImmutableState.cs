@@ -6,9 +6,22 @@
 namespace System
 {
     /// <summary>
-    /// Alias for <see cref="IImmutableState{object}"/> provides immutability state of all parts/aspect of an instance.
+    /// Contract that controls immutability of hole instance.
     /// </summary>
-    public interface IImmutableState : IImmutableState<object>
+    public interface IImmutableState
     {
+        /// <summary>
+        /// State of the object or the aspect of the object.
+        /// </summary>
+        ImmutableStates State { get; }
+
+        /// <summary>
+        /// On validation assumes that part/aspect of object is immutable.
+        /// </summary>
+        /// <param name="onlyShallowImmutable">
+        /// If the argument is true, than assumption is made only on shallow immutability,
+        /// otherwise assumption will been maden on full immutability.
+        /// </param>
+        void AssumeImmutable(bool onlyShallowImmutable = false);
     }
 }

@@ -12,7 +12,11 @@ namespace System
     /// frozen.
     /// </summary>
     [PublicAPI]
-    public interface IFreezable : IFreezable<object>
+    public interface IFreezable: IImmutableState
     {
+        /// <summary>
+        /// Deeply freezes part/aspect of an instance.
+        /// </summary>
+        void Freeze(bool shallowOnly = false);
     }
 }

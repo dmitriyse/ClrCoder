@@ -15,13 +15,17 @@ namespace System
     public interface IImmutableState<out T>
     {
         /// <summary>
-        /// Shows if part/state of an instance is deeply immutable.
+        /// State of the object or the aspect of the object.
         /// </summary>
-        bool IsImmutable { get; }
+        ImmutableStates State { get; }
 
         /// <summary>
-        /// Shows if part/state of an instance is shallow immutable.
+        /// On validation assumes that part/aspect of object is immutable.
         /// </summary>
-        bool IsShallowImmutable { get; }
+        /// <param name="onlyShallowImmutable">
+        /// If the argument is true, than assumption is made only on shallow immutability,
+        /// otherwise assumption will been maden on full immutability.
+        /// </param>
+        void AssumeImmutable(bool onlyShallowImmutable = false);
     }
 }

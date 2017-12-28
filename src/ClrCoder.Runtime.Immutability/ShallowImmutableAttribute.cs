@@ -12,7 +12,8 @@ namespace System
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.ReturnValue | AttributeTargets.Interface
-        | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
+        | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
+        AllowMultiple = true)]
     [PublicAPI]
     public class ShallowImmutableAttribute : Attribute
     {
@@ -22,7 +23,7 @@ namespace System
         /// <param name="type">The type of part/aspect of an instance that is/should be shallow immutable.</param>
         public ShallowImmutableAttribute(Type type = null)
         {
-            Type = type ?? typeof(object);
+            Type = type;
         }
 
         /// <summary>

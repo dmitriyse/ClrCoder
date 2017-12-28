@@ -14,11 +14,6 @@ namespace System
         /// <summary>
         /// Deeply freezes part/aspect of an instance.
         /// </summary>
-        void Freeze();
-
-        /// <summary>
-        /// Freezes only object itself but not a references.
-        /// </summary>
-        void ShallowFreeze();
+        void Freeze(bool shallowOnly);
     }
 }

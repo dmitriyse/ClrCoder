@@ -7,7 +7,6 @@ namespace ClrCoder
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
 
     [Immutable]
     public class UPath
@@ -20,34 +19,79 @@ namespace ClrCoder
 
         private readonly string _uniformPath;
 
-        public UPath(string uniformPath)
+        public UPath(string path, UPathParseMode parseMode = UPathParseMode.AllowIncorrectFormat)
         {
-            if (uniformPath == null)
+            if (path == null)
             {
-                throw new ArgumentNullException(nameof(uniformPath));
+                throw new ArgumentNullException(nameof(path));
             }
 
-            uniformPath = uniformPath.Trim();
+            ParseUPathInternal(path, parseMode, true, out _drive, out _uniformPath);
+        }
 
-            if (uniformPath.Length >= 2 && uniformPath[1] == ':')
+        private UPath(string uniformPath, char? drive)
+        {
+            _uniformPath = uniformPath;
+            _drive = drive;
+        }
+
+        public char? Drive => _drive;
+
+        public string Path => _uniformPath;
+
+        public static bool TryParse(string path, UPathParseMode parseMode, out UPath uPath)
+        {
+            if (path == null)
             {
-                _drive = char.ToUpperInvariant(uniformPath[0]);
+                throw new ArgumentNullException(nameof(path));
+            }
 
-                if (!ValidDriveChars.Contains(_drive.Value))
+            if (ParseUPathInternal(path, parseMode, false, out char? drive, out string uniformPath))
+            {
+                uPath = new UPath(uniformPath, drive);
+                return true;
+            }
+
+            uPath = null;
+            return false;
+        }
+
+        private static bool ParseUPathInternal(
+            string path,
+            UPathParseMode parseMode,
+            bool throwFormatException,
+            out char? drive,
+            out string uniformPath)
+        {
+            path = path.Trim();
+            drive = null;
+
+            if ((path.Length >= 2) && (path[1] == ':'))
+            {
+                drive = char.ToUpperInvariant(path[0]);
+
+                if (!ValidDriveChars.Contains(drive.Value))
                 {
-                    throw new UPathFormatException($"Invalid drive char: {_drive}");
+                    if (throwFormatException)
+                    {
+                        throw new UPathFormatException($"Invalid drive char: {drive}");
+                    }
+
+                    uniformPath = null;
+                    return false;
                 }
 
-                uniformPath = uniformPath.Substring(2, uniformPath.Length - 2);
+                path = path.Substring(2, path.Length - 2);
             }
 
             // TODO: Parse and validate.
-            _uniformPath = uniformPath.Replace("\\", "/");
+            uniformPath = path.Replace("\\", "/");
+            return true;
         }
 
         public string ToPlatformPath()
         {
-            if (Path.DirectorySeparatorChar == '/')
+            if (System.IO.Path.DirectorySeparatorChar == '/')
             {
                 return ToUnixPath();
             }
@@ -58,33 +102,33 @@ namespace ClrCoder
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (_drive != null)
+            if (Drive != null)
             {
-                return $"{_drive}:{_uniformPath}";
+                return $"{Drive}:{Path}";
             }
 
-            return _uniformPath;
+            return Path;
         }
 
         public string ToUnixPath()
         {
             // TODO: Remove drive path.
-            return _uniformPath;
+            return Path;
         }
 
         public string ToWindowsPath()
         {
-            if (_drive != null)
+            if (Drive != null)
             {
-                return $"{_drive}:{_uniformPath.Replace("/", "\\")}";
+                return $"{Drive}:{Path.Replace("/", "\\")}";
             }
 
-            if (_uniformPath.StartsWith("/"))
+            if (Path.StartsWith("/"))
             {
-                return $"C:{_uniformPath.Replace("/", "\\")}";
+                return $"C:{Path.Replace("/", "\\")}";
             }
 
-            return _uniformPath.Replace("/", "\\");
+            return Path.Replace("/", "\\");
         }
     }
 }

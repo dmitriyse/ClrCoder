@@ -10,24 +10,15 @@ namespace System
     /// <summary>
     /// Annotate that target should be shallow immutable.
     /// </summary>
-    [AttributeUsage(
-        AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.ReturnValue | AttributeTargets.Interface
-        | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter)]
     [PublicAPI]
-    public class ImmutableAttribute : Attribute
+    public class ImmutableAttribute : ShallowImmutableAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableAttribute"/> class.
         /// </summary>
-        /// <param name="type">The type of part/aspect of an instance that is/should be shallow immutable.</param>
-        public ImmutableAttribute(Type type = null)
+        /// <param name="scope">The type of part/aspect of an instance that is/should be shallow immutable. null means whole object.</param>
+        public ImmutableAttribute(Type scope = null): base(scope)
         {
-            Type = type ?? typeof(object);
         }
-
-        /// <summary>
-        /// The type of part/aspect of an instance that is/should be shallow immutable.
-        /// </summary>
-        public Type Type { get; }
     }
 }

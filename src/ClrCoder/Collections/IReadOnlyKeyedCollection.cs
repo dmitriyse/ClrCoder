@@ -7,8 +7,11 @@ namespace ClrCoder.Collections
 {
     using System.Collections.Generic;
 
+    using ObjectModel;
+
     public interface IReadOnlyKeyedCollection<TKey, TItem> : IReadOnlyDictionaryEx<TKey, TItem>,
                                                              IReadOnlyCollection<TItem>
+        where TItem : IKeyed<TKey>
     {
         new int Count { get; }
 
