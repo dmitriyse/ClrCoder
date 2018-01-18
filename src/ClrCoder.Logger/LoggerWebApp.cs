@@ -45,7 +45,7 @@ namespace ClrCoder.Logging
         {
             Log = new ClassJsonLogger<LoggerWebApp>(logger);
 
-            LoggerExtensions.Info(Log, _ => _("Starting Asp.Net core..."));
+            Log.Info(_ => _("Starting Asp.Net core..."));
             _webHost = webHostBuilder
 
                 // Should be removed after adoption IndirectX to Asp.Net core.
@@ -67,8 +67,7 @@ namespace ClrCoder.Logging
             foreach (string addressesFeatureAddress in addressesFeature.Addresses)
             {
                 addresses.Add(addressesFeatureAddress);
-                LoggerExtensions.Info(
-                    Log,
+                Log.Info(
                     addressesFeatureAddress,
                     (_, addr) => _($"Now listening on: {addr}").Data(new { ListenAddress = addr }));
             }
@@ -86,9 +85,9 @@ namespace ClrCoder.Logging
         {
             try
             {
-                LoggerExtensions.Trace(Log, _ => _("Waiting Asp.Net core shutdown..."));
+                Log.Trace(_ => _("Waiting Asp.Net core shutdown..."));
                 _webHost.Dispose();
-                LoggerExtensions.Info(Log, _ => _("Asp.Net core shutdown completed"));
+                Log.Info(_ => _("Asp.Net core shutdown completed"));
             }
             catch (Exception ex) when (ex.IsProcessable())
             {
