@@ -388,11 +388,16 @@ namespace ClrCoder.Threading
                 {
                     try
                     {
+                        if (_ct.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
                         action = _workItems.Take(_ct);
                     }
                     catch (OperationCanceledException)
                     {
-                        break;
+                        continue;
                     }
                 }
 

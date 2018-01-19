@@ -28,6 +28,8 @@ namespace ClrCoder.Testing
     {
         private readonly DateTimeZone _localZone;
 
+        private DedicatedThreadWorker _worker;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NUnitJsonLogger"/> class.
         /// </summary>
@@ -103,16 +105,75 @@ namespace ClrCoder.Testing
             }
         }
 
+        /// <summary>
+        /// Binds test to logger.
+        /// </summary>
+        /// <returns>The unbind token.</returns>
+        public IDisposable BindToTest()
+        {
+            if (_worker != null)
+            {
+                throw new InvalidOperationException("Logger already bound to some test.");
+            }
+
+            _worker = new DedicatedThreadWorker();
+
+            return new TestUnbounder(this);
+        }
+
         private void Write(string msg)
         {
-            TestContext.Write(msg);
-            TestContext.Progress.Write(msg);
+            if (_worker == null)
+            {
+                TestContext.Write(msg);
+                TestContext.Progress.Write(msg);
+            }
+            else
+            {
+                _worker.RunAsync(
+                    () =>
+                        {
+                            TestContext.Write(msg);
+                            TestContext.Progress.Write(msg);
+                        });
+            }
         }
 
         private void WriteLine(string msg)
         {
-            TestContext.WriteLine(msg);
-            TestContext.Progress.WriteLine(msg);
+            if (_worker == null)
+            {
+                TestContext.WriteLine(msg);
+                TestContext.Progress.WriteLine(msg);
+            }
+            else
+            {
+                _worker.RunAsync(
+                    () =>
+                        {
+                            TestContext.WriteLine(msg);
+                            TestContext.Progress.WriteLine(msg);
+                        });
+            }
+        }
+
+        private class TestUnbounder : IDisposable
+        {
+            private readonly NUnitJsonLogger _owner;
+
+            public TestUnbounder(NUnitJsonLogger owner)
+            {
+                _owner = owner;
+            }
+
+            public void Dispose()
+            {
+                if (_owner._worker != null)
+                {
+                    _owner._worker.Dispose();
+                    _owner._worker = null;
+                }
+            }
         }
     }
 }
