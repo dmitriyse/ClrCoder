@@ -57,7 +57,7 @@ namespace ClrCoder.Tests.Net.Http
                 using (HostUtils.HostController<TestFlurlController>(host))
                 {
                     string response = await new Url(dnsOrIp).AppendPathSegment(pathSegment).GetAsync().ReceiveString();
-                    if (pathSegment == "Flurl" && host == "http://localhost:5062")
+                    if ((pathSegment == "Flurl") && (host == "http://localhost:5062"))
                     {
                         response.Should().BeEquivalentTo("Hello");
                     }
@@ -78,7 +78,7 @@ namespace ClrCoder.Tests.Net.Http
                     ex.IsDnsResolveError().Should().Be(false);
                 }
 
-                if (dnsOrIp == "http://10.110.110.110/" || dnsOrIp == "http://46.20.65.243:22222/")
+                if ((dnsOrIp == "http://10.110.110.110/") || (dnsOrIp == "http://46.20.65.243:22222/"))
                 {
                     ex.IsIpNotAvailable().Should().Be(true);
                 }
@@ -92,13 +92,18 @@ namespace ClrCoder.Tests.Net.Http
         [Test]
         public async Task SendJsonAsyncWithDumpTest()
         {
-            var data = new MethodInfoDto { Name = "name", TypeFullName = "fullname" };
+            var data = new MethodInfoDto
+                           {
+                               Name = "name",
+                               TypeFullName = "fullname"
+                           };
 
             IJsonLogger logger = new NUnitJsonLogger(SyncHandler.Instance);
 
             using (HostUtils.HostController<TestFlurlController>("http://localhost:5062"))
             {
-                string response = await new Url("http://localhost:5062").AppendPathSegment("Flurl")
+                string response = await new Url("http://localhost:5062")
+                                      .AppendPathSegment("Flurl")
                                       .WithDump(logger)
                                       .PostJsonAsync(data)
                                       .ReceiveString();

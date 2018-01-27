@@ -5,7 +5,6 @@
 
 namespace ClrCoder.Threading
 {
-    using System;
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
@@ -19,15 +18,15 @@ namespace ClrCoder.Threading
         /// <summary>
         /// Enters into work blocker section. Section where new work items cannot be created.
         /// </summary>
-        /// <param name="debugInfo">Work blocker debug information.</param>
-        /// <param name="filePath">Enter place source code file path.</param>
-        /// <param name="memberName">Enter place member name.</param>
-        /// <param name="lineNumber">Enter place line number.</param>
+        /// <param name="debugInfo">The work blocker debug information.</param>
+        /// <param name="filePath">The source code file path of the work blocker section enter.</param>
+        /// <param name="memberName">The class member name of the work blocker section enter.</param>
+        /// <param name="lineNumber">The line number of the work blocker section enter.</param>
         /// <remarks>
         /// Once work item exits from a first blocker section, new work item is created.
         /// </remarks>
-        /// <returns>Work blocker exit token.</returns>
-        IDisposable EnterWorkBlocker(
+        /// <returns>The work blocker exit token.</returns>
+        ActiveWorkerBlockerToken EnterWorkBlocker(
             string debugInfo = "",
             [CallerFilePath] string filePath = null,
             [CallerMemberName] string memberName = null,

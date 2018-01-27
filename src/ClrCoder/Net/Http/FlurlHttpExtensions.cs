@@ -39,17 +39,17 @@ namespace ClrCoder.Net.Http
         public static bool IsCertificateError(this FlurlHttpException flurlException)
         {
             // core
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException?.InnerException?.Message ==
-                "A security error occurred")
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException?.InnerException?.Message ==
+                    "A security error occurred"))
             {
                 return true;
             }
 
             // net 4.6
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
                 && (flurlException.InnerException?.InnerException?.Message?.Contains("A security error occurred")
                     ?? false)
                 && (flurlException.InnerException?.InnerException?.InnerException?.Message?.Contains("handshake failed")
@@ -59,8 +59,8 @@ namespace ClrCoder.Net.Http
             }
 
             // Linux
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
                 && (flurlException.InnerException?.InnerException?.Message?.Contains("SSL") ?? false))
             {
                 return true;
@@ -82,18 +82,18 @@ namespace ClrCoder.Net.Http
             }
 
             // net 4.6
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException.InnerException.Message != null
-                && flurlException.InnerException.InnerException.Message.StartsWith(
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException.InnerException.Message != null)
+                && flurlException.InnerException.InnerException.Message.Contains(
                     "remote name could not be resolved"))
             {
                 return true;
             }
 
             // core
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
                 && (flurlException.InnerException?.InnerException?.Message?.Contains(
                         "server name or address could not be resolved") ?? false))
             {
@@ -101,9 +101,9 @@ namespace ClrCoder.Net.Http
             }
 
             // Linux
-            return flurlException.Call.Response == null
-                   && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                   && flurlException.InnerException?.InnerException?.Message != null
+            return (flurlException.Call.Response == null)
+                   && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                   && (flurlException.InnerException?.InnerException?.Message != null)
                    && flurlException.InnerException.InnerException.Message.Contains("resolve host name");
         }
 
@@ -121,10 +121,10 @@ namespace ClrCoder.Net.Http
             }
 
             // net 4.6 does not exist IP
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException.InnerException.InnerException != null
-                && flurlException.InnerException?.InnerException?.Message == "Unable to connect to the remote server"
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException.InnerException.InnerException != null)
+                && (flurlException.InnerException?.InnerException?.Message == "Unable to connect to the remote server")
                 && flurlException.InnerException.InnerException.InnerException.Message.StartsWith(
                     "A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond")
             )
@@ -133,10 +133,10 @@ namespace ClrCoder.Net.Http
             }
 
             // net 4.6 locked IP
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException.InnerException.InnerException != null
-                && flurlException.InnerException?.InnerException?.Message == "Unable to connect to the remote server"
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException.InnerException.InnerException != null)
+                && (flurlException.InnerException?.InnerException?.Message == "Unable to connect to the remote server")
                 && flurlException.InnerException.InnerException.InnerException.Message.StartsWith(
                     "No connection could be made because the target machine actively refused it"))
             {
@@ -144,19 +144,19 @@ namespace ClrCoder.Net.Http
             }
 
             // core does not exist IP
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException?.InnerException?.Message ==
-                "The operation timed out")
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException?.InnerException?.Message ==
+                    "The operation timed out"))
             {
                 return true;
             }
 
             // core locked IP
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException?.InnerException?.Message ==
-                "A connection with the server could not be established")
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException?.InnerException?.Message ==
+                    "A connection with the server could not be established"))
             {
                 return true;
             }
@@ -168,10 +168,10 @@ namespace ClrCoder.Net.Http
             // A task was canceled.
 
             // Linux locked IP
-            if (flurlException.Call.Response == null
-                && flurlException.InnerException?.GetType() == typeof(HttpRequestException)
-                && flurlException.InnerException?.InnerException?.Message ==
-                "Couldn't connect to server")
+            if ((flurlException.Call.Response == null)
+                && (flurlException.InnerException?.GetType() == typeof(HttpRequestException))
+                && (flurlException.InnerException?.InnerException?.Message ==
+                    "Couldn't connect to server"))
             {
                 return true;
             }
@@ -273,8 +273,7 @@ namespace ClrCoder.Net.Http
         /// <returns></returns>
         public static IFlurlRequest WithDump(this Url url, IJsonLogger logger)
         {
-            // TODO: Improve me.
-            return new FlurlRequest().WithClient(
+            return new FlurlRequest(url).WithClient(
                 new FlurlClient().Configure(
                     client => client.HttpClientFactory = new HttpClientWithDumpingFactory(logger)));
         }
@@ -316,14 +315,22 @@ namespace ClrCoder.Net.Http
                     {
                         Log.Error(
                             _ => _($"Error dumping request content: {requestDump.Method} {requestDump.Url}")
-                                .Data(new { RequestDump = requestDump })
+                                .Data(
+                                    new
+                                        {
+                                            RequestDump = requestDump
+                                        })
                                 .Exception(ex));
                     }
                     else
                     {
                         Log.Error(
                             _ => _($"Error dumping request: {requestDump.Method} {requestDump.Url}")
-                                .Data(new { RequestDump = requestDump })
+                                .Data(
+                                    new
+                                        {
+                                            RequestDump = requestDump
+                                        })
                                 .Exception(ex));
                     }
 
@@ -332,7 +339,12 @@ namespace ClrCoder.Net.Http
 
                 Log.Trace(
                     _ => _($"Client http request started: {requestDump.Method} {requestDump.Url}")
-                        .Data(new { RequestDump = requestDump, ClientRequestId = id }));
+                        .Data(
+                            new
+                                {
+                                    RequestDump = requestDump,
+                                    ClientRequestId = id
+                                }));
 
                 HttpResponseMessage response;
                 try
@@ -346,7 +358,11 @@ namespace ClrCoder.Net.Http
                 {
                     Log.Error(
                         _ => _($"Client http request error. ({requestDump.Method} {requestDump.Url})")
-                            .Data(new { ClientRequestId = id })
+                            .Data(
+                                new
+                                    {
+                                        ClientRequestId = id
+                                    })
                             .Exception(ex));
                     throw;
                 }
@@ -373,7 +389,12 @@ namespace ClrCoder.Net.Http
                         Log.Error(
                             _ => _(
                                     $"Error dumping response content: {requestDump.Method} {requestDump.Url} -> {response.StatusCode} {response.ReasonPhrase}")
-                                .Data(new { ResponseDump = responseDump, ClientResponseId = id })
+                                .Data(
+                                    new
+                                        {
+                                            ResponseDump = responseDump,
+                                            ClientResponseId = id
+                                        })
                                 .Exception(ex));
                     }
                     else
@@ -381,7 +402,12 @@ namespace ClrCoder.Net.Http
                         Log.Error(
                             _ => _(
                                     $"Error dumping response: {requestDump.Method} {requestDump.Url} -> {response.StatusCode} {response.ReasonPhrase}")
-                                .Data(new { ResponseDump = responseDump, ClientResponseId = id })
+                                .Data(
+                                    new
+                                        {
+                                            ResponseDump = responseDump,
+                                            ClientResponseId = id
+                                        })
                                 .Exception(ex));
                     }
 
@@ -391,7 +417,12 @@ namespace ClrCoder.Net.Http
                 Log.Trace(
                     _ => _(
                             $"Response received: {requestDump.Method} {requestDump.Url} -> {responseDump.StatusCode} {responseDump.ReasonPhrase}")
-                        .Data(new { ResponseDump = responseDump, ClientResponseId = id }));
+                        .Data(
+                            new
+                                {
+                                    ResponseDump = responseDump,
+                                    ClientResponseId = id
+                                }));
 
                 return response;
             }

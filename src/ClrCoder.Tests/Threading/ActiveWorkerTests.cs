@@ -33,8 +33,9 @@ namespace ClrCoder.Tests.Threading
             var allWorkItems = new HashSet<IActiveWorkItem>();
             TextWriter writer = TestContext.Out;
             var activeWorker = new ActiveWorker(
-                async workItem =>
+                async (workItem, initialBlockerToken) =>
                     {
+                        initialBlockerToken.Dispose();
                         lock (allWorkItems)
                         {
                             allWorkItems.Add(workItem);
@@ -50,21 +51,22 @@ namespace ClrCoder.Tests.Threading
                         ////          ~~---XX
                         ////            ~~---XX
                         //// ====================>t
-                        // Estimated speed is 2 task in 350ms
+                        // Estimated speed is 2 task in 450ms
                         await Task.Delay(150);
 
                         using (workItem.EnterWorkBlocker())
                         {
                             await Task.Delay(100);
                         }
-                    });
+                    },
+                TimeSpan.FromMilliseconds(100));
 
             var delayMilliseconds = 5000;
             await activeWorker.AsyncUsing(
                 async w => { await Task.Delay(delayMilliseconds); });
 
             var expectedAsymptotically = (int)Math.Round(
-                (delayMilliseconds * 2) / 350.0,
+                (delayMilliseconds * 2) / 450.0,
                 MidpointRounding.AwayFromZero);
             var maxDelta = 5;
             writer.WriteLine($"Total executed work items = {allWorkItems.Count}");
