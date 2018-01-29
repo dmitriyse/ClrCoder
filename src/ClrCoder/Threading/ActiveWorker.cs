@@ -219,9 +219,18 @@ namespace ClrCoder.Threading
                     // It's allowed to not dispose initial blocker.
                     if ((workItem.Blockers.Count == 1) && workItem.Blockers.First().IsInitialBlocker)
                     {
+                        var blocker = workItem.Blockers.First();
+                        
                         // Disposing last initial blocker.
-                        workItem.Blockers.Remove(workItem.Blockers.First());
-                        _workBlockers.Remove(workItem.Blockers.First());
+                        workItem.Blockers.Remove(blocker);
+                        _workBlockers.Remove(blocker);
+
+                        // Scheduling next work item after some grace period.
+                        if (!_workBlockers.Any() && !IsShutdownStarted)
+                        {
+                            // Raising event for starting new work item.
+                            _noMoreBlockersEvent.Set();
+                        }
                     }
                     else
                     {
