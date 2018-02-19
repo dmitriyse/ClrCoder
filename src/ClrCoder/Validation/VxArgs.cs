@@ -124,6 +124,22 @@ namespace ClrCoder.Validation
         }
 
         /// <summary>
+        /// Validates argument string is not empty.
+        /// </summary>
+        /// <param name="str">The string to validate.</param>
+        /// <param name="name">The name of the argument.</param>
+        public static void CanBeNullButNotWhiteSpace([CanBeNull]string str, [InvokerParameterName] string name)
+        {
+            if (str != null)
+            {
+                if (string.IsNullOrWhiteSpace(str))
+                {
+                    throw new ArgumentException($"{name} should not be an empty or whitespace string.", name);
+                }
+            }
+        }
+
+        /// <summary>
         /// Validates that the specified value not equals to the default value.
         /// </summary>
         /// <typeparam name="T">The type of the value to validate.</typeparam>
