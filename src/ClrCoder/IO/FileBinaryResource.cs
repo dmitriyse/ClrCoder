@@ -12,6 +12,8 @@ namespace ClrCoder.IO
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
 #if NETSTANDARD2_0
     using Mono.Unix;
     using Mono.Unix.Native;
@@ -19,12 +21,17 @@ namespace ClrCoder.IO
 
     using Validation;
 
+    //// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
+
     /// <summary>
     /// The local file binary resource.
     /// </summary>
+    [PublicAPI]
     public class FileBinaryResource : IBinaryResource
     {
-        private static readonly bool UseSyscall = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        //// ReSharper disable once IdentifierTypo
+        private static readonly bool MmapAvailable = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                                                     || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         private readonly string _fullFilePath;
 
@@ -32,7 +39,6 @@ namespace ClrCoder.IO
         /// Initializes a new instance of the <see cref="FileBinaryResource"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="useCopyForMemoryAccess">Shows that ReadMemory should be performed through copy file content to the memory.</param>
         public FileBinaryResource(UPath filePath)
         {
             VxArgs.NotNull(filePath, nameof(filePath));
@@ -46,6 +52,14 @@ namespace ClrCoder.IO
             }
         }
 
+        //// ReSharper disable once IdentifierTypo
+        //// ReSharper disable once CommentTypo
+
+        /// <summary>
+        /// Allows to use mmap directly.
+        /// </summary>
+        public static bool AllowUseMmap { get; set; } = true;
+
         /// <inheritdoc/>
         public virtual Task ReadFromFile(Func<string, Task> readProc)
         {
@@ -58,7 +72,7 @@ namespace ClrCoder.IO
         {
             VxArgs.NotNull(readProc, nameof(readProc));
 #if NETSTANDARD2_0
-            if (UseSyscall)
+            if (MmapAvailable && AllowUseMmap)
             {
                 var fileId = Syscall.open(_fullFilePath, OpenFlags.O_RDONLY);
                 VerifyUnixSuccess(fileId);
@@ -103,15 +117,25 @@ namespace ClrCoder.IO
                 {
                     using (var mmv = mmf.CreateViewAccessor(0L, 0L, MemoryMappedFileAccess.Read))
                     {
-                        IntPtr mmfDataPtr;
-                        unsafe
+                        using (var handle = mmv.SafeMemoryMappedViewHandle)
                         {
-                            byte* mmfData = (byte*)IntPtr.Zero;
-                            mmv.SafeMemoryMappedViewHandle.AcquirePointer(ref mmfData);
-                            mmfDataPtr = (IntPtr)mmfData;
-                        }
+                            IntPtr mmfDataPtr;
+                            unsafe
+                            {
+                                byte* mmfData = (byte*)IntPtr.Zero;
+                                handle.AcquirePointer(ref mmfData);
+                                mmfDataPtr = (IntPtr)mmfData;
+                            }
 
-                        await readProc(mmfDataPtr, mmv.Capacity);
+                            try
+                            {
+                                await readProc(mmfDataPtr, mmv.Capacity);
+                            }
+                            finally
+                            {
+                                handle.ReleasePointer();
+                            }
+                        }
                     }
                 }
             }
