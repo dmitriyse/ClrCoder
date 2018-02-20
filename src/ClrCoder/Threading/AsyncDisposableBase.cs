@@ -37,24 +37,18 @@ namespace ClrCoder.Threading
 
         private bool _isActualDisposeCalled;
 
+        private int _usageCounter;
+
         [CanBeNull]
         private Exception _lastError;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AsyncDisposableBase"/> class.
-        /// </summary>
-        protected AsyncDisposableBase()
-            : this(new object())
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncDisposableBase"/> class with synchronization root object.
         /// </summary>
         /// <param name="disposeSyncRoot">Synchronization root.</param>
-        protected AsyncDisposableBase(object disposeSyncRoot)
+        protected AsyncDisposableBase([CanBeNull]object disposeSyncRoot = null)
         {
-            DisposeSyncRoot = disposeSyncRoot;
+            DisposeSyncRoot = disposeSyncRoot ?? new object();
         }
 
         /// <inheritdoc/>
@@ -92,6 +86,7 @@ namespace ClrCoder.Threading
 
         /// <summary>
         /// Dispose synchronization root.
+        /// TODO: Rename to LifetimeSyncRoot
         /// </summary>
         public object DisposeSyncRoot { get; }
 
@@ -131,7 +126,31 @@ namespace ClrCoder.Threading
                 }
             }
 
-            return Disposed;
+            Task disposed = Disposed;
+
+            Debug.Assert(disposed != null, "disposed != null");
+
+            return disposed;
+        }
+
+        /// <summary>
+        /// Decreases usage counter. Dispose only allowed when usage counter is zero.
+        /// </summary>
+        protected void DecreaseUsageCounter()
+        {
+            lock (DisposeSyncRoot)
+            {
+                if (_usageCounter == 0)
+                {
+                    throw new InvalidOperationException(
+                        "You cannot decrease usage counter because it's already equals to zero.");
+                }
+
+                if (--_usageCounter == 0)
+                {
+                    SetDisposeSuspended(false);
+                }
+            }
         }
 
         /// <summary>
@@ -139,6 +158,20 @@ namespace ClrCoder.Threading
         /// </summary>
         /// <returns>Async execution TPL task.</returns>
         protected abstract Task DisposeAsyncCore();
+
+        /// <summary>
+        /// Increases usage counter. Dispose only allowed when usage counter is zero.
+        /// </summary>
+        protected void IncreaseUsageCounter()
+        {
+            lock (DisposeSyncRoot)
+            {
+                if (_usageCounter++ == 0)
+                {
+                    SetDisposeSuspended(true);
+                }
+            }
+        }
 
         /// <summary>
         /// Allows to handle dispose started event.
@@ -154,8 +187,19 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Fancy way to control usages with c# using operator.
+        /// </summary>
+        /// <returns>The dispose token.</returns>
+        protected UsageDecrementToken RegisterUsage()
+        {
+            IncreaseUsageCounter();
+            return new UsageDecrementToken(this);
+        }
+
+        /// <summary>
         /// Allow to suspend actual call to <see cref="DisposeAsyncCore"/>. If StartDispose called while in suspended state, actual
-        /// dispose process will not begins untl suspend turn off. It' is impossible to turn on suspend state if DisposeAsyncCore was
+        /// dispose process will not begins untl suspend turn off. It' is impossible to turn on suspend state if DisposeAsyncCore
+        /// was
         /// already called.
         /// </summary>
         /// <remarks>This method can be called as many times as required until actual dispose was started.</remarks>
@@ -170,6 +214,12 @@ namespace ClrCoder.Threading
             // ----------------------------------
             lock (DisposeSyncRoot)
             {
+                if (_usageCounter != 0)
+                {
+                    throw new InvalidOperationException(
+                        "You cannot directly control suspended state if usage counter is non zero.");
+                }
+
                 // -------Implicit memory barrier here-----------
                 if (isDisposeSuspended && _isActualDisposeCalled)
                 {
@@ -232,8 +282,8 @@ namespace ClrCoder.Threading
                 {
                     // We are still under lock here.
                     Debug.Assert(
-                        _disposeTask == null
-                        || _disposeCompletionSource != null && _disposeTask == _disposeCompletionSource.Task,
+                        (_disposeTask == null)
+                        || ((_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task)),
                         "Dispose task should be null here, except when completion source was created.");
                     _disposeCompletionSource?.SetResult(default(ValueVoid));
                 }
@@ -267,8 +317,8 @@ namespace ClrCoder.Threading
                 {
                     // We are still under lock here.
                     Debug.Assert(
-                        _disposeTask == null
-                        || _disposeCompletionSource != null && _disposeTask == _disposeCompletionSource.Task,
+                        (_disposeTask == null)
+                        || ((_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task)),
                         "Dispose task should be null here, except when completion source was created.");
 
                     if (_disposeCompletionSource == null)
@@ -302,8 +352,31 @@ namespace ClrCoder.Threading
             else
             {
                 Debug.Assert(
-                    _disposeCompletionSource != null && _disposeTask == _disposeCompletionSource.Task,
+                    (_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task),
                     "When disposeTask was set before first call to StartDispose, it should be completion source task.");
+            }
+        }
+
+        /// <summary>
+        /// Dispose token that is helpful to decrease usage counter.
+        /// </summary>
+        public struct UsageDecrementToken : IDisposable
+        {
+            private readonly AsyncDisposableBase _owner;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="UsageDecrementToken"/> struct.
+            /// </summary>
+            /// <param name="owner">The owner component.</param>
+            internal UsageDecrementToken(AsyncDisposableBase owner)
+            {
+                _owner = owner;
+            }
+
+            /// <inheritdoc/>
+            public void Dispose()
+            {
+                _owner.DecreaseUsageCounter();
             }
         }
     }

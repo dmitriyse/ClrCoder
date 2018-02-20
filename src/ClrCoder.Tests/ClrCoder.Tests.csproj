@@ -4,6 +4,7 @@
     <VersionPrefix>0.3.0</VersionPrefix>
     <GenerateProgramFile>false</GenerateProgramFile>
     <OutputType>exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <FrameworkPathOverride Condition=" '$(OS)' != 'Windows_NT' ">$(NuGetPackageRoot)\microsoft.targetingpack.netframework.v4.6.1\1.0.1\lib\net461\</FrameworkPathOverride>
   </PropertyGroup>
@@ -32,7 +33,9 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
-  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <PackageReference Include="System.Threading.Tasks.DataFlow" Version="4.6.0" />
+  </ItemGroup>  
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

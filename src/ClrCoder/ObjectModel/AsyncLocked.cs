@@ -8,6 +8,8 @@ namespace ClrCoder.ObjectModel
     using System;
     using System.Threading.Tasks;
 
+    using JetBrains.Annotations;
+
     using Threading;
 
     /// <summary>
@@ -16,6 +18,7 @@ namespace ClrCoder.ObjectModel
     /// <typeparam name="T">Type of <c>object</c>.</typeparam>
     public class AsyncLocked<T> : AsyncDisposableBase, IAsyncLocked<T>
     {
+        [CanBeNull]
         private readonly Func<Task> _disposeAction;
 
         /// <summary>
@@ -23,16 +26,11 @@ namespace ClrCoder.ObjectModel
         /// </summary>
         /// <param name="target"> The target object that will be locked. </param>
         /// <param name="disposeAction"> The dispose action. </param>
-        public AsyncLocked(T target, Func<Task> disposeAction)
+        public AsyncLocked(T target, [CanBeNull] Func<Task> disposeAction = null)
         {
             if (target == null)
             {
                 throw new ArgumentNullException(nameof(target));
-            }
-
-            if (disposeAction == null)
-            {
-                throw new ArgumentNullException(nameof(disposeAction));
             }
 
             _disposeAction = disposeAction;
@@ -46,7 +44,10 @@ namespace ClrCoder.ObjectModel
         /// <inheritdoc/>
         protected override async Task DisposeAsyncCore()
         {
-            await _disposeAction();
+            if (_disposeAction != null)
+            {
+                await _disposeAction();
+            }
         }
     }
 }

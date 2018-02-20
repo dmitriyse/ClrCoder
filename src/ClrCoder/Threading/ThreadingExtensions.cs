@@ -22,6 +22,7 @@ namespace ClrCoder.Threading
     [PublicAPI]
     public static class ThreadingExtensions
     {
+        private static readonly int ProcessorsCount = Environment.ProcessorCount;
 
         /// <summary>
         /// Ensures that task is started, call <see cref="Task.Start()"/> if the task in the <see cref="TaskStatus.WaitingToRun"/>
@@ -206,7 +207,9 @@ namespace ClrCoder.Threading
         {
             return task ?? Task.FromResult(default(T));
         }
+
 #if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
+
         /// <summary>
         /// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
         /// </summary>
@@ -216,12 +219,14 @@ namespace ClrCoder.Threading
         {
             return task ?? Task.CompletedTask;
         }
+
 #else
-        /// <summary>
-        /// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
-        /// </summary>
-        /// <param name="task">Task that can be null.</param>
-        /// <returns>Always not null awaitable task.</returns>
+
+/// <summary>
+/// Overrides null task to completed task. This is analogue for the <see cref="GetOrDefault{T}"/> method.
+/// </summary>
+/// <param name="task">Task that can be null.</param>
+/// <returns>Always not null awaitable task.</returns>
         public static async Task GetOrDefault([CanBeNull] this Task task)
         {
             if (task != null)
@@ -229,7 +234,9 @@ namespace ClrCoder.Threading
                 await task;
             }
         }
+
 #endif
+
         /// <summary>
         /// Gets result of task, from unknown final type task. CoreFX Proposal: https://github.com/dotnet/corefx/issues/17094.
         /// </summary>
@@ -381,6 +388,7 @@ namespace ClrCoder.Threading
         }
 
 #if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
+
         /// <summary>
         /// Helps to detect synchronous execution of await <see langword="operator"/>.
         /// </summary>
@@ -398,6 +406,7 @@ namespace ClrCoder.Threading
 
             return threadId == Thread.CurrentThread.ManagedThreadId;
         }
+
 #endif
 
         /// <summary>
@@ -437,7 +446,7 @@ namespace ClrCoder.Threading
             public bool IsCompleted => _cancellationToken.IsCancellationRequested;
 
             /// <summary>
-            /// Registers continuation <c>action</c>.
+            /// Registers continuation <c>body</c>.
             /// </summary>
             /// <param name="action">Operation continuation.</param>
             [UsedImplicitly]
@@ -450,6 +459,351 @@ namespace ClrCoder.Threading
 
                 // ReSharper disable once ImpureMethodCallOnReadonlyValueField
                 _cancellationToken.Register(action);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that provided task is in the completed state, but not in canceled or in faulted state.
+        /// This is polyfill method.
+        /// See this discussion https://github.com/dotnet/corefx/issues/16745.
+        /// </summary>
+        /// <param name="task">The task.</param>
+        /// <returns>The value of expression "IsCompleted &amp;&amp; !IsFaulted &amp;&amp; !IsCanceled."</returns>
+        public static bool IsCompletedSuccessfully(this Task task)
+        {
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            return task.IsCompleted && !task.IsFaulted && !task.IsCanceled;
+        }
+
+        /// <summary>
+        /// Allows to correctly use <see cref="ManualResetEventSlim"/> as an auto reset event.
+        /// See <see cref="ManualResetEventSlim.Wait()"/>.
+        /// </summary>
+        /// <param name="mre">The event to wait.</param>
+        public static void WaitAndReset(this ManualResetEventSlim mre)
+        {
+            mre.Wait();
+            mre.Reset();
+        }
+
+        /// <summary>
+        /// Allows to correctly use <see cref="ManualResetEventSlim"/> as an auto reset event.
+        /// See <see cref="ManualResetEventSlim.Wait(CancellationToken)"/>.
+        /// </summary>
+        /// <param name="mre">The event to wait.</param>
+        /// <param name="ct">The cancellation token.</param>
+        public static void WaitAndReset(this ManualResetEventSlim mre, CancellationToken ct)
+        {
+            mre.Wait(ct);
+            mre.Reset();
+        }
+
+        /// <summary>
+        /// Allows to correctly use <see cref="ManualResetEventSlim"/> as an auto reset event.
+        /// See <see cref="ManualResetEventSlim.Wait(TimeSpan, CancellationToken)"/>.
+        /// </summary>
+        /// <param name="mre">The event to wait.</param>
+        /// <param name="timeout">The wait timeout.</param>
+        /// <param name="ct">The cancellation token.</param>
+        public static void WaitAndReset(this ManualResetEventSlim mre, TimeSpan timeout, CancellationToken ct)
+        {
+            if (mre.Wait(timeout, ct))
+            {
+                mre.Reset();
+            }
+        }
+
+        /// <summary>
+        /// Allows to correctly use <see cref="ManualResetEventSlim"/> as an auto reset event.
+        /// See <see cref="ManualResetEventSlim.Wait(int)"/>.
+        /// </summary>
+        /// <param name="mre">The event to wait.</param>
+        /// <param name="millisecondsTimeout">The timeout in milliseconds.</param>
+        public static void WaitAndReset(this ManualResetEventSlim mre, int millisecondsTimeout)
+        {
+            if (mre.Wait(millisecondsTimeout))
+            {
+                mre.Reset();
+            }
+        }
+
+        /// <summary>
+        /// Allows to correctly use <see cref="ManualResetEventSlim"/> as an auto reset event.
+        /// See <see cref="ManualResetEventSlim.Wait(CancellationToken)"/>.
+        /// </summary>
+        /// <param name="mre">The event to wait.</param>
+        /// <param name="timeout">The wait timeout.</param>
+        public static void WaitAndReset(this ManualResetEventSlim mre, TimeSpan timeout)
+        {
+            if (mre.Wait(timeout))
+            {
+                mre.Reset();
+            }
+        }
+
+        /// <summary>
+        /// Correctly invokes multicast delegate.
+        /// </summary>
+        /// <typeparam name="TEventArgs">The type of the event arguments.</typeparam>
+        /// <param name="handler">THe handler multicast delegate.</param>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains the event data. </param>
+        /// <returns>Async execution TPL task.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Task InvokeAsync<TEventArgs>(
+            [CanBeNull] this AsyncEventHandler<TEventArgs> handler,
+            object sender,
+            TEventArgs e)
+            where TEventArgs : EventArgs
+        {
+            // In most cases events are not subscribed and fast return should be inlined by JIT.
+            if (handler == null)
+            {
+                return TaskEx.CompletedTaskValue;
+            }
+
+            return InvokeAsyncSlow(handler, sender, e);
+        }
+
+        private static Task InvokeAsyncSlow<TEventArgs>(
+            this AsyncEventHandler<TEventArgs> handler,
+            object sender,
+            TEventArgs e)
+            where TEventArgs : EventArgs
+        {
+            Delegate[] invocationList = handler.GetInvocationList();
+
+            var handlerTasks = new Task[invocationList.Length];
+
+            // Firing all handlers.
+            bool successFastPossible = true;
+            for (int i = 0; i < invocationList.Length; i++)
+            {
+                var h = (AsyncEventHandler<TEventArgs>)invocationList[i];
+                try
+                {
+                    var t = h(sender, e);
+                    handlerTasks[i] = t;
+                    if (t.IsCompletedSuccessfully())
+                    {
+                    }
+                }
+                catch (Exception ex)
+                {
+                    successFastPossible = false;
+                    handlerTasks[i] = TaskEx.FromException(ex);
+                }
+            }
+
+            if (!successFastPossible)
+            {
+                return Task.WhenAll(handlerTasks);
+            }
+
+            return TaskEx.CompletedTaskValue;
+        }
+
+        /// <summary>
+        /// Correctly invokes multicast delegate.
+        /// </summary>
+        /// <param name="handler">THe handler multicast delegate.</param>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains the event data. </param>
+        /// <returns>Async execution TPL task.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Task InvokeAsync(
+            [CanBeNull] this AsyncEventHandler handler,
+            object sender,
+            EventArgs e)
+        {
+            // In most cases events are not subscribed and fast return should be inlined by JIT.
+            if (handler == null)
+            {
+                return TaskEx.CompletedTaskValue;
+            }
+
+            return InvokeAsyncSlow(handler, sender, e);
+        }
+
+        private static Task InvokeAsyncSlow(
+            this AsyncEventHandler handler,
+            object sender,
+            EventArgs e)
+        {
+            Delegate[] invocationList = handler.GetInvocationList();
+
+            var handlerTasks = new Task[invocationList.Length];
+
+            // Firing all handlers.
+            bool successFastPossible = true;
+            for (int i = 0; i < invocationList.Length; i++)
+            {
+                var h = (AsyncEventHandler)invocationList[i];
+                try
+                {
+                    var t = h(sender, e);
+                    handlerTasks[i] = t;
+                    if (t.IsCompletedSuccessfully())
+                    {
+                    }
+                }
+                catch (Exception ex)
+                {
+                    successFastPossible = false;
+                    handlerTasks[i] = TaskEx.FromException(ex);
+                }
+            }
+
+            if (!successFastPossible)
+            {
+                return Task.WhenAll(handlerTasks);
+            }
+
+            return TaskEx.CompletedTaskValue;
+        }
+
+        /// <summary>
+        /// The parallel loop with async body.
+        /// </summary>
+        /// <typeparam name="T">The type of the data in the <paramref name="source"/>.</typeparam>
+        /// <param name="source">An enumerable data source.</param>
+        /// <param name="body">The async delegate that is invoked once per iteration.</param>
+        /// <param name="maxDegreeOfParallelism">The  maximum number of concurrent tasks enabled in this operation.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="scheduler">The tasks scheduler.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public static Task ParallelForEachAsync<T>(
+            this ICollection<T> source,
+            Func<T, Task> body,
+            int? maxDegreeOfParallelism = null,
+            CancellationToken cancellationToken = default,
+            [CanBeNull] TaskScheduler scheduler = null)
+        {
+            VxArgs.NotNull(body, nameof(body));
+
+            if (maxDegreeOfParallelism == null)
+            {
+                maxDegreeOfParallelism = ProcessorsCount;
+            }
+
+            int parallelTasksCount = maxDegreeOfParallelism.Value;
+
+            if (source is IReadOnlyCollection<T> rc)
+            {
+                parallelTasksCount = Math.Min(parallelTasksCount, rc.Count);
+            }
+            else if (source is ICollection<T> c)
+            {
+                parallelTasksCount = Math.Min(parallelTasksCount, c.Count);
+            }
+
+            return ParallelForEachAsync(
+                new ConcurrentEnumerator<T, IEnumerator<T>>(source.GetEnumerator()),
+                body,
+                parallelTasksCount,
+                cancellationToken,
+                scheduler);
+        }
+
+        /// <summary>
+        /// The parallel loop with async body.
+        /// </summary>
+        /// <typeparam name="T">The type of the data in the <paramref name="source"/>.</typeparam>
+        /// <typeparam name="TList">The type of the list.</typeparam>
+        /// <param name="source">An enumerable data source.</param>
+        /// <param name="body">The async delegate that is invoked once per iteration.</param>
+        /// <param name="maxDegreeOfParallelism">The  maximum number of concurrent tasks enabled in this operation.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="scheduler">The tasks scheduler.</param>
+        /// <returns>Async execution TPL task.</returns>
+        public static Task ParallelForEachAsync<T, TList>(
+            this TList source,
+            Func<T, Task> body,
+            int? maxDegreeOfParallelism = null,
+            CancellationToken cancellationToken = default,
+            [CanBeNull] TaskScheduler scheduler = null)
+            where TList : IReadOnlyList<T>
+        {
+            VxArgs.NotNull(body, nameof(body));
+
+            int parallelTasksCount = maxDegreeOfParallelism ?? ProcessorsCount;
+
+            parallelTasksCount = Math.Min(parallelTasksCount, source.Count);
+
+            return ParallelForEachAsync(
+                new ListConcurrentEnumerator<T, TList>(source),
+                body,
+                parallelTasksCount,
+                cancellationToken,
+                scheduler);
+        }
+
+        private static Task ParallelForEachAsync<T, TEnumerator>(
+            TEnumerator enumerator,
+            Func<T, Task> body,
+            int tasksCount,
+            CancellationToken cancellationToken = default,
+            [CanBeNull] TaskScheduler scheduler = null)
+            where TEnumerator : IConcurrentEnumerator<T>
+        {
+            var wrappedEnumerator = new[] { enumerator };
+
+            async Task WorkSequenceProc()
+            {
+                while (wrappedEnumerator[0].TryGetNext(out var item))
+                {
+                    bool isYieldRequired = false;
+                    try
+                    {
+                        Task t = null;
+                        try
+                        {
+                            t = body(item);
+                        }
+                        catch
+                        {
+                            // Do nothing.
+                        }
+
+                        isYieldRequired = (t == null) || t.IsCompleted;
+
+                        if (t != null)
+                        {
+                            await t;
+                        }
+                    }
+                    catch
+                    {
+                        // Do nothing.
+                    }
+
+                    if (isYieldRequired)
+                    {
+                        await Task.Yield();
+                    }
+                }
+            }
+
+            var tasks = new Task[tasksCount];
+
+            using (enumerator)
+            {
+                for (int i = 0; i < tasksCount; i++)
+                {
+                    tasks[i] = scheduler == null
+                                   ? Task.Factory.StartNew(WorkSequenceProc, cancellationToken).Unwrap()
+                                   : Task.Factory.StartNew(
+                                       WorkSequenceProc,
+                                       cancellationToken,
+                                       TaskCreationOptions.None,
+                                       scheduler).Unwrap();
+                }
+
+                return Task.WhenAll(tasks);
             }
         }
     }

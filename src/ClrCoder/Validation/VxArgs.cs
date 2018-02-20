@@ -210,7 +210,7 @@ namespace ClrCoder.Validation
         /// <param name="errorName">The parameter name.</param>
         /// <exception cref="ArgumentNullException">Argument is null.</exception>
         [ContractAnnotation("value:null=>halt")]
-        public static void NotNull<T>([CanBeNull] T value, string errorName)
+        public static void NotNull<T>([NoEnumeration][CanBeNull] T value, string errorName)
             where T : class
         {
             if (value == null)
