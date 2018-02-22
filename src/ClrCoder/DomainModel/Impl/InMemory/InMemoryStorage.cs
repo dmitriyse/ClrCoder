@@ -14,8 +14,6 @@ namespace ClrCoder.DomainModel.Impl.InMemory
     using System.Threading;
     using System.Threading.Tasks;
 
-    using DomainModel.InMemory;
-
     using JetBrains.Annotations;
 
     using ObjectModel;

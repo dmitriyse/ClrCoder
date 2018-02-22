@@ -7,8 +7,6 @@ namespace ClrCoder.DomainModel.Impl.InMemory
 {
     using System;
 
-    using DomainModel.InMemory;
-
     using ObjectModel;
 
     /// <summary>
@@ -41,10 +39,7 @@ namespace ClrCoder.DomainModel.Impl.InMemory
         /// </summary>
         public TEntity Entity
         {
-            get
-            {
-                return _entity;
-            }
+            get => _entity;
 
             set
             {

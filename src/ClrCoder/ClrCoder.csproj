@@ -65,7 +65,7 @@
     <PackageReference Include="NodaTime" Version="2.0.1" />
     <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.0.0" />
     <PackageReference Include="Flurl.Http" Version="2.0.0" />
-    <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0"/>
+    <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
     <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
   </ItemGroup>
 
@@ -79,7 +79,7 @@
     <PackageReference Include="NodaTime" Version="2.0.1" />
     <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.0.0" />
     <PackageReference Include="Flurl.Http" Version="2.0.0" />
-    <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0"/>
+    <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
     <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
   </ItemGroup>
 

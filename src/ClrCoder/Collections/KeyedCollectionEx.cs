@@ -13,6 +13,8 @@ namespace ClrCoder.Collections
 
     using ObjectModel;
 
+    using Validation;
+
     /// <summary>
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
@@ -30,6 +32,16 @@ namespace ClrCoder.Collections
         public KeyedCollectionEx(IEqualityComparer<TKey> comparer)
         {
             _inner = new DictionaryEx<TKey, TValue>(comparer);
+        }
+
+        public KeyedCollectionEx(IEnumerable<TValue> items):this()
+        {
+            VxArgs.NotNull(items, nameof(items));
+
+            foreach (var item in items)
+            {
+                _inner.Add(item.Key, item);
+            }
         }
 
         public IEnumerable<TKey> Keys => _inner.Keys;
