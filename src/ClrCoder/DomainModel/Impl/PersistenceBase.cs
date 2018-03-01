@@ -7,6 +7,7 @@ namespace ClrCoder.DomainModel.Impl
 {
 #if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -30,7 +31,7 @@ namespace ClrCoder.DomainModel.Impl
         private readonly List<PersistencePluginBase<TPersistence, TUnitOfWork>> _plugins =
             new List<PersistencePluginBase<TPersistence, TUnitOfWork>>();
 
-        private readonly HashSet<TUnitOfWork> _openedUoWs = new HashSet<TUnitOfWork>();
+        private readonly ConcurrentDictionary<TUnitOfWork, ValueVoid> _openedUoWs = new ConcurrentDictionary<TUnitOfWork, ValueVoid>();
 
         private readonly List<PersistencePluginBase<TPersistence, TUnitOfWork>> _nonDeclaredResolvePlugins =
             new List<PersistencePluginBase<TPersistence, TUnitOfWork>>();
@@ -68,28 +69,23 @@ namespace ClrCoder.DomainModel.Impl
         {
             VerifyInitialized();
 
-            // TODO: pass debug information to a unit of work.
-            lock (DisposeSyncRoot)
+            TUnitOfWork uow = CreateUnitOfWork();
+
+            _openedUoWs.TryAdd(uow, default);
+
+            try
             {
-                SetDisposeSuspended(true);
-                TUnitOfWork uow = CreateUnitOfWork();
-
-                _openedUoWs.Add(uow);
-
-                try
-                {
-                    // Handler should never rise an exception.
-                    OnUnitOfWorkOpened(uow);
-                }
-                catch (Exception ex)
-                {
-                    Critical.Assert(
-                        false,
-                        $"UnitOfWorkOpened handlers should never rise any exception. Error = {ex.Message}");
-                }
-
-                return uow;
+                // Handler should never rise an exception.
+                OnUnitOfWorkOpened(uow);
             }
+            catch (Exception ex)
+            {
+                Critical.Assert(
+                    false,
+                    $"UnitOfWorkOpened handlers should never rise any exception. Error = {ex.Message}");
+            }
+
+            return uow;
         }
 
         /// <summary>
@@ -99,14 +95,9 @@ namespace ClrCoder.DomainModel.Impl
         /// <remarks>SyncRoot <c>lock</c> required here.</remarks>
         internal void OnUowDisposed(TUnitOfWork uow)
         {
-            // We need lock here.
-            lock (DisposeSyncRoot)
+            if (!_openedUoWs.TryRemove(uow, out var _))
             {
-                _openedUoWs.Remove(uow);
-                if (_openedUoWs.Count == 0)
-                {
-                    SetDisposeSuspended(false);
-                }
+                Critical.Assert(false, "Wrong Unit of Work or double dispose.");
             }
         }
 

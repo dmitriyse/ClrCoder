@@ -7,6 +7,7 @@ namespace ClrCoder.Tests
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -122,18 +123,131 @@ namespace ClrCoder.Tests
             // ReSharper disable once UnusedVariable
             var obj = new object();
 
-            var testSize = 10000000;
+            const int TestSize = 100000000;
+
             Stopwatch stopwatch = Stopwatch.StartNew();
-            for (var i = 0; i < testSize; i++)
+            long sum = 0;
+            for (var i = 0; i < TestSize; i++)
             {
-                if (new object().GetHashCode() == 42)
-                {
-                    i++;
-                }
+                sum += new MyClass().Value;
+            }
+
+            // Avoid compiler optimizations.
+            if (sum == 0)
+            {
+                throw new InvalidOperationException("Jackpot!");
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
+            double singleCoreSpeed = (TestSize * 1000.0) / stopwatch.ElapsedMilliseconds;
+
+            void BenchmarkProc()
+            {
+                long s = 0;
+                for (var i = 0; i < TestSize; i++)
+                {
+                    s += new MyClass().Value;
+                }
+
+                // Avoid compiler optimizations.
+                if (s == 0)
+                {
+                    throw new InvalidOperationException("Jackpot!");
+                }
+            }
+
+            // Assuming that we are running on the HyperThreading CPU.
+            int trueCoresCount = Environment.ProcessorCount / 2;
+
+            var threads = Enumerable.Range(0, trueCoresCount).Select(x => new Thread(BenchmarkProc)).ToList();
+
+            stopwatch = Stopwatch.StartNew();
+            foreach (Thread thread in threads)
+            {
+                thread.Start();
+            }
+
+            foreach (Thread thread in threads)
+            {
+                thread.Join();
+            }
+
+            stopwatch.Stop();
+            double multiCoreSpeed = TestSize * threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {4}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
+        }
+
+        /// <summary>
+        /// Tests thread static variables access performance.
+        /// </summary>
+        [Test]
+        public void ThreadStaticAccessBenchmark()
+        {
+            const int TestSize = 100000000;
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            MyThreadStatic.ThreadLocalValue = 10;
+
+            long sum = 0;
+            for (var i = 0; i < TestSize; i++)
+            {
+                if (i == 1000)
+                {
+                    MyThreadStatic.ThreadLocalValue = i;
+                }
+
+                sum += MyThreadStatic.ThreadLocalValue;
+            }
+
+            // Avoid compiler optimizations.
+            if (sum == 0)
+            {
+                throw new InvalidOperationException("Jackpot!");
+            }
+
+            stopwatch.Stop();
+            double singleCoreSpeed = (TestSize * 1000.0) / stopwatch.ElapsedMilliseconds;
+
+            void BenchmarkProc()
+            {
+                MyThreadStatic.ThreadLocalValue = Thread.CurrentThread.ManagedThreadId;
+                long s = 0;
+                for (var i = 0; i < TestSize; i++)
+                {
+                    if (i == 1000)
+                    {
+                        MyThreadStatic.ThreadLocalValue = i;
+                    }
+
+                    s += MyThreadStatic.ThreadLocalValue;
+                }
+
+                // Avoid compiler optimizations.
+                if (s == 0)
+                {
+                    throw new InvalidOperationException("Jackpot!");
+                }
+            }
+
+            // Assuming that we are running on the HyperThreading CPU.
+            int trueCoresCount = Environment.ProcessorCount / 2;
+
+            var threads = Enumerable.Range(0, trueCoresCount).Select(x => new Thread(BenchmarkProc)).ToList();
+
+            stopwatch = Stopwatch.StartNew();
+            foreach (Thread thread in threads)
+            {
+                thread.Start();
+            }
+
+            foreach (Thread thread in threads)
+            {
+                thread.Join();
+            }
+
+            stopwatch.Stop();
+            double multiCoreSpeed = TestSize * threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {4}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
         }
 
         /// <summary>
@@ -153,6 +267,17 @@ namespace ClrCoder.Tests
         {
             Func<string> f = () => str;
             return f();
+        }
+
+        private class MyClass
+        {
+            public readonly int Value = 7;
+        }
+
+        private class MyThreadStatic
+        {
+            [ThreadStatic]
+            public static int ThreadLocalValue;
         }
     }
 }
