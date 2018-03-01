@@ -7,6 +7,7 @@ namespace ClrCoder.Threading
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -469,6 +470,7 @@ namespace ClrCoder.Threading
         /// </summary>
         /// <param name="task">The task.</param>
         /// <returns>The value of expression "IsCompleted &amp;&amp; !IsFaulted &amp;&amp; !IsCanceled."</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsCompletedSuccessfully(this Task task)
         {
             if (task == null)
@@ -677,7 +679,7 @@ namespace ClrCoder.Threading
         /// <param name="scheduler">The tasks scheduler.</param>
         /// <returns>Async execution TPL task.</returns>
         public static Task ParallelForEachAsync<T>(
-            this ICollection<T> source,
+            this IEnumerable<T> source,
             Func<T, Task> body,
             int? maxDegreeOfParallelism = null,
             CancellationToken cancellationToken = default,
@@ -711,6 +713,7 @@ namespace ClrCoder.Threading
 
         /// <summary>
         /// The parallel loop with async body.
+        /// TODO: Add yield period option.
         /// </summary>
         /// <typeparam name="T">The type of the data in the <paramref name="source"/>.</typeparam>
         /// <typeparam name="TList">The type of the list.</typeparam>
@@ -734,12 +737,125 @@ namespace ClrCoder.Threading
 
             parallelTasksCount = Math.Min(parallelTasksCount, source.Count);
 
+            if (source.Count / 10 > parallelTasksCount )
+            {
+                return ParallelForEachFastAsync(
+                    source,
+                    body,
+                    parallelTasksCount,
+                    cancellationToken,
+                    scheduler);
+            }
+
             return ParallelForEachAsync(
                 new ListConcurrentEnumerator<T, TList>(source),
                 body,
                 parallelTasksCount,
                 cancellationToken,
                 scheduler);
+        }
+
+        private static Task ParallelForEachFastAsync<T, TList>(
+            TList source,
+            Func<T, Task> body,
+            int tasksCount,
+            CancellationToken cancellationToken = default,
+            [CanBeNull] TaskScheduler scheduler = null)
+            where TList : IReadOnlyList<T>
+        {
+            int sourceCount = source.Count;
+            int itemsBatchSize = sourceCount / tasksCount;
+            int nextBatchStart = 0;
+            int maxBatchEndExclusive = sourceCount + itemsBatchSize;
+            async Task WorkSequenceProcAsync(Task t, int nextStart, int batchEndExclusive)
+            {
+                await t;
+
+                for (int i = nextStart; i < batchEndExclusive; i++)
+                {
+                    try
+                    {
+                        try
+                        {
+                            t = body(source[i]);
+                        }
+                        catch
+                        {
+                            // Do nothing.
+                        }
+
+                        if (t != null)
+                        {
+                            await t;
+                        }
+                    }
+                    catch
+                    {
+                        // Do nothing.
+                    }
+                }
+
+                while (true)
+                {
+                    batchEndExclusive = Interlocked.Add(ref nextBatchStart, itemsBatchSize);
+                    if (batchEndExclusive >= maxBatchEndExclusive)
+                    {
+                        break;
+                    }
+
+                    int nextItem = batchEndExclusive - itemsBatchSize;
+                    batchEndExclusive = Math.Min(batchEndExclusive, sourceCount);
+
+                    // Processing batch super fast.
+                    while (nextItem < batchEndExclusive)
+                    {
+                        await body(source[nextItem++]);
+                    }
+                }
+            }
+
+            Task WorkSequenceProc()
+            {
+                while (true)
+                {
+                    int batchEndExclusive = Interlocked.Add(ref nextBatchStart, itemsBatchSize);
+                    if (batchEndExclusive >= maxBatchEndExclusive)
+                    {
+                        break;
+                    }
+
+                    int nextItem = batchEndExclusive - itemsBatchSize;
+                    batchEndExclusive = Math.Min(batchEndExclusive, sourceCount);
+
+                    // Processing batch super fast.
+                    while (nextItem < batchEndExclusive)
+                    {
+                        Task t = body(source[nextItem++]);
+                        if (!t.IsCompleted)
+                        {
+                            // Fallback to async.
+                            return WorkSequenceProcAsync(t, nextItem, batchEndExclusive).EnsureStarted();
+                        }
+                    }
+                }
+
+                return TaskEx.CompletedTaskValue;
+            }
+
+            var tasks = new Task[tasksCount];
+
+            for (int i = 0; i < tasksCount; i++)
+            {
+                tasks[i] = scheduler == null
+                                ? Task.Factory.StartNew(WorkSequenceProc, cancellationToken).Unwrap()
+                                : Task.Factory.StartNew(
+                                    WorkSequenceProc,
+                                    cancellationToken,
+                                    TaskCreationOptions.None,
+                                    scheduler).Unwrap();
+            }
+
+            return Task.WhenAll(tasks);
         }
 
         private static Task ParallelForEachAsync<T, TEnumerator>(
@@ -754,8 +870,18 @@ namespace ClrCoder.Threading
 
             async Task WorkSequenceProc()
             {
-                while (wrappedEnumerator[0].TryGetNext(out var item))
+                while (true)
                 {
+                    T item;
+                    try
+                    {
+                        item = wrappedEnumerator[0].GetNext();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        break;
+                    }
+
                     bool isYieldRequired = false;
                     try
                     {
@@ -783,7 +909,7 @@ namespace ClrCoder.Threading
 
                     if (isYieldRequired)
                     {
-                        await Task.Yield();
+                        //await Task.Yield();
                     }
                 }
             }

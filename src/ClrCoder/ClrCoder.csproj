@@ -80,12 +80,9 @@
     <PackageReference Include="NodaTime.Serialization.JsonNet" Version="2.0.0" />
     <PackageReference Include="Flurl.Http" Version="2.0.0" />
     <PackageReference Include="System.IO.MemoryMappedFiles" Version="4.3.0" />
-    <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Mono.Posix.NETStandard">
       <Version>1.0.0-beta3-100</Version>
     </PackageReference>
+    <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
   </ItemGroup>
 </Project>

@@ -9,9 +9,9 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
 #if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading;
     using System.Threading.Tasks;
+
+    using Collections;
 
     using JetBrains.Annotations;
 
@@ -45,6 +45,9 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
     {
         private readonly SortedDictionary<TKey, TEntity> _entities;
 
+        [CanBeNull]
+        private readonly IndexedLinkedList<TKey, ValueVoid> _gcFifoQueue;
+
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="LwtInMemoryStorage{TPersistence,TUnitOfWork,TStorage,TRepository,TKey,TEntity}"/> class.
@@ -52,16 +55,33 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         /// <param name="persistence">The owner persistence.</param>
         /// <param name="supportedRepositoryTypes">The repository types set that can be resolved with <c>this</c> plugin.</param>
         /// <param name="keysComparer">The keys comparer.</param>
+        /// <param name="maxCapacity">The maximal capacity, most old entries are removed.</param>
         public LwtInMemoryStorage(
             TPersistence persistence,
             [Immutable] IReadOnlySet<Type> supportedRepositoryTypes,
-            IComparer<TKey> keysComparer)
+            IComparer<TKey> keysComparer,
+            int? maxCapacity = null)
             : base(persistence, supportedRepositoryTypes, false)
         {
+            if (maxCapacity < 1)
+            {
+                throw new ArgumentException("Max capacity should be greater or equal than 1");
+            }
+
             _entities = new SortedDictionary<TKey, TEntity>(keysComparer);
 
-            persistence.UnitOfWorkOpened += UnitOfWorkOpened;
+            ////persistence.UnitOfWorkOpened += UnitOfWorkOpened;
+            MaxCapacity = maxCapacity;
+            if (MaxCapacity != null)
+            {
+                _gcFifoQueue = new IndexedLinkedList<TKey, ValueVoid>();
+            }
         }
+
+        /// <summary>
+        /// The maximal storage capacity.
+        /// </summary>
+        public int? MaxCapacity { get; }
 
         /// <summary>
         /// Creates or updates entity.
@@ -87,6 +107,22 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
                 else
                 {
                     TEntity newEntity = createFunc();
+
+                    // Following max capacity rule.
+                    if (MaxCapacity != null && _gcFifoQueue != null)
+                    {
+                        if (_gcFifoQueue.Count >= MaxCapacity)
+                        {
+                            if (_gcFifoQueue.TryDequeue(out var itemToRemove))
+                            {
+                                _entities.Remove(itemToRemove.Key);
+                            }
+                        }
+
+                        _gcFifoQueue.AddFirst(entityKey, default);
+
+                    }
+
                     _entities.Add(entityKey, newEntity);
                     Critical.Assert(
                         newEntity.Key.Equals(entityKey),
@@ -104,16 +140,16 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
                 return null;
             }
 
-            lock (uow.DisposeSyncRoot)
+            var repository = uow.GetPluginEntry(this) as TRepository;
+            if (repository == null)
             {
-                var repository = uow.GetPluginEntry(this) as TRepository;
-
-                Critical.Assert(repository != null, "Repository should be registered on unit of work init.");
-
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                // ReSharper disable once PossibleInvalidCastException
-                return (TR)(object)repository;
+                repository = CreateRepository();
+                uow.SetPluginEntry(this, repository);
             }
+
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            // ReSharper disable once PossibleInvalidCastException
+            return (TR)(object)repository;
         }
 
         /// <summary>
@@ -125,7 +161,13 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         {
             lock (_entities)
             {
-                return _entities.Remove(entityKey);
+                var result = _entities.Remove(entityKey);
+                if (_gcFifoQueue != null && result)
+                {
+                    _gcFifoQueue.Remove(entityKey);
+                }
+
+                return result;
             }
         }
 
@@ -166,29 +208,16 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
                 () => throw new KeyNotFoundException());
         }
 
-        /// <inheritdoc/>
-        protected override async Task DisposeAsyncCore()
-        {
-            // Do nothing.
-        }
-
         /// <summary>
         /// Creates repository on transaction opening.
         /// </summary>
         /// <returns>Created repository.</returns>
         protected abstract TRepository CreateRepository();
 
-        private void UnitOfWorkOpened(TUnitOfWork uow)
+        /// <inheritdoc/>
+        protected override async Task DisposeAsyncCore()
         {
-            if (uow == null)
-            {
-                throw new ArgumentNullException(nameof(uow));
-            }
-
-            // We are under lock here.
-            Debug.Assert(Monitor.IsEntered(uow.DisposeSyncRoot), "Repository creation allowed only under lock");
-
-            uow.SetPluginEntry(this, CreateRepository());
+            // Do nothing.
         }
     }
 #endif

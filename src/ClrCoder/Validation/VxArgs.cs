@@ -281,6 +281,8 @@ namespace ClrCoder.Validation
         /// <param name="name">Argument <c>name</c>.</param>
         public static void ValidAbsoluteHttpUri(string uri, [InvokerParameterName] string name)
         {
+            // TODO: Implement it faster.
+            return;
             NonNullOrWhiteSpace(uri, name);
 
             try

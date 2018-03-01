@@ -241,93 +241,51 @@ namespace ClrCoder.Threading
             }
         }
 
-        [SuppressMessage(
-            "StyleCop.CSharp.MaintainabilityRules",
-            "SA1408:ConditionalExpressionsMustDeclarePrecedence",
-            Justification = "Reviewed. Suppression is OK here.")]
-        private async Task AsynDisposeWrapped()
+        private void HandleDisposeResult(Task disposeResult)
         {
-            // We are under lock here.
-            var isAsyncRun = false;
-
-            // This line will never throw any exception.
-            Task disposeResult = DisposeAsyncCore();
-
-            try
+            lock (DisposeSyncRoot)
             {
-                await disposeResult.WithSyncDetection(isSync => isAsyncRun = !isSync);
+                Exception error = null;
 
-                if (_lastError != null)
+                if (disposeResult.IsFaulted || disposeResult.IsCanceled)
                 {
-                    throw _lastError;
+                    try
+                    {
+                        disposeResult.GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        error =
+                            ex.IsProcessable() ? new CriticalException("Async dispose error.", ex) : ex;
+                    }
                 }
 
-                if (isAsyncRun)
+                if (error == null)
                 {
-                    // We are out of lock (not luck :) ) here.
-                    lock (DisposeSyncRoot)
+                    error = _lastError;
+                }
+
+                if (error == null)
+                {
+                    if (_disposeTask == null)
                     {
-                        // -------Implicit memory barrier here-----------
-                        Debug.Assert(
-                            _disposeTask != null,
-                            "Dispose task initialized here to completion source task or to DoAsyncDispose wrapper result Task");
-
-                        // If completion source was used prior to StartDispose method we should finalize completion source.
-                        _disposeCompletionSource?.SetResult(default(ValueVoid));
-
-                        // -------Implicit memory barrier here-----------
+                        _disposeTask = TaskEx.CompletedTaskValue;
+                    }
+                    else
+                    {
+                        _disposeCompletionSource?.SetResult(default);
                     }
                 }
                 else
                 {
-                    // We are still under lock here.
-                    Debug.Assert(
-                        (_disposeTask == null)
-                        || ((_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task)),
-                        "Dispose task should be null here, except when completion source was created.");
-                    _disposeCompletionSource?.SetResult(default(ValueVoid));
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception finalError = ex.IsProcessable() ? new CriticalException("Async dispose error.", ex) : ex;
-
-                if (isAsyncRun)
-                {
-                    // We are out of lock here.
-                    lock (DisposeSyncRoot)
+                    if (_disposeTask == null)
                     {
-                        // -------Implicit memory barrier here-----------
-                        Debug.Assert(
-                            _disposeTask != null,
-                            "Dispose task initialized here to completion source task or to DoAsyncDispose wrapper result Task");
-
-                        if (_disposeCompletionSource == null)
-                        {
-                            // This exception will be wrapped into task.
-                            throw finalError;
-                        }
-
-                        _disposeCompletionSource.SetException(finalError);
-
-                        // -------Implicit memory barrier here-----------
+                        _disposeTask = TaskEx.FromException(error);
                     }
-                }
-                else
-                {
-                    // We are still under lock here.
-                    Debug.Assert(
-                        (_disposeTask == null)
-                        || ((_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task)),
-                        "Dispose task should be null here, except when completion source was created.");
-
-                    if (_disposeCompletionSource == null)
+                    else
                     {
-                        // This exception will be wrapped into task !!! even in a synchronous execution path !!!.
-                        throw finalError;
+                        _disposeCompletionSource?.SetException(error);
                     }
-
-                    _disposeCompletionSource.SetException(finalError);
                 }
             }
         }
@@ -338,22 +296,32 @@ namespace ClrCoder.Threading
 
             _isActualDisposeCalled = true;
 
-            // When _disposeTask was not asked, we are free to set it to result of DoAsyncDispose wrapper.
-            Task task = AsynDisposeWrapped().EnsureStarted();
+            Task disposeResult;
+            try
+            {
+                disposeResult = DisposeAsyncCore().EnsureStarted();
+            }
+            catch (Exception ex)
+            {
+                disposeResult = TaskEx.FromException(ex);
+            }
 
-            if (_disposeTask == null)
+            if (disposeResult.IsCompleted)
             {
                 Debug.Assert(
-                    _disposeCompletionSource == null,
-                    "When dispose task not set, completion source also should be uninitialized");
+                    (_disposeTask == null)
+                    || ((_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task)),
+                    "Dispose task should be null here, except when completion source was created.");
 
-                _disposeTask = task;
+                HandleDisposeResult(disposeResult);
             }
             else
             {
-                Debug.Assert(
-                    (_disposeCompletionSource != null) && (_disposeTask == _disposeCompletionSource.Task),
-                    "When disposeTask was set before first call to StartDispose, it should be completion source task.");
+                Task task = disposeResult.ContinueWith(HandleDisposeResult);
+                if (_disposeTask == null)
+                {
+                    _disposeTask = task;
+                }
             }
         }
 

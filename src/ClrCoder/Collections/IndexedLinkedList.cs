@@ -37,6 +37,15 @@ namespace ClrCoder.Collections
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexedLinkedList{TKey,TValue}"/> class.
         /// </summary>
+        /// <param name="capacity">The initial collection capacity.</param>
+        public IndexedLinkedList(int capacity)
+        {
+            _index = new DictionaryEx<TKey, LinkedListNode<KeyValuePair<TKey, TValue>>>(capacity);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexedLinkedList{TKey,TValue}"/> class.
+        /// </summary>
         /// <param name="comparer">
         /// The <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> implementation to use when
         /// comparing keys, or null to use the default <see cref="T:System.Collections.Generic.EqualityComparer`1"/> for the type
@@ -53,8 +62,9 @@ namespace ClrCoder.Collections
 
         IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _index.Keys;
 
-        ICollection IDictionary.Values => _valueCollection
-                                          ?? (_valueCollection = new ValueCollection(this));
+        ICollection IDictionary.Values =>
+            _valueCollection
+            ?? (_valueCollection = new ValueCollection(this));
 
         ICollection IDictionary.Keys => _index.Keys;
 
@@ -62,10 +72,11 @@ namespace ClrCoder.Collections
 
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => _index.Keys;
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values => _valueCollection
-                                                                ?? (_valueCollection = new ValueCollection(this));
+        ICollection<TValue> IDictionary<TKey, TValue>.Values =>
+            _valueCollection
+            ?? (_valueCollection = new ValueCollection(this));
 
-        /// <inheritdoc/>
+        /// <inheritdoc cref="ICollection.Count"/>
         public int Count => _index.Count;
 
         /// <inheritdoc/>
@@ -209,10 +220,11 @@ namespace ClrCoder.Collections
         }
 
         /// <inheritdoc/>
-        public bool Contains(KeyValuePair<TKey, TValue> item) => _index.TryGetValue(item.Key, out var listNode)
-                                                                 && EqualityComparer<TValue>.Default.Equals(
-                                                                     listNode.Value.Value,
-                                                                     item.Value);
+        public bool Contains(KeyValuePair<TKey, TValue> item) =>
+            _index.TryGetValue(item.Key, out var listNode)
+            && EqualityComparer<TValue>.Default.Equals(
+                listNode.Value.Value,
+                item.Value);
 
         /// <inheritdoc/>
         public bool ContainsKey([CanBeNull] TKey key)
@@ -221,9 +233,10 @@ namespace ClrCoder.Collections
         }
 
         /// <inheritdoc/>
-        public void CopyTo([NotNull] KeyValuePair<TKey, TValue>[] array, int arrayIndex) => _list.CopyTo(
-            array,
-            arrayIndex);
+        public void CopyTo([NotNull] KeyValuePair<TKey, TValue>[] array, int arrayIndex) =>
+            _list.CopyTo(
+                array,
+                arrayIndex);
 
         void ICollection.CopyTo([NotNull] Array array, int index)
         {
@@ -236,8 +249,9 @@ namespace ClrCoder.Collections
         }
 
         /// <inheritdoc/>
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _index
-            .Select(kvp => new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value.Value)).GetEnumerator();
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
+            _index
+                .Select(kvp => new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -423,6 +437,24 @@ namespace ClrCoder.Collections
         }
 
         /// <summary>
+        /// Tries to receive and delete a last item.
+        /// </summary>
+        /// <param name="item">The dequeued item.</param>
+        /// <returns></returns>
+        public bool TryDequeue(out KeyValuePair<TKey, TValue> item)
+        {
+            if (_index.Count > 0)
+            {
+                item = _list.Last.Value;
+                RemoveLast();
+                return true;
+            }
+
+            item = default;
+            return false;
+        }
+
+        /// <summary>
         /// Tries to get next item in the list.
         /// </summary>
         /// <param name="key">The key of the item to get next item for.</param>
@@ -493,9 +525,10 @@ namespace ClrCoder.Collections
                 ((IEnumerator)_enumerator).Reset();
             }
 
-            DictionaryEntry IDictionaryEnumerator.Entry => new DictionaryEntry(
-                _enumerator.Current.Key,
-                _enumerator.Current.Value);
+            DictionaryEntry IDictionaryEnumerator.Entry =>
+                new DictionaryEntry(
+                    _enumerator.Current.Key,
+                    _enumerator.Current.Value);
 
             object IDictionaryEnumerator.Key => _enumerator.Current.Key;
 

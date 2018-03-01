@@ -7,6 +7,7 @@ namespace ClrCoder.Threading
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using System.Threading;
 
     /// <summary>
@@ -40,17 +41,16 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public bool TryGetNext(out T item)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T GetNext()
         {
             int itemIndex = Interlocked.Increment(ref _nextItemIndex) - 1;
             if (itemIndex >= _itemsCount)
             {
-                item = default;
-                return false;
+                throw new InvalidOperationException("No more items left.");
             }
 
-            item = _list[itemIndex];
-            return true;
+            return _list[itemIndex];
         }
 
         /// <inheritdoc/>

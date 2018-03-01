@@ -23,7 +23,7 @@ namespace ClrCoder.Threading
         [NotNull]
         private readonly Task _workerTask;
 
-        private readonly BlockingCollection<Action> _workItems = new BlockingCollection<Action>();
+        private readonly BlockingCollection<Action> _workItems = new BlockingCollection<Action>(32768);
 
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 

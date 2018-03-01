@@ -39,25 +39,23 @@ namespace ClrCoder.Threading
         }
 
         /// <inheritdoc/>
-        public bool TryGetNext(out T item)
+        public T GetNext()
         {
             lock (_syncRoot)
             {
                 if (_enumerationFinished)
                 {
-                    item = default;
-                    return false;
+                    throw new InvalidOperationException("No more items left.");
                 }
 
                 if (!_enumerator.MoveNext())
                 {
-                    item = default;
                     _enumerationFinished = true;
-                    return false;
+
+                    throw new InvalidOperationException("No more items left.");
                 }
 
-                item = _enumerator.Current;
-                return true;
+                return _enumerator.Current;
             }
         }
 

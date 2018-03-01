@@ -68,6 +68,11 @@ namespace ClrCoder.Testing
         /// <inheritdoc/>
         public void Log(object entry)
         {
+            if (!IsOutputEnabled)
+            {
+                return;
+            }
+
             LogEntry logEntry = StdJsonLogging.NormalizeToLogEntry(entry, SerializerSource);
 
             string dotNetTypePrefix = logEntry.DotNetType == null ? string.Empty : $"{logEntry.DotNetType}: ";
@@ -156,6 +161,11 @@ namespace ClrCoder.Testing
                         });
             }
         }
+
+        /// <summary>
+        /// Enables or disables output to NUnit progress and log.
+        /// </summary>
+        public bool IsOutputEnabled { get; set; } = true;
 
         private class TestUnbounder : IDisposable
         {

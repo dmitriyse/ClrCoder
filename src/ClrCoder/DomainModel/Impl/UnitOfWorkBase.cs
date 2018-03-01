@@ -3,7 +3,6 @@
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-
 #pragma warning disable 1998
 
 namespace ClrCoder.DomainModel.Impl
@@ -12,7 +11,6 @@ namespace ClrCoder.DomainModel.Impl
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -24,7 +22,7 @@ namespace ClrCoder.DomainModel.Impl
     /// </summary>
     /// <typeparam name="TPersistence">Final type of persistence.</typeparam>
     /// <typeparam name="TUnitOfWork">Final type of unit of work.</typeparam>
-    public abstract class UnitOfWorkBase<TPersistence, TUnitOfWork> : AsyncDisposableBase, IUnitOfWorkImpl
+    public abstract class UnitOfWorkBase<TPersistence, TUnitOfWork> : IUnitOfWorkImpl
         where TPersistence : PersistenceBase<TPersistence, TUnitOfWork>
         where TUnitOfWork : UnitOfWorkBase<TPersistence, TUnitOfWork>
     {
@@ -38,7 +36,6 @@ namespace ClrCoder.DomainModel.Impl
         /// </summary>
         /// <param name="persistence">Persistence to which <c>this</c> UoW belongs.</param>
         protected UnitOfWorkBase(TPersistence persistence)
-            : base(persistence.DisposeSyncRoot)
         {
             if (persistence == null)
             {
@@ -91,13 +88,10 @@ namespace ClrCoder.DomainModel.Impl
                 throw new ArgumentException("Plugin and UoW should belongs to the same persistence.", nameof(plugin));
             }
 
-            lock (DisposeSyncRoot)
-            {
-                object data;
-                _pluginEntries.TryGetValue(plugin, out data);
+            object data;
+            _pluginEntries.TryGetValue(plugin, out data);
 
-                return data;
-            }
+            return data;
         }
 
         /// <summary>
@@ -120,52 +114,53 @@ namespace ClrCoder.DomainModel.Impl
                 throw new ArgumentException("Plugin and UoW should belongs to the same persistence.", nameof(plugin));
             }
 
-            lock (DisposeSyncRoot)
+            if (entry == null)
             {
-                if (entry == null)
-                {
-                    _pluginEntries.Remove(plugin);
-                }
-                else
-                {
-                    _pluginEntries[plugin] = entry;
-                }
+                _pluginEntries.Remove(plugin);
+            }
+            else
+            {
+                _pluginEntries[plugin] = entry;
             }
         }
 
         /// <inheritdoc/>
-        [SuppressMessage(
-            "StyleCop.CSharp.ReadabilityRules",
-            "SA1110:OpeningParenthesisMustBeOnDeclarationLine",
-            Justification = "Reviewed. Suppression is OK here.")]
-        protected override async Task DisposeAsyncCore()
+        public async Task DisposeAsync()
         {
-            List<(PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)> entriesToDispose;
-            lock (DisposeSyncRoot)
+            List<(PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)>
+                entriesToDispose = null;
+
+            foreach (var kvp in _pluginEntries)
             {
-                entriesToDispose =
-                    _pluginEntries.Where(x => x.Value is IDisposablePluginEntry<TPersistence, TUnitOfWork>)
-                        .Select(
-                            x =>
-                                new ValueTuple
-                                <PersistencePluginBase<TPersistence, TUnitOfWork>,
-                                    IDisposablePluginEntry<TPersistence, TUnitOfWork>>(
-                                    x.Key,
-                                    x.Value as IDisposablePluginEntry<TPersistence, TUnitOfWork>)).ToList();
+                if (kvp.Value is IDisposablePluginEntry<TPersistence, TUnitOfWork> disposableEntry)
+                {
+                    if (entriesToDispose == null)
+                    {
+                        entriesToDispose =
+                            new List<(PersistencePluginBase<TPersistence, TUnitOfWork>,
+                                IDisposablePluginEntry<TPersistence, TUnitOfWork>)>();
+                    }
+
+                    entriesToDispose.Add((kvp.Key, disposableEntry));
+                }
             }
 
-            foreach (
-                (PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>)
-                tuple
-                in entriesToDispose)
+            if (entriesToDispose != null)
             {
-                try
+                foreach (
+                    (PersistencePluginBase<TPersistence, TUnitOfWork>, IDisposablePluginEntry<TPersistence, TUnitOfWork>
+                    )
+                    tuple
+                    in entriesToDispose)
                 {
-                    await tuple.Item2.EnsureDisposed(tuple.Item1, (TUnitOfWork)this, _isDiscardRequested);
-                }
-                catch (Exception ex) when (ex.IsProcessable())
-                {
-                    // TODO: Log problem
+                    try
+                    {
+                        await tuple.Item2.EnsureDisposed(tuple.Item1, (TUnitOfWork)this, _isDiscardRequested);
+                    }
+                    catch (Exception ex) when (ex.IsProcessable())
+                    {
+                        // TODO: Log problem
+                    }
                 }
             }
 

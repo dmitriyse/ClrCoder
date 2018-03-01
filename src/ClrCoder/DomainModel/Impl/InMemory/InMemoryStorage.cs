@@ -75,16 +75,19 @@ namespace ClrCoder.DomainModel.Impl.InMemory
                 return null;
             }
 
-            lock (uow.DisposeSyncRoot)
+            var entry = uow.GetPluginEntry(this);
+            Debug.Assert(entry != null, "Snapshot reference should be registered on unit of work init.");
+
+            if (entry is ImmutableDictionary<TKey, TEntity> dataSnapshot)
             {
-                var repository = uow.GetPluginEntry(this) as TRepository;
-
-                Debug.Assert(repository != null, "Repository should be registered on unit of work init.");
-
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                // ReSharper disable once PossibleInvalidCastException
-                return (TR)(object)repository;
+                // ReSharper disable once AssignNullToNotNullAttribute
+                entry = CreateRepository(dataSnapshot);
+                uow.SetPluginEntry(this, entry);
             }
+
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            // ReSharper disable once PossibleInvalidCastException
+            return (TR)entry;
         }
 
         /// <summary>
@@ -178,10 +181,10 @@ namespace ClrCoder.DomainModel.Impl.InMemory
                 throw new ArgumentNullException(nameof(uow));
             }
 
-            // We are under lock here.
-            Debug.Assert(Monitor.IsEntered(uow.DisposeSyncRoot), "Repository creation allowed only under lock");
+            //// We are under lock here.
+            //Debug.Assert(Monitor.IsEntered(uow.DisposeSyncRoot), "Repository creation allowed only under lock");
 
-            uow.SetPluginEntry(this, CreateRepository(_data));
+            uow.SetPluginEntry(this, _data);
         }
     }
 #endif

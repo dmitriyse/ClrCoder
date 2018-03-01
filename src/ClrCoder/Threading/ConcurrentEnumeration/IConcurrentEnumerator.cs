@@ -11,13 +11,13 @@ namespace ClrCoder.Threading
     /// The enumerator that allows to gather items concurrently.
     /// </summary>
     /// <typeparam name="T">The type of an item.</typeparam>
-    public interface IConcurrentEnumerator<T>: IDisposable
+    public interface IConcurrentEnumerator<out T>: IDisposable
     {
         /// <summary>
         /// Gets the next item, if enumeration is not being finished.
         /// </summary>
-        /// <param name="item">The next enumerated item.</param>
         /// <returns><see langword="true"/>, if the next item is obtained, <see langword="false"/> if enumeration has been finished.</returns>
-        bool TryGetNext(out T item);
+        /// <exception cref="InvalidOperationException">No more items left.</exception>
+        T GetNext();
     }
 }

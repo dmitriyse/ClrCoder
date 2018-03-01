@@ -74,10 +74,6 @@ namespace ClrCoder.DomainModel.Impl
                 SetDisposeSuspended(true);
                 TUnitOfWork uow = CreateUnitOfWork();
 
-                Critical.Assert(
-                    DisposeSyncRoot == uow.DisposeSyncRoot,
-                    "Unit of Work and its persistence should be synchronized with the same DisposeSyncRoot.");
-
                 _openedUoWs.Add(uow);
 
                 try

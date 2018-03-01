@@ -13,8 +13,6 @@ namespace ClrCoder.Cluster
 
     using IO;
 
-    using Threading;
-
     /// <summary>
     /// Cluster node.
     /// </summary>
