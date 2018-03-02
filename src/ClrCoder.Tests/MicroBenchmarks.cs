@@ -180,10 +180,13 @@ namespace ClrCoder.Tests
         /// <summary>
         /// Tests thread static variables access performance.
         /// </summary>
+        /// <param name="threadsCount">The concurrency level.</param>
         [Test]
-        public void ThreadStaticAccessBenchmark()
+        [TestCase(4)]
+        [TestCase(64)]
+        public void ThreadStaticAccessBenchmark(int threadsCount)
         {
-            const int TestSize = 100000000;
+            const int TestSize = 1000_000_000;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             MyThreadStatic.ThreadLocalValue = 10;
@@ -229,10 +232,8 @@ namespace ClrCoder.Tests
                 }
             }
 
-            // Assuming that we are running on the HyperThreading CPU.
-            int trueCoresCount = Environment.ProcessorCount / 2;
 
-            var threads = Enumerable.Range(0, trueCoresCount).Select(x => new Thread(BenchmarkProc)).ToList();
+            var threads = Enumerable.Range(0, threadsCount).Select(x => new Thread(BenchmarkProc)).ToList();
 
             stopwatch = Stopwatch.StartNew();
             foreach (Thread thread in threads)
@@ -246,8 +247,8 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            double multiCoreSpeed = TestSize * threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
-            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {4}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
+            double multiCoreSpeed = TestSize * (long)threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {threadsCount}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
         }
 
         /// <summary>
