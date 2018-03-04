@@ -44,8 +44,8 @@ namespace ClrCoder.Threading
             protected override void QueueTask([NotNull] Task task)
             {
                 var curEventLoop = _currentEventLoop;
-                if (curEventLoop != null && ((task.CreationOptions & TaskCreationOptions.PreferFairness)
-                                                   == TaskCreationOptions.None))
+                if ((curEventLoop != null) && ((task.CreationOptions & TaskCreationOptions.PreferFairness)
+                                               == TaskCreationOptions.None))
                 {
                     curEventLoop.Enqueue(task);
                 }

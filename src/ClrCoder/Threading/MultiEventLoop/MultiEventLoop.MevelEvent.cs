@@ -2,6 +2,7 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 #if NETSTANDARD1_3 || NETSTANDARD1_6 || NETSTANDARD2_0
 namespace ClrCoder.Threading
 {
@@ -36,7 +37,7 @@ namespace ClrCoder.Threading
                 {
                     var simpleAction = SimpleAction;
                     SimpleAction = null;
-                    
+
                     simpleAction();
                 }
                 else if (Action != null)
@@ -84,7 +85,7 @@ namespace ClrCoder.Threading
                 }
             }
 
-            public void SetAction(Action<object> action, Object state)
+            public void SetAction(Action<object> action, object state)
             {
                 Action = action;
                 State = state;
