@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ClrCoder.Tests": {
+      "commandName": "Project"
+    },
+    "CustomTest": {
+      "commandName": "Project",
+      "commandLineArgs": "--test=ClrCoder.Tests.Threading.MultiEventLoopTests.SimpleMultiEventLoopBenchmark"
+    }
+  }
+}
