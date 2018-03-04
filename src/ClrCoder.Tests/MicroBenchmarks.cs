@@ -115,7 +115,7 @@ namespace ClrCoder.Tests
         }
 
         /// <summary>
-        /// Core i7-5920k@4.5Ghz speed = ~47M op/s.
+        /// Core i7-5920k@4.5Ghz speed = ~200M op/s.
         /// </summary>
         [Test]
         public void ObjectCreationBenchmark()

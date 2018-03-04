@@ -11,6 +11,7 @@ namespace ClrCoder.Dsp
     /// <summary>
     /// The DSP processing target (receives data from a processor).
     /// </summary>
+    /// <remarks>TODO: Add back pressure capability!</remarks>
     /// <typeparam name="TOutput">The type or processing output items.</typeparam>
     public interface IDsTarget<TOutput>
     {

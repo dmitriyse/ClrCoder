@@ -6,7 +6,6 @@
 namespace ClrCoder.Dsp
 {
     using System;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// The processor that can produce output data to the provided buffers.
@@ -20,8 +19,7 @@ namespace ClrCoder.Dsp
         /// <param name="t1">The first part of the output data.</param>
         /// <param name="t2">The second part of the output data.</param>
         /// <param name="outputProcessed">The number of items written to the output.</param>
-        /// <returns>The task that becomes completed when processor become available to process next items.</returns>
-        Task Process(
+        void Process(
             Span<TOutput> t1,
             Span<TOutput> t2,
             out int outputProcessed);

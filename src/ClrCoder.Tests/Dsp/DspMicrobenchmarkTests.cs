@@ -75,7 +75,7 @@ namespace ClrCoder.Tests.Dsp
                 }
 
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public Task Process(
+                public void Process(
                     ReadOnlySpan<byte> p1,
                     ReadOnlySpan<byte> p2,
                     Span<int> t1,
@@ -85,7 +85,6 @@ namespace ClrCoder.Tests.Dsp
                 {
                     // Do nothing.
                     processedInput = processed = p1.Length + p2.Length;
-                    return TaskEx.CompletedTaskValue;
                 }
             }
         }
@@ -129,7 +128,8 @@ namespace ClrCoder.Tests.Dsp
                 out int inputProcessed)
                 where TDirectProcessor : IDsDirectProcessor<TInput, int>
             {
-                return directProcessor.Process(s1, s2, new Span<int>(), new Span<int>(), out inputProcessed, out var _);
+                directProcessor.Process(s1, s2, new Span<int>(), new Span<int>(), out inputProcessed, out var _);
+                return TaskEx.CompletedTaskValue;
             }
         }
     }

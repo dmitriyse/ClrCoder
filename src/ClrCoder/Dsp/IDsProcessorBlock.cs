@@ -19,8 +19,8 @@ namespace ClrCoder.Dsp
         /// </summary>
         /// <param name="s1">The first part of the input data.</param>
         /// <param name="s2">The second part of the input data.</param>
-        /// <param name="processedCount">The number of processed items.</param>
-        /// <returns>The task that becomes completed when processor become available to process next items.</returns>
-        Task Process(ReadOnlySpan<TInput> s1, ReadOnlySpan<TInput> s2, out int processedCount);
+        /// <param name="consumedCount">The number of consumed items.</param>
+        /// <returns>The full processing completion of the consumed tasks.</returns>
+        Task Process(ReadOnlySpan<TInput> s1, ReadOnlySpan<TInput> s2, out int consumedCount);
     }
 }
