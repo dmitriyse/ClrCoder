@@ -7,6 +7,7 @@
 namespace ClrCoder.Threading
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -20,7 +21,12 @@ namespace ClrCoder.Threading
         /// </summary>
         public class EventLoop : IDisposable
         {
-            private const int InitialQueueCapacity = 0x10000;
+            private const int InitialQueueCapacity = 0x1000;
+
+            /// <summary>
+            /// Currently queued events count.
+            /// </summary>
+            internal int QueuedCount;
 
             private readonly int _id;
 
@@ -30,13 +36,17 @@ namespace ClrCoder.Threading
 
             private readonly CancellationToken _shutdownCancellationToken;
 
+            private readonly BlockingCollection<MevelEvent> _remoteScheduledEvents =
+                new BlockingCollection<MevelEvent>();
+
             private MevelEvent[] _localEventQueue = new MevelEvent[InitialQueueCapacity];
 
             private int _queueCapacityMask = InitialQueueCapacity - 1;
 
-            private int _readPointer = 0;
+            private int _readPointer;
 
-            private int _queuedCount = 0;
+            // ReSharper disable once InconsistentNaming
+            private bool _haveRemoteEvents_BadlyVolatile = false;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="EventLoop"/> class.
@@ -60,15 +70,79 @@ namespace ClrCoder.Threading
             }
 
             /// <summary>
+            /// Performs nested event loop processing.
+            /// </summary>
+            /// <param name="includeNonLocal">Forces to try fetch event from global event loop.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void DoEventsUnsafe(bool includeNonLocal)
+            {
+                if (includeNonLocal || (QueuedCount != 0))
+                {
+                    DoEventsCore(includeNonLocal);
+                }
+            }
+
+            /// <summary>
             /// Schedules action with state.
             /// </summary>
             /// <param name="action">The action to schedule.</param>
             /// <param name="state">The state object for the action.</param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal void Enqueue(Action<object> action, object state)
+            public void EnqueueRemotely(Action<object> action, object state)
             {
-                _localEventQueue[(_readPointer + _queuedCount++) & _queueCapacityMask].SetAction(action, state);
-                if (_queuedCount == _localEventQueue.Length)
+                _remoteScheduledEvents.Add(
+                    new MevelEvent
+                        {
+                            Action = action,
+                            State = state
+                        });
+
+                _haveRemoteEvents_BadlyVolatile = true;
+            }
+
+            /// <summary>
+            /// Schedules the task to execute.
+            /// </summary>
+            /// <param name="task">The task to execute.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void EnqueueRemotely(Task task)
+            {
+                _remoteScheduledEvents.Add(
+                    new MevelEvent
+                        {
+                            Task = task
+                        });
+
+                _haveRemoteEvents_BadlyVolatile = true;
+            }
+
+            /// <summary>
+            /// Schedules the simple action.
+            /// </summary>
+            /// <param name="simpleAction">The simple action to execute.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void EnqueueRemotely(Action simpleAction)
+            {
+                _remoteScheduledEvents.Add(
+                    new MevelEvent
+                        {
+                            SimpleAction = simpleAction
+                        });
+
+                _haveRemoteEvents_BadlyVolatile = true;
+            }
+
+            /// <summary>
+            /// Schedules action with state.
+            /// </summary>
+            /// <param name="action">The action to schedule.</param>
+            /// <param name="state">The state object for the action.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void EnqueueUnsafe(Action<object> action, object state)
+            {
+                Debug.Assert(_currentEventLoop == this, "_currentEventLoop == this");
+                _localEventQueue[(_readPointer + QueuedCount++) & _queueCapacityMask].SetAction(action, state);
+                if (QueuedCount == _localEventQueue.Length)
                 {
                     IncreaseCapacity();
                 }
@@ -79,10 +153,12 @@ namespace ClrCoder.Threading
             /// </summary>
             /// <param name="task">The task to execute.</param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal void Enqueue(Task task)
+            public void EnqueueUnsafe(Task task)
             {
-                _localEventQueue[(_readPointer + _queuedCount++) & _queueCapacityMask].Task = task;
-                if (_queuedCount == _localEventQueue.Length)
+                Debug.Assert(_currentEventLoop == this, "_currentEventLoop == this");
+
+                _localEventQueue[(_readPointer + QueuedCount++) & _queueCapacityMask].Task = task;
+                if (QueuedCount == _localEventQueue.Length)
                 {
                     IncreaseCapacity();
                 }
@@ -93,13 +169,82 @@ namespace ClrCoder.Threading
             /// </summary>
             /// <param name="simpleAction">The simple action to execute.</param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal void Enqueue(Action simpleAction)
+            public void EnqueueUnsafe(Action simpleAction)
             {
-                _localEventQueue[(_readPointer + _queuedCount++) & _queueCapacityMask].SimpleAction = simpleAction;
-                if (_queuedCount == _localEventQueue.Length)
+                Debug.Assert(_currentEventLoop == this, "_currentEventLoop == this");
+
+                _localEventQueue[(_readPointer + QueuedCount++) & _queueCapacityMask].SimpleAction = simpleAction;
+                if (QueuedCount == _localEventQueue.Length)
                 {
                     IncreaseCapacity();
                 }
+            }
+
+            private bool DoEventsCore(bool includeNonLocal)
+            {
+                try
+                {
+                    if (includeNonLocal)
+                    {
+                        while (_remoteScheduledEvents.TryTake(out var rev))
+                        {
+                            rev.ExecuteEvent();
+                        }
+
+                        _haveRemoteEvents_BadlyVolatile = false;
+                    }
+
+                    while (QueuedCount != 0)
+                    {
+                        // ---- This is most critical execution path ----
+                        ref MevelEvent ev = ref _localEventQueue[_readPointer];
+                        _readPointer++;
+                        _readPointer &= _queueCapacityMask;
+                        QueuedCount--;
+
+                        if (ev.SimpleAction != null)
+                        {
+                            var simpleAction = ev.SimpleAction;
+                            ev.SimpleAction = null;
+
+                            simpleAction();
+                        }
+                        else if (ev.Action != null)
+                        {
+                            var action = ev.Action;
+                            ev.Action = null;
+
+                            var state = ev.State;
+                            ev.State = null;
+
+                            // ReSharper disable once PossibleNullReferenceException
+                            action(state);
+                        }
+                        else
+                        {
+                            Debug.Assert(ev.Task != null, "Task != null");
+                            var task = ev.Task;
+                            ev.Task = null;
+
+                            // ReSharper disable once PossibleNullReferenceException
+                            // ReSharper disable once AssignNullToNotNullAttribute
+                            _scheduler.TryExecuteTaskInternal(task);
+                        }
+
+                        if (((_readPointer & 0xFF) == 0) || _haveRemoteEvents_BadlyVolatile)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                catch
+                {
+                    // Do nothing.
+                }
+
+                return true;
             }
 
             private void EventLoopThreadProc()
@@ -107,60 +252,28 @@ namespace ClrCoder.Threading
                 _currentEventLoopId = _id;
                 _currentEventLoop = this;
 
-                while (!_shutdownCancellationToken.IsCancellationRequested)
+                try
                 {
-                    try
+                    while (!_shutdownCancellationToken.IsCancellationRequested)
                     {
-                        while (_queuedCount != 0)
+                        while (DoEventsCore(true))
                         {
-                            // ---- This is most critical execution path ----
-                            ref MevelEvent ev = ref _localEventQueue[_readPointer];
-                            _readPointer++;
-                            _readPointer &= _queueCapacityMask;
-                            _queuedCount--;
-
-                            if (ev.SimpleAction != null)
-                            {
-                                var simpleAction = ev.SimpleAction;
-                                ev.SimpleAction = null;
-
-                                simpleAction();
-                            }
-                            else if (ev.Action != null)
-                            {
-                                var action = ev.Action;
-                                ev.Action = null;
-
-                                var state = ev.State;
-                                ev.State = null;
-
-                                // ReSharper disable once PossibleNullReferenceException
-                                action(state);
-                            }
-                            else
-                            {
-                                Debug.Assert(ev.Task != null, "Task != null");
-                                var task = ev.Task;
-                                ev.Task = null;
-
-                                // ReSharper disable once PossibleNullReferenceException
-                                // ReSharper disable once AssignNullToNotNullAttribute
-                                _scheduler.TryExecuteTaskInternal(task);
-                            }
-
-                            // Verifying global queue every 512 events.
-                            if (((_readPointer & 511) == 0) && GlobalEventsQueue.TryTake(out var gev))
-                            {
-                                gev.ExecuteEvent();
-                            }
                         }
 
-                        GlobalEventsQueue.Take(_shutdownCancellationToken).ExecuteEvent();
+                        var ev = _remoteScheduledEvents.Take(_shutdownCancellationToken);
+                        try
+                        {
+                            ev.ExecuteEvent();
+                        }
+                        catch
+                        {
+                            // Do nothing.
+                        }
                     }
-                    catch
-                    {
-                        // Do nothing.
-                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Valid exit.
                 }
             }
 
@@ -170,7 +283,7 @@ namespace ClrCoder.Threading
                 MevelEvent[] oldArray = _localEventQueue;
                 _localEventQueue = new MevelEvent[oldArray.Length * 2];
 
-                for (int i = 0; i < _queuedCount; i++)
+                for (int i = 0; i < QueuedCount; i++)
                 {
                     _localEventQueue[_readPointer + i] = oldArray[(_readPointer + i) & _queueCapacityMask];
                 }

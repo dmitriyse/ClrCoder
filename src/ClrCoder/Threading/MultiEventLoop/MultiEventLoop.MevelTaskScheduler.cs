@@ -47,15 +47,12 @@ namespace ClrCoder.Threading
                 if ((curEventLoop != null) && ((task.CreationOptions & TaskCreationOptions.PreferFairness)
                                                == TaskCreationOptions.None))
                 {
-                    curEventLoop.Enqueue(task);
+                    curEventLoop.EnqueueUnsafe(task);
                 }
                 else
                 {
-                    GlobalEventsQueue.Add(
-                        new MevelEvent
-                            {
-                                Task = task
-                            });
+                    // ReSharper disable once PossibleNullReferenceException
+                    _eventLoops[GetNextEventLoopToScheduleGlobalEvent()].EnqueueRemotely(task);
                 }
             }
 
@@ -68,11 +65,9 @@ namespace ClrCoder.Threading
                     return TryExecuteTask(task);
                 }
 
-                GlobalEventsQueue.Add(
-                    new MevelEvent
-                        {
-                            Task = task
-                        });
+                // ReSharper disable once PossibleNullReferenceException
+                _eventLoops[GetNextEventLoopToScheduleGlobalEvent()].EnqueueRemotely(task);
+
                 return false;
             }
         }

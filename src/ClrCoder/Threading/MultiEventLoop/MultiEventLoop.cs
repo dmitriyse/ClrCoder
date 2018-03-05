@@ -7,7 +7,6 @@
 namespace ClrCoder.Threading
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Security;
@@ -22,11 +21,6 @@ namespace ClrCoder.Threading
     /// </remarks>
     public static partial class MultiEventLoop
     {
-        /// <summary>
-        /// The global events queue.
-        /// </summary>
-        private static readonly BlockingCollection<MevelEvent> GlobalEventsQueue = new BlockingCollection<MevelEvent>();
-
         [ThreadStatic]
         [CanBeNull]
         private static EventLoop _currentEventLoop;
@@ -40,8 +34,17 @@ namespace ClrCoder.Threading
         [CanBeNull]
         private static EventLoop[] _eventLoops;
 
+        // ReSharper disable once InconsistentNaming
+        private static int _nextEventLoop_BadlyVolatile;
+
         [CanBeNull]
         private static MevelTaskScheduler _scheduler;
+
+        /// <summary>
+        /// <see cref="EventLoop"/> of the currently running thread, or null for non <see cref="MultiEventLoop"/> threads.
+        /// </summary>
+        [CanBeNull]
+        public static EventLoop CurrentEventLoop => _currentEventLoop;
 
         /// <summary>
         /// The TPL scheduler interface to the component.
@@ -105,11 +108,6 @@ namespace ClrCoder.Threading
                 _eventLoops[i].Dispose();
             }
 
-            // Clearing all not processed events.
-            while (GlobalEventsQueue.TryTake(out var _))
-            {
-            }
-
             _scheduler = null;
         }
 
@@ -118,7 +116,22 @@ namespace ClrCoder.Threading
         /// <see cref="MultiEventLoop"/> thread).
         /// </summary>
         /// <returns>The awaitable.</returns>
-        public static FastYieldAwaitable Yield() => default;
+        public static FastYieldAwaitable Yield() =>
+            new FastYieldAwaitable
+                {
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    EventLoop = _currentEventLoop
+                };
+
+        /// <summary>
+        /// Gets next event loop in a round robin strategy with non strict concurrent counting.
+        /// </summary>
+        /// <returns>The next event loop index.</returns>
+        private static int GetNextEventLoopToScheduleGlobalEvent()
+        {
+            // ReSharper disable once PossibleNullReferenceException
+            return (_nextEventLoop_BadlyVolatile++ & 0xFFFFFF % (_eventLoops.Length - 1)) + 1;
+        }
 
         [Conditional("DEBUG")]
         private static void VerifyInitialized()
@@ -152,11 +165,8 @@ namespace ClrCoder.Threading
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void OnCompleted([NotNull] Action continuation)
             {
-                GlobalEventsQueue.Add(
-                    new MevelEvent
-                        {
-                            SimpleAction = continuation
-                        });
+                // ReSharper disable once PossibleNullReferenceException
+                _eventLoops[GetNextEventLoopToScheduleGlobalEvent()].EnqueueRemotely(continuation);
             }
 
             /// <summary>
@@ -172,7 +182,11 @@ namespace ClrCoder.Threading
         /// </summary>
         public struct FastYieldAwaitable
         {
-            private EventLoop _eventLoop;
+            /// <summary>
+            /// The event loop.
+            /// </summary>
+            [NotNull]
+            internal EventLoop EventLoop;
 
             /// <summary>
             /// Gets the awaiter.
@@ -180,12 +194,7 @@ namespace ClrCoder.Threading
             /// <returns>The awaiter.</returns>
             public FastYieldAwaiter GetAwaiter()
             {
-                if (_eventLoop == null)
-                {
-                    _eventLoop = _currentEventLoop;
-                }
-
-                return new FastYieldAwaiter(_eventLoop);
+                return new FastYieldAwaiter(EventLoop);
             }
         }
 
@@ -194,14 +203,13 @@ namespace ClrCoder.Threading
         /// </summary>
         public struct FastYieldAwaiter : ICriticalNotifyCompletion
         {
-            [CanBeNull]
             private readonly EventLoop _eventLoop;
 
             /// <summary>
             /// Initializes the struct.
             /// </summary>
             /// <param name="eventLoop">The even loop object of the current thread.</param>
-            internal FastYieldAwaiter([CanBeNull] EventLoop eventLoop)
+            internal FastYieldAwaiter(EventLoop eventLoop)
             {
                 _eventLoop = eventLoop;
             }
@@ -219,18 +227,7 @@ namespace ClrCoder.Threading
                     ReferenceEquals(_eventLoop, _currentEventLoop),
                     "ReferenceEquals(_eventLoop, _currentEventLoop)");
 
-                if (_eventLoop != null)
-                {
-                    _eventLoop.Enqueue(continuation);
-                }
-                else
-                {
-                    GlobalEventsQueue.Add(
-                        new MevelEvent
-                            {
-                                SimpleAction = continuation
-                            });
-                }
+                _eventLoop.EnqueueUnsafe(continuation);
             }
 
             /// <inheritdoc/>
@@ -241,18 +238,7 @@ namespace ClrCoder.Threading
                     ReferenceEquals(_eventLoop, _currentEventLoop),
                     "ReferenceEquals(_eventLoop, _currentEventLoop)");
 
-                if (_eventLoop != null)
-                {
-                    _eventLoop.Enqueue(continuation);
-                }
-                else
-                {
-                    GlobalEventsQueue.Add(
-                        new MevelEvent
-                            {
-                                SimpleAction = continuation
-                            });
-                }
+                _eventLoop.EnqueueUnsafe(continuation);
             }
 
             /// <summary>

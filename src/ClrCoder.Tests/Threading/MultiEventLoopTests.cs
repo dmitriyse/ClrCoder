@@ -8,13 +8,10 @@ namespace ClrCoder.Tests.Threading
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
     using ClrCoder.Threading;
-
-    using Dsp;
 
     using NUnit.Framework;
 
@@ -110,6 +107,14 @@ namespace ClrCoder.Tests.Threading
             {
                 await yieldAwaitable;
             }
+
+            // ------- Use this trick to get totally unlimited calculation power, without blocking other tasks.
+            ////var eventLoop = MultiEventLoop.CurrentEventLoop;
+            ////for (int i = 0; i < count; i++)
+            ////{
+            ////    // ReSharper disable once PossibleNullReferenceException
+            ////    eventLoop.DoEventsUnsafe((i & 0xFFFF) == 0);
+            ////}
         }
     }
 }
