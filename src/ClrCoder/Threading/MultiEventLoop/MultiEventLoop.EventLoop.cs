@@ -62,6 +62,11 @@ namespace ClrCoder.Threading
                 _thread.Start();
             }
 
+            /// <summary>
+            /// Returns true, if locally and remote queues are empty.
+            /// </summary>
+            internal bool IsEmpty => QueuedCount + _remoteScheduledEvents.Count == 0;
+
             /// <inheritdoc/>
             public void Dispose()
             {
@@ -261,6 +266,7 @@ namespace ClrCoder.Threading
                         }
 
                         var ev = _remoteScheduledEvents.Take(_shutdownCancellationToken);
+
                         try
                         {
                             ev.ExecuteEvent();

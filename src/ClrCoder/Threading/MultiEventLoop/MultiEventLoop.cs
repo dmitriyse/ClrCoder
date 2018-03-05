@@ -127,6 +127,7 @@ namespace ClrCoder.Threading
         /// Gets next event loop in a round robin strategy with non strict concurrent counting.
         /// </summary>
         /// <returns>The next event loop index.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetNextEventLoopToScheduleGlobalEvent()
         {
             // ReSharper disable once PossibleNullReferenceException

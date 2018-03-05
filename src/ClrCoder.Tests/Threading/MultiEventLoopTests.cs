@@ -44,7 +44,7 @@ namespace ClrCoder.Tests.Threading
         [Category("Manual")]
         public void SimpleMultiEventLoopBenchmark()
         {
-            const int TestSize = 300_000_000;
+            const int TestSize = 30_000_000;
 
             MultiEventLoop.Initialize();
             try
@@ -105,6 +105,7 @@ namespace ClrCoder.Tests.Threading
             var yieldAwaitable = MultiEventLoop.Yield();
             for (int i = 0; i < count; i++)
             {
+                //await Task.Yield();
                 await yieldAwaitable;
             }
 

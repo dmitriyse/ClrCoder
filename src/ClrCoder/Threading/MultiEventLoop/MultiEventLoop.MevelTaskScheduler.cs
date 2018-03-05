@@ -51,8 +51,15 @@ namespace ClrCoder.Threading
                 }
                 else
                 {
-                    // ReSharper disable once PossibleNullReferenceException
-                    _eventLoops[GetNextEventLoopToScheduleGlobalEvent()].EnqueueRemotely(task);
+                    if (curEventLoop != null && curEventLoop.IsEmpty)
+                    {
+                        curEventLoop.EnqueueUnsafe(task);
+                    }
+                    else
+                    {
+                        // ReSharper disable once PossibleNullReferenceException
+                        _eventLoops[GetNextEventLoopToScheduleGlobalEvent()].EnqueueRemotely(task);
+                    }
                 }
             }
 
