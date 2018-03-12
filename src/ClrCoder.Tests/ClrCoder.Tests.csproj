@@ -15,6 +15,12 @@
   <ItemGroup Condition=" '$(OS)' != 'Windows_NT' ">
     <PackageReference Include="Microsoft.TargetingPack.NETFramework.v4.6.1" Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Dsp\**" />
+    <EmbeddedResource Remove="Dsp\**" />
+    <None Remove="Dsp\**" />
+  </ItemGroup>
   
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
