@@ -68,7 +68,6 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 StyleCop.Cache
-
 #------------------
 *.lock.json
 src/packages/
