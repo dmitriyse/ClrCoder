@@ -1,4 +1,4 @@
-﻿// <copyright file="ValueVoid.cs" company="ClrCoder project">
+﻿// <copyright file="VoidResult.cs" company="ClrCoder project">
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -19,10 +19,10 @@ namespace ClrCoder
     /// </remarks>
     [StructLayout(LayoutKind.Sequential, Size = 1)]
     [PublicAPI]
-    public struct ValueVoid : IEquatable<ValueVoid>, IStructuralEquatable
+    public struct VoidResult : IEquatable<VoidResult>, IStructuralEquatable
     {
         /// <inheritdoc/>
-        public bool Equals(ValueVoid other)
+        public bool Equals(VoidResult other)
         {
             return true;
         }
@@ -30,7 +30,7 @@ namespace ClrCoder
         /// <inheritdoc/>
         public override bool Equals([CanBeNull] object obj)
         {
-            return obj is ValueVoid;
+            return obj is VoidResult;
         }
 
         bool IStructuralEquatable.Equals([CanBeNull] object other, [CanBeNull] IEqualityComparer comparer)

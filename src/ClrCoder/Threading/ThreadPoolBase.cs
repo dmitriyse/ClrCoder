@@ -197,7 +197,7 @@ namespace ClrCoder.Threading
 
             private readonly CancellationTokenSource _shutdownCts;
 
-            private readonly TaskCompletionSource<ValueVoid> _shutdownCompletedCompletionSource;
+            private readonly TaskCompletionSource<VoidResult> _shutdownCompletedCompletionSource;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="WorkerThread"/> class.
@@ -213,7 +213,7 @@ namespace ClrCoder.Threading
                 _shutdownCts = new CancellationTokenSource();
                 ShutdownCancellationToken = _shutdownCts.Token;
 
-                _shutdownCompletedCompletionSource = new TaskCompletionSource<ValueVoid>();
+                _shutdownCompletedCompletionSource = new TaskCompletionSource<VoidResult>();
                 _currentWorker = this;
             }
 

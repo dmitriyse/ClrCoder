@@ -40,7 +40,8 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            TestContext.WriteLine((testSize * 1000.0) / stopwatch.ElapsedMilliseconds);
+            double itemsPerSecond = (testSize * 1000.0) / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine($"{itemsPerSecond / 1000_000.0:F4} Mops/sec");
         }
 
         /// <summary>
@@ -173,8 +174,9 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            double multiCoreSpeed = TestSize * threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
-            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {4}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
+            double multiCoreSpeed = (TestSize * threads.Count * 1000.0) / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine(
+                $"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {4}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={(multiCoreSpeed / (singleCoreSpeed * threads.Count)) * 100.0:F3}%");
         }
 
         /// <summary>
@@ -232,7 +234,6 @@ namespace ClrCoder.Tests
                 }
             }
 
-
             var threads = Enumerable.Range(0, threadsCount).Select(x => new Thread(BenchmarkProc)).ToList();
 
             stopwatch = Stopwatch.StartNew();
@@ -247,8 +248,9 @@ namespace ClrCoder.Tests
             }
 
             stopwatch.Stop();
-            double multiCoreSpeed = TestSize * (long)threads.Count * 1000.0 / stopwatch.ElapsedMilliseconds;
-            TestContext.WriteLine($"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {threadsCount}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={multiCoreSpeed / (singleCoreSpeed * threads.Count) * 100.0:F3}%");
+            double multiCoreSpeed = (TestSize * (long)threads.Count * 1000.0) / stopwatch.ElapsedMilliseconds;
+            TestContext.WriteLine(
+                $"single-thread:{singleCoreSpeed / 1000_000.0:F4} millions/sec  {threadsCount}-thread: {multiCoreSpeed / 1000_000.0:F4} millions/sec scalability={(multiCoreSpeed / (singleCoreSpeed * threads.Count)) * 100.0:F3}%");
         }
 
         /// <summary>

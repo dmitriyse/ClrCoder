@@ -22,16 +22,29 @@ namespace ClrCoder.Threading
         /// </summary>
         public static readonly Task CompletedTaskValue;
 
+        /// <summary>
+        /// This task will never completes.
+        /// </summary>
+        public static readonly Task NeverCompletingTaskValue;
+
         static TaskEx()
         {
             CompletedTask = ((Func<Task>)(async () => { }))();
             CompletedTaskValue = CompletedTask;
+
+            NeverCompletingTask = new TaskCompletionSource<bool>().Task;
+            NeverCompletingTaskValue = NeverCompletingTask;
         }
 
         /// <summary>
         /// Alternative to Task.CompletedTask (for .Net Standard 1.0).
         /// </summary>
         public static Task CompletedTask { get; }
+
+        /// <summary>
+        /// This task will never completes.
+        /// </summary>
+        public static Task NeverCompletingTask { get; }
 
         /// <summary>
         /// The Task.FromException polyfill for the netstandard 1.0 

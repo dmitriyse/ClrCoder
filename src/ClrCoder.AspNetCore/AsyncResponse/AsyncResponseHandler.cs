@@ -173,11 +173,11 @@ namespace ClrCoder.AspNetCore.AsyncResponse
 
             private readonly TResponseKey _key;
 
-            private readonly TaskCompletionSource<ValueVoid> _aspNetPipelineHandlingCompletedPromise =
-                new TaskCompletionSource<ValueVoid>();
+            private readonly TaskCompletionSource<VoidResult> _aspNetPipelineHandlingCompletedPromise =
+                new TaskCompletionSource<VoidResult>();
 
-            private readonly TaskCompletionSource<ValueVoid> _handlingCompletedPromise =
-                new TaskCompletionSource<ValueVoid>();
+            private readonly TaskCompletionSource<VoidResult> _handlingCompletedPromise =
+                new TaskCompletionSource<VoidResult>();
 
             public Workflow(AsyncResponseHandler<TResponseKey> owner, TResponseKey key)
             {
@@ -247,8 +247,8 @@ namespace ClrCoder.AspNetCore.AsyncResponse
                     }
                     else
                     {
-                        _aspNetPipelineHandlingCompletedPromise.SetResult(default(ValueVoid));
-                        _handlingCompletedPromise.SetResult(default(ValueVoid));
+                        _aspNetPipelineHandlingCompletedPromise.SetResult(default(VoidResult));
+                        _handlingCompletedPromise.SetResult(default(VoidResult));
                     }
                 }
                 finally

@@ -14,7 +14,7 @@ namespace ClrCoder.Threading.Channels
     /// Memory can also be encapsulated in this <see langword="struct"/>.
     /// </remarks>
     /// <typeparam name="T">Specifies the type of data that may be written to the channel.</typeparam>
-    public class ChannelWriterBufferSlice<T>
+    public struct ChannelWriterBufferSlice<T>
     {
         private T[] _array;
 
@@ -25,7 +25,7 @@ namespace ClrCoder.Threading.Channels
         private int _id;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelWriterBufferSlice{T}"/> class.
+        /// Initializes a new instance of the <see cref="ChannelWriterBufferSlice{T}"/> struct.
         /// </summary>
         /// <param name="array">The array.</param>
         /// <param name="start">The slice start in the array.</param>
@@ -52,6 +52,11 @@ namespace ClrCoder.Threading.Channels
         /// The slice id.
         /// </summary>
         public int Id => _id;
+
+        /// <summary>
+        /// The length of the slice.
+        /// </summary>
+        public int Length => _length;
 
         /// <summary>
         /// Decreases slice length.

@@ -26,7 +26,7 @@ namespace ClrCoder.Threading
         /// TODO: Replace with CancellationTokenSource.
         /// </summary>
         [CanBeNull]
-        private TaskCompletionSource<ValueVoid> _disposeCompletionSource;
+        private TaskCompletionSource<VoidResult> _disposeCompletionSource;
 
         [CanBeNull]
         private Task _disposeTask;
@@ -64,7 +64,7 @@ namespace ClrCoder.Threading
                         // Implicit memory barrier here
                         if (_disposeTask == null)
                         {
-                            _disposeCompletionSource = new TaskCompletionSource<ValueVoid>();
+                            _disposeCompletionSource = new TaskCompletionSource<VoidResult>();
                             _disposeTask = _disposeCompletionSource.Task;
                         }
 

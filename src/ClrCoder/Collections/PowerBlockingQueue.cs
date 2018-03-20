@@ -32,11 +32,11 @@ namespace ClrCoder.Collections
 
         private readonly object _syncRoot;
 
-        private LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)> _pendingEnqueueActions =
-            new LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)>();
+        private LinkedList<(TaskCompletionSource<VoidResult>, Func<TInnerCollection, bool>)> _pendingEnqueueActions =
+            new LinkedList<(TaskCompletionSource<VoidResult>, Func<TInnerCollection, bool>)>();
 
-        private LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)> _pendingDequeueActions =
-            new LinkedList<(TaskCompletionSource<ValueVoid>, Func<TInnerCollection, bool>)>();
+        private LinkedList<(TaskCompletionSource<VoidResult>, Func<TInnerCollection, bool>)> _pendingDequeueActions =
+            new LinkedList<(TaskCompletionSource<VoidResult>, Func<TInnerCollection, bool>)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PowerBlockingQueue{TInnerCollection}"/> class.
@@ -73,7 +73,7 @@ namespace ClrCoder.Collections
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var completionSource = new TaskCompletionSource<ValueVoid>();
+                var completionSource = new TaskCompletionSource<VoidResult>();
 
                 _pendingDequeueActions.AddLast((completionSource, tryDequeueFunc));
 
@@ -106,7 +106,7 @@ namespace ClrCoder.Collections
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var completionSource = new TaskCompletionSource<ValueVoid>();
+                var completionSource = new TaskCompletionSource<VoidResult>();
 
                 _pendingEnqueueActions.AddLast((completionSource, tryEnqueueFunc));
 
@@ -117,9 +117,9 @@ namespace ClrCoder.Collections
         }
 
         private void SubscribeToCancellationToken(
-            TaskCompletionSource<ValueVoid> completionSource,
+            TaskCompletionSource<VoidResult> completionSource,
             CancellationToken cancellationToken,
-            LinkedList<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> listToRemovePendingAction,
+            LinkedList<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> listToRemovePendingAction,
             bool tryEnqueueFirst)
         {
             if (cancellationToken != default(CancellationToken))
@@ -129,13 +129,13 @@ namespace ClrCoder.Collections
                         {
                             lock (_syncRoot)
                             {
-                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+                                LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> node
 = listToRemovePendingAction.First;
                                 while (node != null)
                                 {
                                     if (ReferenceEquals(node.Value.Tcs, completionSource))
                                     {
-                                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+                                        LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
 = node;
                                         node = node.Next;
                                         listToRemovePendingAction.Remove(nodeToDelete);
@@ -167,7 +167,7 @@ namespace ClrCoder.Collections
                     do
                     {
                         hasEnqueueChanges = false;
-                        LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+                        LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> node
 = _pendingEnqueueActions.First;
                         while (node != null)
                         {
@@ -175,8 +175,8 @@ namespace ClrCoder.Collections
                             {
                                 hasEnqueueChanges = true;
                                 hasChanges = true;
-                                node.Value.Tcs.SetResult(default(ValueVoid));
-                                LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+                                node.Value.Tcs.SetResult(default(VoidResult));
+                                LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
 = node;
                                 node = node.Next;
                                 _pendingEnqueueActions.Remove(nodeToDelete);
@@ -194,7 +194,7 @@ namespace ClrCoder.Collections
                 do
                 {
                     hasDequeueChanges = false;
-                    LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> node
+                    LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> node
 = _pendingDequeueActions.First;
                     while (node != null)
                     {
@@ -202,8 +202,8 @@ namespace ClrCoder.Collections
                         {
                             hasChanges = true;
                             hasDequeueChanges = true;
-                            node.Value.Tcs.SetResult(default(ValueVoid));
-                            LinkedListNode<(TaskCompletionSource<ValueVoid> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
+                            node.Value.Tcs.SetResult(default(VoidResult));
+                            LinkedListNode<(TaskCompletionSource<VoidResult> Tcs, Func<TInnerCollection, bool> PendingAction)> nodeToDelete
 = node;
                             node = node.Next;
                             _pendingDequeueActions.Remove(nodeToDelete);

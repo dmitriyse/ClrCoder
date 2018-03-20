@@ -46,7 +46,7 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
         private readonly SortedDictionary<TKey, TEntity> _entities;
 
         [CanBeNull]
-        private readonly IndexedLinkedList<TKey, ValueVoid> _gcFifoQueue;
+        private readonly IndexedLinkedList<TKey, VoidResult> _gcFifoQueue;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -74,7 +74,7 @@ namespace ClrCoder.DomainModel.Impl.LwtInMemory
             MaxCapacity = maxCapacity;
             if (MaxCapacity != null)
             {
-                _gcFifoQueue = new IndexedLinkedList<TKey, ValueVoid>();
+                _gcFifoQueue = new IndexedLinkedList<TKey, VoidResult>();
             }
         }
 

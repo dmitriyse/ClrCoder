@@ -15,7 +15,7 @@ namespace ClrCoder.Threading.Channels
     /// <content>The <see cref="ModeBufferReaderEx"/> implementation.</content>
     public partial class BatchModeBuffer<T>
     {
-        private class ModeBufferReaderEx : ChannelReaderEx<T>
+        private class ModeBufferReaderEx : ChannelReaderBase<T>
         {
             private readonly BatchModeBuffer<T> _owner;
 
@@ -28,7 +28,7 @@ namespace ClrCoder.Threading.Channels
             public override Task Completion { get; }
 
             /// <inheritdoc/>
-            public override ValueTask<ValueVoid> ValueTaskCompletion { get; }
+            public override ValueTask<VoidResult> ValueTaskCompletion { get; }
 
             /// <inheritdoc/>
             public override void CompleteRead(int processedCount, ref ChannelReaderBufferSlice<T> slice)

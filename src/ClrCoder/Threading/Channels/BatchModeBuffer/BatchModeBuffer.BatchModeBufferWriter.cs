@@ -15,7 +15,7 @@ namespace ClrCoder.Threading.Channels
     /// <content>The <see cref="BatchModeBufferWriter"/> implementation.</content>
     public partial class BatchModeBuffer<T>
     {
-        private class BatchModeBufferWriter : ChannelWriterEx<T>
+        private class BatchModeBufferWriter : ChannelWriterBase<T>
         {
             private readonly BatchModeBuffer<T> _owner;
 
@@ -111,7 +111,7 @@ namespace ClrCoder.Threading.Channels
             }
 
             /// <inheritdoc/>
-            public override ValueTask<ValueVoid> WriteAsyncWithOwnership(T[] items, CancellationToken cancellationToken = default)
+            public override ValueTask<VoidResult> WriteAsyncWithOwnership(T[] items, CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
             }
@@ -152,7 +152,7 @@ namespace ClrCoder.Threading.Channels
             }
 
             /// <inheritdoc/>
-            public override ValueTask<ValueVoid> WriteValueTaskAsync(T item, CancellationToken cancellationToken = default)
+            public override ValueTask<VoidResult> WriteValueTaskAsync(T item, CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
             }

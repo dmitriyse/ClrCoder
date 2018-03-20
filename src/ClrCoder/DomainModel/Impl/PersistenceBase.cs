@@ -31,7 +31,7 @@ namespace ClrCoder.DomainModel.Impl
         private readonly List<PersistencePluginBase<TPersistence, TUnitOfWork>> _plugins =
             new List<PersistencePluginBase<TPersistence, TUnitOfWork>>();
 
-        private readonly ConcurrentDictionary<TUnitOfWork, ValueVoid> _openedUoWs = new ConcurrentDictionary<TUnitOfWork, ValueVoid>();
+        private readonly ConcurrentDictionary<TUnitOfWork, VoidResult> _openedUoWs = new ConcurrentDictionary<TUnitOfWork, VoidResult>();
 
         private readonly List<PersistencePluginBase<TPersistence, TUnitOfWork>> _nonDeclaredResolvePlugins =
             new List<PersistencePluginBase<TPersistence, TUnitOfWork>>();
