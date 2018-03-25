@@ -35,7 +35,7 @@ namespace ClrCoder.Threading.Channels
         {
 #if DEBUG
 
-            // TODO: checks
+// TODO: checks
 #endif
             _array = array;
             _start = start;

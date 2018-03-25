@@ -7,7 +7,7 @@
 namespace ClrCoder.Threading.Channels
 {
     using System;
-    using System.Diagnostics;
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
@@ -18,11 +18,10 @@ namespace ClrCoder.Threading.Channels
     /// <typeparam name="T"></typeparam>
     public partial class BatchModeBuffer<T> : IDataFlowConsumer<T>, IDataFlowProducer<T>
     {
-        private const int _initialSliceEntriesCount = 4;
+        private static readonly T[] EmptyBuffer = new T[0];
 
-        private readonly object _syncRoot = new object();
-
-        private readonly T[] _buffer;
+        [CanBeNull]
+        private readonly object _syncRoot;
 
         private readonly int _maxBufferLength;
 
@@ -30,58 +29,30 @@ namespace ClrCoder.Threading.Channels
 
         private readonly TimeSpan _maxReadAccumulationDelay;
 
-        [NotNull]
-        [ItemNotNull]
-        private SliceEntry[] _sliceEntriesRegistry;
+        private readonly Dictionary<int, LinkedListNode<SliceEntry>> _idToSliceEntries =
+            new Dictionary<int, LinkedListNode<SliceEntry>>();
 
-        [NotNull]
-        [ItemNotNull]
-        private SliceEntry[] _sliceEntriesAllocationStack;
+        private readonly LinkedList<SliceEntry> _sliceEntries = new LinkedList<SliceEntry>();
 
-        private int _sliceEntriesAllocationStackPointer;
+        private readonly int _maxSliceLength;
 
-        [CanBeNull]
-        private SliceEntry _entriesListHead;
-
-        private int _allocatedSize;
-
-        private int _freePosition;
-
-        private int _bufferSizeMask;
-
-        private int _allocLimitLeft;
+        private int _nextId = 0;
 
         /// <summary>
         /// </summary>
         /// <param name="maxBufferLength"></param>
         /// <param name="minReadSize"></param>
-        public BatchModeBuffer(int maxBufferLength, int minReadSize, TimeSpan maxReadAccumulationDelay)
+        public BatchModeBuffer(
+            int maxBufferLength,
+            int minReadSize,
+            TimeSpan maxReadAccumulationDelay,
+            object syncRoot = null)
         {
             _maxBufferLength = maxBufferLength;
             _minReadSize = minReadSize;
             _maxReadAccumulationDelay = maxReadAccumulationDelay;
-
-            // Buffer size should be power of two.
-            // Picking nearest greater number than maxBufferLength 
-            int bufferSize = 1;
-            while ((bufferSize <<= 1) < maxBufferLength)
-            {
-            }
-
-            // Do not be greedy, memory is cheap.
-            _buffer = new T[bufferSize * 2];
-            _bufferSizeMask = _buffer.Length - 1;
-
-            _allocLimitLeft = maxBufferLength;
-
-            _sliceEntriesAllocationStack = new SliceEntry[_initialSliceEntriesCount];
-            for (int i = 0; i < _initialSliceEntriesCount; i++)
-            {
-                _sliceEntriesRegistry[i] = _sliceEntriesAllocationStack[i] = new SliceEntry
-                                                                                 {
-                                                                                     Id = i
-                                                                                 };
-            }
+            _syncRoot = syncRoot;
+            _maxSliceLength = Math.Max(512, _minReadSize);
         }
 
         private enum SliceEntryStatus
@@ -96,166 +67,108 @@ namespace ClrCoder.Threading.Channels
         /// <inheritdoc/>
         public IChannelReader<T> OpenReader()
         {
-            return new ModeBufferReaderEx(this);
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc/>
         public IChannelWriter<T> OpenWriter()
         {
-            return new BatchModeBufferWriter(this);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void IncreaseSliceEntriesPoolSize()
-        {
-            int oldSize = _sliceEntriesAllocationStack.Length;
-            int newSize = oldSize << 1;
-
-            // Increasing pool size.
-            Array.Resize(ref _sliceEntriesRegistry, newSize);
-            Array.Resize(ref _sliceEntriesAllocationStack, newSize);
-
-            // Writing new slice entries indexes.
-            for (int i = oldSize; i < newSize; i++)
+            if (_syncRoot == null)
             {
-                _sliceEntriesAllocationStack[i] = _sliceEntriesRegistry[i] = new SliceEntry
-                                                                                 {
-                                                                                     Id = i
-                                                                                 };
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SliceEntry InsertNewEntryAfter(SliceEntry entry)
-        {
-            SliceEntry newEntry = _sliceEntriesAllocationStack[_sliceEntriesAllocationStackPointer++];
-            if (_sliceEntriesAllocationStackPointer == _sliceEntriesAllocationStack.Length)
-            {
-                IncreaseSliceEntriesPoolSize();
+                return new BatchModeBufferWriter<SyncFreeObject>(this, default);
             }
 
-            SliceEntry next = newEntry.Next = entry.Next;
-            newEntry.Prev = entry;
-            entry.Next = next.Prev = newEntry;
+            return new BatchModeBufferWriter<MonitorSyncObject>(this, new MonitorSyncObject(_syncRoot));
+        }
+
+        private SliceEntry AllocateEmptyEntryAfter(LinkedListNode<SliceEntry> node)
+        {
+            var newEntry = new SliceEntry
+                               {
+                                   Id = _nextId++
+                               };
+            _sliceEntries.AddAfter(node, newEntry);
 
             return newEntry;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SliceEntry InsertNewEntryLast()
+        private SliceEntry AllocateNewEntry()
         {
-            SliceEntry newEntry = _sliceEntriesAllocationStack[_sliceEntriesAllocationStackPointer++];
-            if (_sliceEntriesAllocationStackPointer == _sliceEntriesAllocationStack.Length)
-            {
-                IncreaseSliceEntriesPoolSize();
-            }
+            var result = new SliceEntry
+                             {
+                                 Buffer = new T[_maxSliceLength],
+                                 Status = SliceEntryStatus.Data,
+                                 Id = _nextId++
+                             };
 
-            if (_entriesListHead == null)
-            {
-                _entriesListHead = newEntry;
-                _entriesListHead.Prev = _entriesListHead;
-                _entriesListHead.Next = _entriesListHead;
-            }
-            else
-            {
-                SliceEntry prev = newEntry.Prev = _entriesListHead.Prev;
-                newEntry.Next = _entriesListHead;
-                _entriesListHead.Prev = prev.Next = newEntry;
-            }
+            _idToSliceEntries.Add(result.Id, _sliceEntries.AddLast(result));
 
-            return newEntry;
+            return result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsConnectedWithNext(SliceEntry entry)
+        private void RemoveNode(LinkedListNode<SliceEntry> sliceEntryNode)
         {
-            return entry.Start + entry.Length == entry.Next.Start;
+            _idToSliceEntries.Remove(sliceEntryNode.Value.Id);
+            _sliceEntries.Remove(sliceEntryNode);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsFirstEntry(SliceEntry entry)
+        private Span<T> TryAllocateUnsafe(int amount)
         {
-            return ReferenceEquals(entry.Prev, _entriesListHead);
-        }
+            // We don't check logical amount.
+            SliceEntry lastEntry = _sliceEntries.Last?.Value;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsLastEntry(SliceEntry entry)
-        {
-            return ReferenceEquals(entry.Next, _entriesListHead);
-        }
+            Span<T> result;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SliceEntry JoinToNextEntry(SliceEntry entry)
-        {
-            SliceEntry next = entry.Next;
-            int allocationLength = entry.Length;
-            next.Start -= allocationLength;
-            next.Length += allocationLength;
-
-            // Remove op.
-            next.Prev = entry.Prev;
-            entry.Prev.Next = next;
-            _sliceEntriesAllocationStack[--_sliceEntriesAllocationStackPointer] = entry;
-            if (ReferenceEquals(entry, _entriesListHead))
+            if ((lastEntry != null)
+                && (lastEntry.Status == SliceEntryStatus.Data))
             {
-                _entriesListHead = next;
-            }
-
-            return next;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void JoinToPrevEntry(SliceEntry entry)
-        {
-            SliceEntry prev = entry.Prev;
-
-            prev.Length += entry.Length;
-
-            // Remove op.
-            prev.Next = entry.Next;
-            entry.Next.Prev = prev;
-            _sliceEntriesAllocationStack[--_sliceEntriesAllocationStackPointer] = entry;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void RemoveEntry(SliceEntry entry)
-        {
-            Debug.Assert(_entriesListHead != null, "_entriesListHead != null");
-
-            // ReSharper disable once PossibleNullReferenceException
-            if (ReferenceEquals(_entriesListHead.Next, _entriesListHead))
-            {
-                Debug.Assert(ReferenceEquals(entry, _entriesListHead), "ReferenceEquals(entry, _entriesListHead)");
-
-                _entriesListHead = null;
-                _sliceEntriesAllocationStack[--_sliceEntriesAllocationStackPointer] = _entriesListHead;
-            }
-            else
-            {
-                SliceEntry next = entry.Next;
-                next.Prev = entry.Prev;
-                entry.Prev.Next = next;
-                _sliceEntriesAllocationStack[--_sliceEntriesAllocationStackPointer] = entry;
-                if (ReferenceEquals(_entriesListHead, entry))
+                result = lastEntry.AllocateForWrite(amount);
+                if (result.Length != 0)
                 {
-                    _entriesListHead = next;
+                    return result;
                 }
             }
+
+            lastEntry = AllocateNewEntry();
+            return lastEntry.AllocateForWrite(amount);
         }
 
         private class SliceEntry
         {
             public int Id;
 
-            public SliceEntryStatus Status;
+            public T[] Buffer;
 
             public int Start;
 
             public int Length;
 
-            public SliceEntry Next;
+            public SliceEntryStatus Status;
 
-            public SliceEntry Prev;
+            public int SpaceLeft => Buffer.Length - Start - Length;
+
+            public Span<T> AllocateForWrite(int maxAmount)
+            {
+                int writePosition = Start + Length;
+                int amount = Math.Min(Buffer.Length - writePosition, maxAmount);
+                Length += amount;
+                return new Span<T>(Buffer, writePosition, amount);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool TryWriteLast(T item)
+            {
+                bool result = false;
+                int writePosition = Start + Length;
+                if (writePosition < Buffer.Length)
+                {
+                    Buffer[writePosition] = item;
+                    Length++;
+                    result = true;
+                }
+
+                return result;
+            }
         }
     }
 }

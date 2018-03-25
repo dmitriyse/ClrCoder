@@ -48,7 +48,7 @@ namespace ClrCoder.Threading.Channels
         /// <inheritdoc/>
         public virtual void CompleteWrite(int processedCount, ref ChannelWriterBufferSlice<T> writeSlice)
         {
-            if (processedCount < 0 || processedCount > 1)
+            if ((processedCount < 0) || (processedCount > 1))
             {
                 throw new ArgumentOutOfRangeException(
                     "processedCount should be greater or equal to zero and less than slice length.",
@@ -73,14 +73,18 @@ namespace ClrCoder.Threading.Channels
         {
             if (newCount != 1)
             {
-                throw new ArgumentOutOfRangeException("newCount should be less or equal than current and greater than zero.", nameof(newCount));
+                throw new ArgumentOutOfRangeException(
+                    "newCount should be less or equal than current and greater than zero.",
+                    nameof(newCount));
             }
 
             // Do nothing.
         }
 
         /// <inheritdoc/>
-        public virtual async ValueTask<ChannelWriterBufferSlice<T>> StartWriteAsync(int count, CancellationToken cancellationToken)
+        public virtual async ValueTask<ChannelWriterBufferSlice<T>> StartWriteAsync(
+            int count,
+            CancellationToken cancellationToken)
         {
             if (await WaitToWriteAsync(cancellationToken))
             {
@@ -132,25 +136,9 @@ namespace ClrCoder.Threading.Channels
         public abstract ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
-        public virtual ValueTask<bool> WriteAsync(T item, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                return
-                    cancellationToken.IsCancellationRequested
-                        ? new ValueTask<bool>(Task.FromCanceled<bool>(cancellationToken))
-                        : TryWrite(item)
-                            ? default
-                            : new ValueTask<bool>(WriteAsyncCore(item, cancellationToken));
-            }
-            catch (Exception e)
-            {
-                return new ValueTask<bool>(Task.FromException<bool>(e));
-            }
-        }
-
-        /// <inheritdoc/>
-        public virtual async ValueTask<int> WriteAsync(ArraySegment<T> items, CancellationToken cancellationToken = default)
+        public virtual async ValueTask<int> WriteAsync(
+            ArraySegment<T> items,
+            CancellationToken cancellationToken = default)
         {
             if (await WaitToWriteAsync(cancellationToken))
             {
@@ -173,13 +161,19 @@ namespace ClrCoder.Threading.Channels
         }
 
         /// <inheritdoc/>
-        public virtual async ValueTask<int> WriteAsync<TItems>(TItems items, CancellationToken cancellationToken = default)
+        public abstract int TryWrite<TItems>(TItems items)
+            where TItems : IEnumerable<T>;
+
+        /// <inheritdoc/>
+        public virtual async ValueTask<int> WriteAsync<TItems>(
+            TItems items,
+            CancellationToken cancellationToken = default)
             where TItems : IEnumerable<T>
         {
             if (await WaitToWriteAsync(cancellationToken))
             {
                 int writtenCount = 0;
-                foreach(var item in items)
+                foreach (var item in items)
                 {
                     if (!TryWrite(item))
                     {
@@ -193,6 +187,24 @@ namespace ClrCoder.Threading.Channels
             }
 
             throw new ChannelClosedException();
+        }
+
+        /// <inheritdoc/>
+        public ValueTask WriteAsync(T item, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return
+                    cancellationToken.IsCancellationRequested
+                        ? new ValueTask(Task.FromCanceled(cancellationToken))
+                        : TryWrite(item)
+                            ? default
+                            : new ValueTask(WriteAsyncCore(item, cancellationToken));
+            }
+            catch (Exception e)
+            {
+                return new ValueTask(Task.FromException(e));
+            }
         }
 
         /// <inheritdoc/>
@@ -214,13 +226,13 @@ namespace ClrCoder.Threading.Channels
         {
         }
 
-        private async Task<bool> WriteAsyncCore(T innerItem, CancellationToken ct)
+        private async Task WriteAsyncCore(T innerItem, CancellationToken ct)
         {
             while (await WaitToWriteAsync(ct).ConfigureAwait(false))
             {
                 if (TryWrite(innerItem))
                 {
-                    return true;
+                    return;
                 }
             }
 

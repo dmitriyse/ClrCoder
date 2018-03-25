@@ -548,6 +548,20 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Creates lock helper.
+        /// </summary>
+        /// <typeparam name="T">The type of the sync object.</typeparam>
+        /// <param name="syncObject">The sync object.</param>
+        /// <returns>The lock helper.</returns>
+        public static SyncObjectLockHelper<T> Lock<T>(this T syncObject)
+            where T : struct, ISyncObject =>
+            new SyncObjectLockHelper<T>
+                {
+                    SyncObject = syncObject
+                };
+
+
+        /// <summary>
         /// Correctly invokes multicast delegate.
         /// </summary>
         /// <typeparam name="TEventArgs">The type of the event arguments.</typeparam>
@@ -666,6 +680,46 @@ namespace ClrCoder.Threading
             }
 
             return TaskEx.CompletedTaskValue;
+        }
+
+        /// <summary>
+        /// Creates wrapper task that is sensitive to the provided cancellation token.
+        /// </summary>
+        /// <typeparam name="T">The type of the item.</typeparam>
+        /// <param name="task">The original task object.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The wrapped task.</returns>
+        public static async Task<T> WithCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
+        {
+
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            if (!cancellationToken.CanBeCanceled)
+            {
+                return await task;
+            }
+
+            var cs = new TaskCompletionSource<VoidResult>();
+            cancellationToken.Register(
+                () =>
+                    {
+                        cs.SetException(new OperationCanceledException(cancellationToken));
+                    });
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var t = await Task.WhenAny(new Task[] { task, cs.Task });
+            if (task.IsCompleted)
+            {
+                return task.Result;
+            }
+
+            // Should throw an exception.
+            var vr = cs.Task.Result;
+
+            throw new InvalidOperationException("This is totally impossible state.");
         }
 
         /// <summary>
@@ -930,6 +984,25 @@ namespace ClrCoder.Threading
                 }
 
                 return Task.WhenAll(tasks);
+            }
+        }
+
+        /// <summary>
+        /// Helps to exit from critical sections with using statement.
+        /// </summary>
+        /// <typeparam name="TSyncObject">The type of the sync object.</typeparam>
+        public struct SyncObjectLockHelper<TSyncObject> : IDisposable
+            where TSyncObject : ISyncObject
+        {
+            /// <summary>
+            /// The sync object.
+            /// </summary>
+            internal TSyncObject SyncObject;
+
+            /// <inheritdoc/>
+            public void Dispose()
+            {
+                SyncObject.Exit();
             }
         }
     }

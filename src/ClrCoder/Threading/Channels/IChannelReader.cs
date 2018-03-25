@@ -29,7 +29,7 @@ namespace ClrCoder.Threading.Channels
         /// <remarks>
         /// Task is slow, we needs IValueTaskSource everywhere !
         /// </remarks>
-        ValueTask ValueTaskCompletion { get; }
+        ValueTask Completion { get; }
 
         /// <summary>
         /// Asynchronously reads an item from the channel.

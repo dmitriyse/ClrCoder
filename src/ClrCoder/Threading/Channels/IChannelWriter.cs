@@ -71,7 +71,7 @@ namespace ClrCoder.Threading.Channels
         /// A <see cref="ValueTask{T}"/> that will complete with a <c>true</c> result when item was written
         /// or with a <c>false</c> result when no further writing will be permitted.
         /// </returns>
-        ValueTask<bool> WriteAsync(T item, CancellationToken cancellationToken = default);
+        ValueTask WriteAsync(T item, CancellationToken cancellationToken = default);
 
         #region The zero-copy batch mode interface
 
@@ -137,6 +137,20 @@ namespace ClrCoder.Threading.Channels
         /// has been written.
         /// </returns>
         ValueTask<int> WriteAsync(ArraySegment<T> items, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously writes an items to the channel.
+        /// </summary>
+        /// <param name="items">The items to write to the channel.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> used to cancel the write
+        /// operation.
+        /// </param>
+        /// <returns>
+        /// The number of items has been written.
+        /// </returns>
+        int TryWrite<TItems>(TItems items)
+            where TItems : IEnumerable<T>;
 
         /// <summary>
         /// Asynchronously writes an item to the channel.

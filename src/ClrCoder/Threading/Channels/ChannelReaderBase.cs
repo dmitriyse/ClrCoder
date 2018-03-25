@@ -47,7 +47,7 @@ namespace ClrCoder.Threading.Channels
         }
 
         /// <inheritdoc/>
-        public virtual ValueTask ValueTaskCompletion => new ValueTask(TaskEx.NeverCompletingTaskValue);
+        public virtual ValueTask Completion => new ValueTask(TaskEx.NeverCompletingTaskValue);
 
         /// <inheritdoc/>
         public virtual ValueTask<T> ReadAsync(CancellationToken cancellationToken = default)

@@ -36,7 +36,7 @@ namespace ClrCoder.Threading.Channels
         {
 #if DEBUG
 
-            // TODO: checks
+// TODO: checks
 #endif
             _array = array;
             _start = start;
@@ -62,6 +62,11 @@ namespace ClrCoder.Threading.Channels
         /// The slice id.
         /// </summary>
         public int Id => _id;
+
+        /// <summary>
+        /// The length of the slice.
+        /// </summary>
+        public int Length => _length;
     }
 }
 

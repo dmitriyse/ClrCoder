@@ -7,11 +7,6 @@
     <DefineConstants>$(DefineConstants);CHECKED_BUILD</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Threading\Channels\BatchModeBuffer\**" />
-    <EmbeddedResource Remove="Threading\Channels\BatchModeBuffer\**" />
-    <None Remove="Threading\Channels\BatchModeBuffer\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

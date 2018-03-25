@@ -2,263 +2,649 @@
 // Copyright (c) ClrCoder project. All rights reserved.
 // Licensed under the Apache 2.0 license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 #if !NETSTANDARD1_0 && !NETSTANDARD1_1
 namespace ClrCoder.Threading.Channels
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
 
-    using Validation;
+    using JetBrains.Annotations;
 
-    /// <content>The <see cref="BatchModeBufferWriter"/> implementation.</content>
+    /// <content>The <see cref="BatchModeBufferWriter{T}"/> implementation.</content>
     public partial class BatchModeBuffer<T>
     {
-        private class BatchModeBufferWriter : ChannelWriterBase<T>
+        [NoReorder]
+        private class BatchModeBufferWriter<TSyncObject> : IChannelWriter<T>
+            where TSyncObject : struct, ISyncObject
         {
             private readonly BatchModeBuffer<T> _owner;
 
-            public BatchModeBufferWriter(BatchModeBuffer<T> owner)
+            private readonly TSyncObject _syncObject;
+
+            private bool _writeInProgress;
+
+            public BatchModeBufferWriter(BatchModeBuffer<T> owner, TSyncObject syncObject)
             {
                 _owner = owner;
+                _syncObject = syncObject;
+            }
+
+            /// <summary>
+            /// </summary>
+            ~BatchModeBufferWriter()
+            {
+                Debug.Assert(false, "Buffer writer should be disposed manually.");
             }
 
             /// <inheritdoc/>
-            public override void CompleteWrite(int processedCount, ref ChannelWriterBufferSlice<T> writeSlice)
+            public void Dispose()
             {
-                lock (_owner._syncRoot)
-                {
-                    var sliceEntry = _owner._sliceEntriesRegistry[writeSlice.Id];
+                // Do nothing.
+                GC.SuppressFinalize(this);
+            }
 
-                    // int allocatedLength = sliceEntry.AllocatedLength;
-                    int unprocessedCount = sliceEntry.Length - processedCount;
-                    sliceEntry.Length = processedCount;
+            /// <inheritdoc/>
+            public void Complete(Exception error = null)
+            {
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    if (!guard.TryComplete(error))
+                    {
+                        throw new ChannelClosedException();
+                    }
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool TryComplete(Exception error = null)
+            {
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    return guard.TryComplete();
+                }
+            }
+
+            /// <inheritdoc/>
+            public async ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default)
+            {
+                Task<VoidResult> taskToAwait = null;
+                using (var seqGuard = new SequentialUsageGuard(this))
+                {
+                    using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                    {
+                        seqGuard.OnStateGuardEntered();
+
+                        if (guard.GetFreeSpaceForWrite() == 0)
+                        {
+                            taskToAwait = _owner._writeSpaceAvailableCs?.Task;
+                        }
+                    }
+
+                    if (taskToAwait != null)
+                    {
+                        await taskToAwait.WithCancellation(cancellationToken);
+                    }
+
+                    // it's safe to use shadow.
+                    return !_owner._isCompleted;
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool TryWrite(T item)
+            {
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    EnsureSequentialUsage();
+
+                    bool result = false;
+                    if (guard.GetFreeSpaceForWrite() > 0)
+                    {
+                        guard.NotifyWritten(1);
+
+                        var sliceEntry = _owner._sliceEntries.Last?.Value;
+
+                        if ((sliceEntry == null) || (sliceEntry.Status != SliceEntryStatus.Data)
+                                                 || !sliceEntry.TryWriteLast(item))
+                        {
+                            _owner.AllocateNewEntry().TryWriteLast(item);
+                        }
+
+                        result = true;
+                    }
+
+                    return result;
+                }
+            }
+
+            /// <inheritdoc/>
+            public async ValueTask WriteAsync(T item, CancellationToken cancellationToken = default)
+            {
+                using (var seqGuard = new SequentialUsageGuard(this))
+                {
+                    while (true)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        Task<VoidResult> taskToAwait;
+
+                        using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                        {
+                            if (_owner._isCompleted)
+                            {
+                                throw new ChannelClosedException();
+                            }
+
+                            seqGuard.OnStateGuardEntered();
+
+                            if (guard.GetFreeSpaceForWrite() > 0)
+                            {
+                                guard.NotifyWritten(1);
+
+                                var sliceEntry = _owner._sliceEntries.Last?.Value;
+
+                                if ((sliceEntry == null) || (sliceEntry.Status != SliceEntryStatus.Data)
+                                                         || !sliceEntry.TryWriteLast(item))
+                                {
+                                    _owner.AllocateNewEntry().TryWriteLast(item);
+                                }
+
+                                return;
+                            }
+
+                            Debug.Assert(_owner._writeSpaceAvailableCs != null);
+                            taskToAwait = _owner._writeSpaceAvailableCs.Task;
+                        }
+
+                        await taskToAwait.WithCancellation(cancellationToken);
+
+                        // TODO: put this to avoid possible recursion.
+                        // await Task.Yield();
+                    }
+                }
+            }
+
+            /// <inheritdoc/>
+            public ChannelWriterBufferSlice<T> TryStartWrite(int count)
+            {
+                if (count <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(count), "Count should be non-zero positive value.");
+                }
+
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    EnsureSequentialUsage();
+
+                    if (_owner._isCompleted)
+                    {
+                        throw new ChannelClosedException();
+                    }
+
+                    int freeSpace = guard.GetFreeSpaceForWrite();
+                    if (freeSpace != 0)
+                    {
+                        int amountToAllocate = Math.Min(Math.Min(count, freeSpace), _owner._maxSliceLength);
+
+                        guard.NotifyAllocated(amountToAllocate);
+
+                        var sliceEntry = _owner.AllocateNewEntry();
+                        sliceEntry.Status = SliceEntryStatus.AllocatedForWrite;
+                        sliceEntry.Length = amountToAllocate;
+                        _writeInProgress = true;
+
+                        return new ChannelWriterBufferSlice<T>(sliceEntry.Buffer, 0, amountToAllocate, sliceEntry.Id);
+                    }
+
+                    return new ChannelWriterBufferSlice<T>(EmptyBuffer, 0, 0, 0);
+                }
+            }
+
+            /// <inheritdoc/>
+            public async ValueTask<ChannelWriterBufferSlice<T>> StartWriteAsync(
+                int count,
+                CancellationToken cancellationToken)
+            {
+                if (count <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(count), "Count should be non-zero positive value.");
+                }
+
+                bool isWriteStarted = false;
+                while (true)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    Task<VoidResult> taskToAwait;
+
+                    using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                    {
+                        if (!isWriteStarted)
+                        {
+                            EnsureSequentialUsage();
+                            _writeInProgress = true;
+                            isWriteStarted = true;
+                        }
+
+                        if (_owner._isCompleted)
+                        {
+                            _writeInProgress = false;
+                            throw new ChannelClosedException();
+                        }
+
+                        int freeSpace = guard.GetFreeSpaceForWrite();
+                        if (freeSpace != 0)
+                        {
+                            int amountToAllocate = Math.Min(Math.Min(count, freeSpace), _owner._maxSliceLength);
+
+                            guard.NotifyAllocated(amountToAllocate);
+
+                            var sliceEntry = _owner.AllocateNewEntry();
+                            sliceEntry.Status = SliceEntryStatus.AllocatedForWrite;
+                            sliceEntry.Length = amountToAllocate;
+
+                            var slice = new ChannelWriterBufferSlice<T>(
+                                sliceEntry.Buffer,
+                                0,
+                                amountToAllocate,
+                                sliceEntry.Id);
+                            return slice;
+                        }
+
+                        Debug.Assert(_owner._writeSpaceAvailableCs != null, "_owner._writeSpaceAvailableCs != null");
+                        taskToAwait = _owner._writeSpaceAvailableCs.Task;
+                    }
+
+                    await taskToAwait.WithCancellation(cancellationToken);
+
+                    // TODO: put this to avoid possible recursion.
+                    // await Task.Yield();
+                }
+            }
+
+            /// <inheritdoc/>
+            public void PartialFree(int newCount, ref ChannelWriterBufferSlice<T> writeSlice)
+            {
+                if ((newCount < 1) || (newCount > writeSlice.Length))
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(newCount),
+                        "New count should be greater than zero and less or equal to already allocated length.");
+                }
+
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    if (!_owner._idToSliceEntries.TryGetValue(writeSlice.Id, out var sliceEntryNode))
+                    {
+                        throw new ArgumentException("Wrong slice variable.");
+                    }
+
+                    if (!_writeInProgress)
+                    {
+                        throw new InvalidOperationException("PartialFree operation has not been started.");
+                    }
+
+                    if (writeSlice.Length != sliceEntryNode.Value.Length)
+                    {
+                        throw new ArgumentException("The provided slice have an invalid state", nameof(writeSlice));
+                    }
+
+                    int decreaseSize = sliceEntryNode.Value.Length - newCount;
+
+                    if (decreaseSize == 0)
+                    {
+                        // shit in shit out
+                        return;
+                    }
+
+                    writeSlice.DecreaseLength(decreaseSize);
+
+                    sliceEntryNode.Value.Length = newCount;
+
+                    guard.NotifyWritten(0, decreaseSize);
+                }
+            }
+
+            /// <inheritdoc/>
+            public void CompleteWrite(int processedCount, ref ChannelWriterBufferSlice<T> writeSlice)
+            {
+                if ((processedCount < 0) || (processedCount > writeSlice.Length))
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(processedCount),
+                        "processedCount should be non-negative and less than allocated count");
+                }
+
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                {
+                    if (!_owner._idToSliceEntries.TryGetValue(writeSlice.Id, out var sliceEntryNode))
+                    {
+                        throw new ArgumentException("Wrong slice variable.");
+                    }
+
+                    if (!_writeInProgress)
+                    {
+                        throw new InvalidOperationException("CompleteWrite operation has not been started.");
+                    }
+
+                    var sliceEntry = sliceEntryNode.Value;
+                    if (writeSlice.Length != sliceEntry.Length)
+                    {
+                        throw new ArgumentException("The provided slice have an invalid state", nameof(writeSlice));
+                    }
+
+                    guard.NotifyWritten(processedCount, sliceEntry.Length);
+
                     sliceEntry.Status = SliceEntryStatus.Data;
 
-                    // Update global state
-                    _owner._allocLimitLeft += unprocessedCount;
-
-                    if (_owner.IsLastEntry(sliceEntry))
+                    if (processedCount == 0)
                     {
-                        // Update global state
-                        _owner._allocatedSize -= unprocessedCount;
-
-                        // Updating entry.
-                        if (processedCount != 0)
-                        {
-                            // Trying to merge to th prev entry.
-                            SliceEntry prev = sliceEntry.Prev;
-                            if (!_owner.IsFirstEntry(sliceEntry)
-                                && (prev.Status == SliceEntryStatus.Data)
-                                && _owner.IsConnectedWithNext(prev))
-                            {
-                                _owner.JoinToPrevEntry(sliceEntry);
-                            }
-                        }
-                        else
-                        {
-                            _owner.RemoveEntry(sliceEntry);
-                        }
+                        _owner.RemoveNode(sliceEntryNode);
                     }
                     else
                     {
-                        if (processedCount != 0)
-                        {
-                            SliceEntry entryToTryJoinWithPrev = sliceEntry;
-
-                            // Trying to merge to the next entry.
-                            var next = sliceEntry.Next;
-                            if ((unprocessedCount == 0)
-                                && (next.Status == SliceEntryStatus.Data) && _owner.IsConnectedWithNext(sliceEntry))
-                            {
-                                entryToTryJoinWithPrev = _owner.JoinToNextEntry(sliceEntry);
-                            }
-
-                            // Trying to merge to th prev entry.
-                            SliceEntry prev = entryToTryJoinWithPrev.Prev;
-                            if (!_owner.IsFirstEntry(entryToTryJoinWithPrev)
-                                && (prev.Status == SliceEntryStatus.Data)
-                                && _owner.IsConnectedWithNext(prev))
-                            {
-                                _owner.JoinToPrevEntry(entryToTryJoinWithPrev);
-                            }
-                        }
-                        else
-                        {
-                            _owner.RemoveEntry(sliceEntry);
-                        }
+                        sliceEntry.Length = processedCount;
                     }
+
+                    _writeInProgress = false;
                 }
             }
 
             /// <inheritdoc/>
-            public override bool TryWrite(ReadOnlySpan<T> items, out int written)
+            public int TryWrite(ReadOnlySpan<T> items)
             {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override ValueTask<int> WriteAsync(ReadOnlySpan<T> items, CancellationToken cancellationToken = default)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override bool TryWriteWithOwnership(T[] items)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override ValueTask<VoidResult> WriteAsyncWithOwnership(T[] items, CancellationToken cancellationToken = default)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override void PartialFree(int newCount, ref ChannelWriterBufferSlice<T> writeSlice)
-            {
-#if DEBUG
-                VxArgs.NonNegative(newCount, nameof(newCount));
-#endif
-                lock (_owner._syncRoot)
+                using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
                 {
-                    var sliceEntry = _owner._sliceEntriesRegistry[writeSlice.Id];
+                    EnsureSequentialUsage();
 
-                    Debug.Assert(newCount <= sliceEntry.Length, "newCount <= sliceEntry.AllocatedLength");
-
-                    int decreaseSize = sliceEntry.Length - newCount;
-
-                    // Updating global state
-                    _owner._allocLimitLeft += decreaseSize;
-
-                    if (_owner.IsLastEntry(sliceEntry))
+                    if (_owner._isCompleted)
                     {
-                        // Updating global state
-                        _owner._allocatedSize -= decreaseSize;
+                        throw new ChannelClosedException();
                     }
 
-                    sliceEntry.Length = newCount;
+                    // Shit in - shit out
+                    if (items.Length == 0)
+                    {
+                        return 0;
+                    }
+
+                    int spaceLeft = guard.GetFreeSpaceForWrite();
+
+                    if (spaceLeft == 0)
+                    {
+                        return 0;
+                    }
+
+                    int amountToWrite = Math.Min(spaceLeft, items.Length);
+                    int writtenCount = amountToWrite;
+
+                    guard.NotifyWritten(amountToWrite);
+
+                    int sourcePosition = 0;
+
+                    // Perform copying.
+                    while (amountToWrite > 0)
+                    {
+                        var target = _owner.TryAllocateUnsafe(amountToWrite);
+                        amountToWrite -= target.Length;
+                        for (int i = 0; i < target.Length; i++)
+                        {
+                            target[i] = items[sourcePosition++];
+                        }
+                    }
+
+                    return writtenCount;
                 }
-
-                writeSlice.DecreaseLength(newCount);
             }
 
             /// <inheritdoc/>
-            public override ValueTask<bool> WaitToWriteValueTaskAsync(CancellationToken cancellationToken = default)
+            public bool TryWriteWithOwnership(ArraySegment<T> items)
             {
                 throw new NotImplementedException();
             }
 
             /// <inheritdoc/>
-            public override ValueTask<VoidResult> WriteValueTaskAsync(T item, CancellationToken cancellationToken = default)
+            public async ValueTask<int> WriteAsync(ArraySegment<T> items, CancellationToken cancellationToken = default)
             {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override bool TryComplete(Exception error = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override bool TryWrite(T item)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <inheritdoc/>
-            public override bool TryStartWrite(int count, out ChannelWriterBufferSlice<T> slice)
-            {
-#if DEBUG
-                VxArgs.NonNegative(count, nameof(count));
-#endif
-                lock (_owner._syncRoot)
+                if (items.Count == 0)
                 {
-                    // Even we have space we need to strictly follow _owner._maxBufferLength limit.
-                    count = Math.Min(count, _owner._allocLimitLeft);
+                    return 0;
+                }
 
-                    // Checking if there are any free space.
-                    if ((_owner._allocatedSize < _owner._buffer.Length) || (count == 0))
+                using (var seqGuard = new SequentialUsageGuard(this))
+                {
+                    while (true)
                     {
-                        slice = default;
-                        return false;
-                    }
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                    int bufferLength = _owner._buffer.Length;
+                        Task<VoidResult> taskToAwait;
 
-                    int writeStartOffset = (_owner._freePosition + _owner._allocatedSize) & _owner._bufferSizeMask;
-                    int sliceLength = _owner._freePosition - writeStartOffset;
-
-                    if (sliceLength > 0)
-                    {
-                        // The case where unallocated space is not overlapped over buffer end.
-                        sliceLength = Math.Min(count, sliceLength);
-                        _owner._allocatedSize += sliceLength;
-                    }
-                    else
-                    {
-                        // Unallocated space is overlapped over buffer end
-                        // ---
-                        sliceLength = bufferLength - writeStartOffset;
-                        if (count < sliceLength)
+                        using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
                         {
-                            // First part of unallocated space is big enough to fit required buffer size.
-                            sliceLength = count;
-                            _owner._allocatedSize += sliceLength;
-                        }
-                        else
-                        {
-                            // First part of unallocated space cannot fit all required "count"
-                            // So we try to choose biggest part of unallocated space: first or second (overlapping).
-                            // ====
-                            if (_owner._freePosition < sliceLength)
+                            if (_owner._isCompleted)
                             {
-                                // Choosing non overlapping part.
-                                _owner._allocatedSize += sliceLength;
+                                throw new ChannelClosedException();
                             }
-                            else
+
+                            seqGuard.OnStateGuardEntered();
+
+                            int spaceLeft = guard.GetFreeSpaceForWrite();
+                            if (spaceLeft > 0)
                             {
-                                // Choosing second (overlapping part).
-                                // ----
-                                writeStartOffset = 0;
-                                if (_owner._freePosition < count)
+                                int amountToWrite = Math.Min(spaceLeft, items.Count);
+                                guard.NotifyWritten(amountToWrite);
+                                int writtenCount = amountToWrite;
+
+                                int sourcePosition = items.Offset;
+
+                                // Perform copying.
+                                while (amountToWrite > 0)
                                 {
-                                    // If second part is less than required count, than we allocating buffer totally.
-                                    sliceLength = _owner._freePosition;
-                                    _owner._allocatedSize = bufferLength;
+                                    var target = _owner.TryAllocateUnsafe(amountToWrite);
+                                    amountToWrite -= target.Length;
+                                    for (int i = 0; i < target.Length; i++)
+                                    {
+                                        target[i] = items.Array[sourcePosition++];
+                                    }
                                 }
-                                else
-                                {
-                                    // Second part have more than enough space to fit "count"
-                                    _owner._allocatedSize += sliceLength + count;
-                                    sliceLength = count;
-                                }
+
+                                return writtenCount;
                             }
+
+                            Debug.Assert(_owner._writeSpaceAvailableCs != null);
+                            taskToAwait = _owner._writeSpaceAvailableCs.Task;
                         }
+
+                        await taskToAwait.WithCancellation(cancellationToken);
+
+                        // TODO: put this to avoid possible recursion.
+                        // await Task.Yield();
                     }
-
-                    _owner._allocLimitLeft -= sliceLength;
-
-                    // Allocating slice entry
-                    var newEntry = _owner.InsertNewEntryLast();
-
-                    newEntry.Status = SliceEntryStatus.AllocatedForWrite;
-                    newEntry.Start = writeStartOffset;
-                    newEntry.Length = sliceLength;
-
-                    // Returning result.
-                    slice = new ChannelWriterBufferSlice<T>(_owner._buffer, writeStartOffset, sliceLength, newEntry.Id);
-                    return true;
                 }
             }
 
             /// <inheritdoc/>
-            public override Task<bool> WaitToWriteAsync(CancellationToken cancellationToken = default)
+            public async ValueTask<int> WriteAsync<TItems>(TItems items, CancellationToken cancellationToken = default)
+                where TItems : IEnumerable<T>
+            {
+                using (var enumerator = items.GetEnumerator())
+                {
+                    if (!enumerator.MoveNext())
+                    {
+                        // No items
+                        return 0;
+                    }
+
+                    using (var seqGuard = new SequentialUsageGuard(this))
+                    {
+                        while (true)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            Task<VoidResult> taskToAwait;
+
+                            using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                            {
+                                if (_owner._isCompleted)
+                                {
+                                    throw new ChannelClosedException();
+                                }
+
+                                seqGuard.OnStateGuardEntered();
+
+                                if (guard.GetFreeSpaceForWrite() > 0)
+                                {
+                                    int writtenCount = 0;
+                                    while (_owner._allocatedCount < _owner._maxBufferLength)
+                                    {
+                                        // ReSharper disable once AccessToDisposedClosure
+                                        T item = enumerator.Current;
+
+                                        guard.NotifyWritten(1);
+
+                                        writtenCount++;
+
+                                        var sliceEntry = _owner._sliceEntries.Last?.Value;
+
+                                        if ((sliceEntry == null)
+                                            || (sliceEntry.Status != SliceEntryStatus.Data)
+                                            || !sliceEntry.TryWriteLast(item))
+                                        {
+                                            _owner.AllocateNewEntry().TryWriteLast(item);
+                                        }
+
+                                        // ReSharper disable once AccessToDisposedClosure
+                                        if (!enumerator.MoveNext())
+                                        {
+                                            return writtenCount;
+                                        }
+                                    }
+                                }
+
+                                Debug.Assert(_owner._writeSpaceAvailableCs != null);
+                                taskToAwait = _owner._writeSpaceAvailableCs.Task;
+                            }
+
+                            await taskToAwait.WithCancellation(cancellationToken);
+
+                            // TODO: put this to avoid possible recursion.
+                            // await Task.Yield();
+                        }
+                    }
+                }
+            }
+
+            public int TryWrite<TItems>(TItems items)
+                where TItems : IEnumerable<T>
+            {
+                using (var enumerator = items.GetEnumerator())
+                {
+                    using (var guard = new StateWriteGuard<TSyncObject>(_syncObject, _owner))
+                    {
+                        EnsureSequentialUsage();
+
+                        if (_owner._isCompleted)
+                        {
+                            throw new ChannelClosedException();
+                        }
+
+                        if (!enumerator.MoveNext())
+                        {
+                            // No items
+                            return 0;
+                        }
+
+                        if (guard.GetFreeSpaceForWrite() == 0)
+                        {
+                            return 0;
+                        }
+
+                        int writtenCount = 0;
+
+                        while (_owner._allocatedCount < _owner._maxBufferLength)
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            T item = enumerator.Current;
+
+                            guard.NotifyWritten(1);
+
+                            writtenCount++;
+
+                            var sliceEntry = _owner._sliceEntries.Last?.Value;
+
+                            if ((sliceEntry == null)
+                                || (sliceEntry.Status != SliceEntryStatus.Data)
+                                || !sliceEntry.TryWriteLast(item))
+                            {
+                                _owner.AllocateNewEntry().TryWriteLast(item);
+                            }
+
+                            // ReSharper disable once AccessToDisposedClosure
+                            if (!enumerator.MoveNext())
+                            {
+                                return writtenCount;
+                            }
+                        }
+
+                        return writtenCount;
+                    }
+                }
+            }
+
+            /// <inheritdoc/>
+            public ValueTask<bool> WriteWithOwnershipAsync(
+                ArraySegment<T> items,
+                CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
+            }
+
+            private void EnsureSequentialUsage()
+            {
+                if (_writeInProgress)
+                {
+                    throw new InvalidOperationException("Every writer should be used sequentially.");
+                }
+            }
+
+            private struct SequentialUsageGuard : IDisposable
+            {
+                private readonly BatchModeBufferWriter<TSyncObject> _writer;
+
+                private bool _writeStarted;
+
+                public SequentialUsageGuard(BatchModeBufferWriter<TSyncObject> writer)
+                {
+                    _writer = writer;
+                    _writeStarted = false;
+                }
+
+                public void OnStateGuardEntered()
+                {
+                    if (!_writeStarted)
+                    {
+                        _writer.EnsureSequentialUsage();
+                        _writeStarted = true;
+                        _writer._writeInProgress = true;
+                    }
+                }
+
+                /// <inheritdoc/>
+                public void Dispose()
+                {
+                    if (_writeStarted)
+                    {
+                        using (_writer._syncObject.Lock())
+                        {
+                            _writer._writeInProgress = false;
+                        }
+                    }
+                }
             }
         }
     }
