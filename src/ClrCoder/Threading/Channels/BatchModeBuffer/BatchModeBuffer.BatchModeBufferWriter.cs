@@ -445,12 +445,16 @@ namespace ClrCoder.Threading.Channels
                                 // Perform copying.
                                 while (amountToWrite > 0)
                                 {
-                                    var target = _owner.TryAllocateUnsafe(amountToWrite);
-                                    amountToWrite -= target.Length;
-                                    for (int i = 0; i < target.Length; i++)
+                                    void DoWrite()
                                     {
-                                        target[i] = items.Array[sourcePosition++];
+                                        var target = _owner.TryAllocateUnsafe(amountToWrite);
+                                        amountToWrite -= target.Length;
+                                        for (int i = 0; i < target.Length; i++)
+                                        {
+                                            target[i] = items.Array[sourcePosition++];
+                                        }
                                     }
+                                    DoWrite();
                                 }
 
                                 return writtenCount;

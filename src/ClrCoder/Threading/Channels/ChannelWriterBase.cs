@@ -142,19 +142,25 @@ namespace ClrCoder.Threading.Channels
         {
             if (await WaitToWriteAsync(cancellationToken))
             {
-                ReadOnlySpan<T> itemsSpan = items;
-                int writtenCount = 0;
-                for (int i = 0; i < itemsSpan.Length; i++)
+                int DoWrite()
                 {
-                    if (!TryWrite(itemsSpan[writtenCount]))
+                    ReadOnlySpan<T> itemsSpan = items;
+                    int writtenCount = 0;
+                    for (int i = 0; i < itemsSpan.Length; i++)
                     {
-                        break;
+                        if (!TryWrite(itemsSpan[writtenCount]))
+                        {
+                            break;
+                        }
+
+                        writtenCount++;
                     }
 
-                    writtenCount++;
+                    return writtenCount;
                 }
 
-                return writtenCount;
+
+                return DoWrite();
             }
 
             throw new ChannelClosedException();
