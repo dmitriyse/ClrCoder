@@ -217,9 +217,10 @@ namespace ClrCoder.ComponentModel.IndirectX
                 Critical.Assert(
                     _objectCreationTask.Value.IsCompleted,
                     "Creator lock should be removed only after object instantiation completes.");
+
+                _initTempLock = null;
             }
 
-            _initTempLock = null;
 
             // --------- We are under tree lock --------------
             if (!_locks.Remove(instanceLock))
@@ -424,7 +425,12 @@ namespace ClrCoder.ComponentModel.IndirectX
         {
             try
             {
-                SetDisposeSuspended(!Locks.All(x => x is IxInstanceChildLock));
+                bool nonChildLocksExists = !Locks.All(x => x is IxInstanceChildLock);
+                SetDisposeSuspended(nonChildLocksExists);
+                if (!nonChildLocksExists && ProviderNode.AutoDisposeEnabled)
+                {
+                    DisposeAsync();
+                }
             }
             catch (InvalidOperationException)
             {

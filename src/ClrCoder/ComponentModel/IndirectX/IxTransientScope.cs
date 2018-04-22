@@ -36,6 +36,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 (a, b, c, d, e) => { throw new NotImplementedException(); },
+                false,
                 obj => TaskEx.CompletedTask)
         {
         }

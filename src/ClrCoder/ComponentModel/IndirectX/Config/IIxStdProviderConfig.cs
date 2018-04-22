@@ -31,6 +31,11 @@ namespace ClrCoder.ComponentModel.IndirectX
         IIxInstanceBuilderConfig InstanceBuilder { get; }
 
         /// <summary>
+        /// Enables auto dispose when no more external locks exists.
+        /// </summary>
+        bool AutoDisposeEnabled { get; }
+
+        /// <summary>
         /// Overrides dispose operation.
         /// </summary>
         [CanBeNull]

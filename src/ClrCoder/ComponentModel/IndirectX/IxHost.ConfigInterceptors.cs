@@ -344,8 +344,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         exportFilter,
                         exportToParent,
                         importFilter,
-                        scopeBinder,
-                        cfg.DisposeHandler);
+                        scopeBinder);
                 };
         }
 
@@ -429,6 +428,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         exportToParent,
                         importFilter,
                         scopeBinder,
+                        cfg.AutoDisposeEnabled,
                         cfg.DisposeHandler);
                 };
         }

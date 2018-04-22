@@ -12,7 +12,7 @@ namespace ClrCoder.Imaging.Raw
     /// <summary>
     /// The raw video stream source.
     /// </summary>
-    public interface IRawVideoStreamSource
+    public interface IRawVideoStreamSource : IAsyncDisposable
     {
         /// <summary>
         /// The video format of the source.

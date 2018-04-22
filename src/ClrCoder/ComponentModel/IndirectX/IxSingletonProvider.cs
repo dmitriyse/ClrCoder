@@ -28,8 +28,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxVisibilityFilter exportFilter,
             IxVisibilityFilter exportToParentFilter,
             IxVisibilityFilter importFilter,
-            IxScopeBinderDelegate scopeBinder,
-            IxDisposeHandlerDelegate disposeHandler)
+            IxScopeBinderDelegate scopeBinder)
             : base(
                 host,
                 parentNode,
@@ -39,7 +38,8 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 scopeBinder,
-                disposeHandler)
+                config.AutoDisposeEnabled,
+                config.DisposeHandler)
         {
             if (parentNode == null)
             {

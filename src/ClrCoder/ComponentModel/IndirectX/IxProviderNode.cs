@@ -29,6 +29,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxVisibilityFilter exportToParentFilter,
             IxVisibilityFilter importFilter,
             IxScopeBinderDelegate scopeBinder,
+            bool autoDisposeEnabled,
             IxDisposeHandlerDelegate disposeHandler)
         {
             if (host == null)
@@ -79,6 +80,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             ExportToParentFilter = exportToParentFilter;
             ImportFilter = importFilter;
             ScopeBinder = scopeBinder;
+            AutoDisposeEnabled = autoDisposeEnabled;
             DisposeHandler = disposeHandler;
 
             ParentNode?.RegisterChild(this);
@@ -94,6 +96,8 @@ namespace ClrCoder.ComponentModel.IndirectX
         public IxVisibilityFilter ImportFilter { get; }
 
         public IxScopeBinderDelegate ScopeBinder { get; }
+
+        public bool AutoDisposeEnabled { get; }
 
         public IxDisposeHandlerDelegate DisposeHandler { get; }
 

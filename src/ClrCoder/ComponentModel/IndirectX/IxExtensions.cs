@@ -68,6 +68,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IIxVisibilityFilterConfig exportFilter = null,
             IIxInstanceBuilderConfig instanceBuilder = null,
             IIxMultiplicityConfig multiplicity = null,
+            bool autoDisposeEnabled = false,
             IxDisposeHandlerDelegate disposeHandler = null,
             Action<IIxBuilder<ICollection<IIxProviderNodeConfig>>> nodes = null)
         {
@@ -80,6 +81,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                                   ImportFilter = importFilter,
                                   ExportFilter = exportFilter,
                                   ExportToParentFilter = exportToParentFilter,
+                                  AutoDisposeEnabled = autoDisposeEnabled,
                                   DisposeHandler = disposeHandler
                               };
 

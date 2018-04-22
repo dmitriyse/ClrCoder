@@ -27,6 +27,7 @@ namespace ClrCoder.ComponentModel.IndirectX
             IxVisibilityFilter exportToParentFilter,
             IxVisibilityFilter importFilter,
             IxScopeBinderDelegate scopeBinder,
+            bool autoDisposeEnabled,
             IxDisposeHandlerDelegate disposeHandler)
             : base(
                 host,
@@ -37,6 +38,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 scopeBinder,
+                autoDisposeEnabled,
                 disposeHandler)
         {
             VxArgs.NotNull(parentNode, nameof(parentNode));

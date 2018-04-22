@@ -20,11 +20,20 @@ namespace ClrCoder.Imaging.Raw
         /// <param name="imagePixelFormat">The pixel format of frames.</param>
         /// <param name="resolution">The raw video resolution.</param>
         /// <param name="fps">The frames per second for equidistant video stream or null for others.</param>
-        public RawVideoStreamFormat(RawPixelFormatCode imagePixelFormat, Size resolution, double? fps)
+        /// <param name="haveJitter">
+        /// Shows that frames timestamps have jitter and actual fps can slightly differ from the
+        /// <see cref="Fps"/>.
+        /// </param>
+        public RawVideoStreamFormat(
+            RawPixelFormatCode imagePixelFormat,
+            Size resolution,
+            double? fps,
+            bool haveJitter)
         {
             ImagePixelFormat = imagePixelFormat;
             Resolution = resolution;
             Fps = fps;
+            HaveJitter = haveJitter;
         }
 
         /// <summary>
@@ -38,9 +47,14 @@ namespace ClrCoder.Imaging.Raw
         public Size Resolution { get; }
 
         /// <summary>
-        /// The frames per second for equidistant video stream or null for others.
+        /// The frames per second for equidistant video stream or <see langword="null"/> for others.
         /// </summary>
         public double? Fps { get; }
+
+        /// <summary>
+        /// Shows that frames timestamps have jitter and actual fps can slightly differ from the <see cref="Fps"/>.
+        /// </summary>
+        public bool HaveJitter { get; }
 
         /// <inheritdoc/>
         public bool Equals(RawVideoStreamFormat other)

@@ -27,7 +27,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 null,
                 new IxStdProviderConfig
                     {
-                        Identifier = new IxIdentifier(typeof(object))
+                        Identifier = new IxIdentifier(typeof(object)),
                     },
                 null,
                 identifier => true,
@@ -38,6 +38,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                         Critical.Assert(false, "Not supported.");
                         return null;
                     },
+                false,
                 obj => TaskEx.CompletedTask)
         {
         }

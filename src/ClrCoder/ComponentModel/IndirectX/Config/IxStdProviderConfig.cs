@@ -27,6 +27,9 @@ namespace ClrCoder.ComponentModel.IndirectX
         [CanBeNull]
         public virtual IIxInstanceBuilderConfig InstanceBuilder { get; set; }
 
+        /// <inheritdoc/>
+        public virtual bool AutoDisposeEnabled { get; set; }
+
         /// <summary>
         /// Overrides dispose operation.
         /// </summary>

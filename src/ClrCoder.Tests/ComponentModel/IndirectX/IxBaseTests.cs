@@ -168,6 +168,52 @@ namespace ClrCoder.Tests.ComponentModel.IndirectX
         }
 
         /// <summary>
+        /// Tests disposing through IIxSelf.
+        /// </summary>
+        /// <returns>Async execution TPL task.</returns>
+        [Test]
+        public async Task Auto_dispose_test()
+        {
+            await (await new IxHostBuilder()
+                       .Configure(
+                           rootNodes =>
+                               rootNodes
+                                   .Add<DummyDisposable>(
+                                       instanceBuilder: new IxClassInstanceBuilderConfig<DummyDisposable>(),
+                                       multiplicity: new IxPerResolveMultiplicityConfig(),
+                                       autoDisposeEnabled: true))
+                       .Build())
+                .AsyncUsing(
+                    async host =>
+                    {
+                        var wasCalled = false;
+                        DummyDisposable dummyTmp;
+                        using (IxLock<DummyDisposable> dummyLock =
+                            await host.Resolver.Get<DummyDisposable>())
+                        {
+                            dummyLock.Target.DisposeAction = () => { wasCalled = true; };
+                            dummyTmp = dummyLock.Target;
+                        }
+
+                        dummyTmp.Disposed.Wait(TimeSpan.FromSeconds(5));
+
+                        wasCalled.Should().BeTrue();
+
+                        wasCalled = false;
+                        using (IxLock<DummyDisposable> dummyLock =
+                            await host.Resolver.Get<DummyDisposable>())
+                        {
+                            dummyLock.Target.DisposeAction = () => { wasCalled = true; };
+                            dummyTmp = dummyLock.Target;
+                        }
+
+                        dummyTmp.Disposed.Wait(TimeSpan.FromSeconds(5));
+
+                        wasCalled.Should().BeTrue();
+                    });
+        }
+
+        /// <summary>
         /// Dependencies registered directly in some object should be resolved by this object.
         /// </summary>
         /// <returns>Async execution TPL task.</returns>

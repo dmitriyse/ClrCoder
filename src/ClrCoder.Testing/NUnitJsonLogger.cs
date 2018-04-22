@@ -130,7 +130,7 @@ namespace ClrCoder.Testing
         {
             if (_worker == null)
             {
-                TestContext.Write(msg);
+                //// TestContext.Write(msg);
                 TestContext.Progress.Write(msg);
             }
             else
@@ -138,7 +138,7 @@ namespace ClrCoder.Testing
                 _worker.RunAsync(
                     () =>
                         {
-                            TestContext.Write(msg);
+                            //// TestContext.Write(msg);
                             TestContext.Progress.Write(msg);
                         });
             }
@@ -148,7 +148,7 @@ namespace ClrCoder.Testing
         {
             if (_worker == null)
             {
-                TestContext.WriteLine(msg);
+                //// TestContext.WriteLine(msg);
                 TestContext.Progress.WriteLine(msg);
             }
             else
@@ -156,7 +156,7 @@ namespace ClrCoder.Testing
                 _worker.RunAsync(
                     () =>
                         {
-                            TestContext.WriteLine(msg);
+                            //// TestContext.WriteLine(msg);
                             TestContext.Progress.WriteLine(msg);
                         });
             }

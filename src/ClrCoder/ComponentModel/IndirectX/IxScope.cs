@@ -33,6 +33,7 @@ namespace ClrCoder.ComponentModel.IndirectX
                 exportToParentFilter,
                 importFilter,
                 host.ScopeBinderBuilder.Delegate(new IxRegistrationScopeBindingConfig()),
+                false,
                 obj => TaskEx.CompletedTask)
         {
             // Adding self provided as default for children.
