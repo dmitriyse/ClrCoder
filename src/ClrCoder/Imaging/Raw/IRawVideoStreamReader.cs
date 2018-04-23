@@ -6,6 +6,8 @@
 #if !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_3
 namespace ClrCoder.Imaging.Raw
 {
+    using System.Threading;
+
     using NodaTime;
 
     using Threading.Channels;
@@ -13,7 +15,7 @@ namespace ClrCoder.Imaging.Raw
     /// <summary>
     /// The video stream reader interface.
     /// </summary>
-    public interface IRawVideoStreamReader : IChannelReader<IRawVideoFrame>
+    public interface IRawVideoStreamReader : IChannelReader<IRawVideoFrame>, IAsyncDisposable
     {
         /// <summary>
         /// Binding of the video stream to the real world.
