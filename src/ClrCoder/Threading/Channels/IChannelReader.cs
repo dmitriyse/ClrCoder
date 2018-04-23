@@ -43,7 +43,7 @@ namespace ClrCoder.Threading.Channels
         /// </summary>
         /// <param name="item">The read item, or a default value if no item could be read.</param>
         /// <returns><see langword="true"/> if an item was read; otherwise, <see langword="false"/> if no item was read.</returns>
-        bool TryRead(out T item);
+        bool TryRead([CanBeNull] out T item);
 
         /// <summary>
         /// Returns a <see cref="ValueTask{T}"/> that will complete when data is available to read.

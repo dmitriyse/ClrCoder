@@ -11,7 +11,7 @@ namespace ClrCoder.Imaging.Raw
     using Threading.Channels;
 
     /// <summary>
-    /// The video stram reader interface.
+    /// The video stream reader interface.
     /// </summary>
     public interface IRawVideoStreamReader : IChannelReader<IRawVideoFrame>
     {
