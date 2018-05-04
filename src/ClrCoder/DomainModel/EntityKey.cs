@@ -16,7 +16,7 @@ namespace ClrCoder.DomainModel
     /// <typeparam name="TKey">Final key type.</typeparam>
     [Immutable]
     [PublicAPI]
-    public abstract class EntityKey<T, TKey> : IEntityKey<TKey>
+    public abstract class EntityKey<T, TKey> : IEntityKey<TKey>, ISimpleEntityKey<T>
         where TKey : EntityKey<T, TKey>
         where T : IEquatable<T>
     {
