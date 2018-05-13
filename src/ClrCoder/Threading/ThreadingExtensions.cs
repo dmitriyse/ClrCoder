@@ -723,6 +723,46 @@ namespace ClrCoder.Threading
         }
 
         /// <summary>
+        /// Creates wrapper task that is sensitive to the provided cancellation token.
+        /// </summary>
+        /// <typeparam name="T">The type of the item.</typeparam>
+        /// <param name="task">The original task object.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The wrapped task.</returns>
+        public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
+        {
+
+            if (task == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            if (!cancellationToken.CanBeCanceled)
+            {
+                await task;
+            }
+
+            var cs = new TaskCompletionSource<VoidResult>();
+            cancellationToken.Register(
+                () =>
+                    {
+                        cs.SetException(new OperationCanceledException(cancellationToken));
+                    });
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var t = await Task.WhenAny(new Task[] { task, cs.Task });
+            if (task.IsCompleted)
+            {
+                return;
+            }
+
+            // Should throw an exception.
+            var vr = cs.Task.Result;
+
+            throw new InvalidOperationException("This is totally impossible state.");
+        }
+
+        /// <summary>
         /// The parallel loop with async body.
         /// </summary>
         /// <typeparam name="T">The type of the data in the <paramref name="source"/>.</typeparam>
