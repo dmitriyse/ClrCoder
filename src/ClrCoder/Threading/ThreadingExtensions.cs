@@ -710,14 +710,15 @@ namespace ClrCoder.Threading
                     });
             cancellationToken.ThrowIfCancellationRequested();
 
-            var t = await Task.WhenAny(new Task[] { task, cs.Task });
+            var t = await Task.WhenAny(task, cs.Task);
+
             if (task.IsCompleted)
             {
-                return task.Result;
+                return await task;
             }
 
             // Should throw an exception.
-            var vr = cs.Task.Result;
+            var vr = cs.Task.GetAwaiter().GetResult();
 
             throw new InvalidOperationException("This is totally impossible state.");
         }
@@ -750,14 +751,16 @@ namespace ClrCoder.Threading
                     });
             cancellationToken.ThrowIfCancellationRequested();
 
-            var t = await Task.WhenAny(new Task[] { task, cs.Task });
+            var t = await Task.WhenAny(task, cs.Task);
+
             if (task.IsCompleted)
             {
+                await task;
                 return;
             }
 
             // Should throw an exception.
-            var vr = cs.Task.Result;
+            var vr = cs.Task.GetAwaiter().GetResult();
 
             throw new InvalidOperationException("This is totally impossible state.");
         }
