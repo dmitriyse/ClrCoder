@@ -25,6 +25,12 @@ namespace ClrCoder.ComponentModel.IndirectX
         /// </summary>
         public Delegate Func { get; }
 
+        public static IxDelegateInstanceBuilderConfig New<TResult>(Func<ValueTask<TResult>> func)
+        {
+            VxArgs.NotNull(func, nameof(func));
+            return new IxDelegateInstanceBuilderConfig(func);
+        }
+
         public static IxDelegateInstanceBuilderConfig New<T, TResult>(Func<T, ValueTask<TResult>> func)
         {
             VxArgs.NotNull(func, nameof(func));
