@@ -64,7 +64,12 @@ namespace ClrCoder.DomainModel
         /// <inheritdoc/>
         public bool Equals([CanBeNull] TKey other)
         {
-            return Id.Equals(other);
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Id.Equals(other.Id);
         }
 
         /// <inheritdoc/>
