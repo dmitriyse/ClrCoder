@@ -36,6 +36,8 @@ namespace ClrCoder.Threading.Channels
             VxArgs.NotNull(innerChannel, nameof(innerChannel));
 
             InnerChannel = innerChannel;
+            Reader = new ChannelAdapterReader(this);
+            Writer = new ChannelAdapterWriter(this);
         }
 
         /// <summary>

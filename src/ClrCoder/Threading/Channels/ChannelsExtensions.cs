@@ -69,33 +69,36 @@ namespace ClrCoder.Threading.Channels
                     {
                         if (!reader.TryRead(out item))
                         {
-                            continue;
-                        }
 
-                        if (!await reader.WaitToReadAsync(readCancellationToken))
-                        {
-                            Exception error = null;
-                            try
+                            if (!await reader.WaitToReadAsync(readCancellationToken))
                             {
-                                await reader.Completion;
-                            }
-                            catch (Exception ex)
-                            {
-                                error = ex;
-                            }
-                            finally
-                            {
+                                Exception error = null;
                                 try
                                 {
-                                    await producerCompletionPassthroughProc(error);
+                                    await reader.Completion;
                                 }
                                 catch (Exception ex)
                                 {
-                                    handlersError = ex;
+                                    error = ex;
                                 }
-                            }
+                                finally
+                                {
+                                    try
+                                    {
+                                        await producerCompletionPassthroughProc(error);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        handlersError = ex;
+                                    }
+                                }
 
-                            return;
+                                return;
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                     }
                     catch (Exception error)

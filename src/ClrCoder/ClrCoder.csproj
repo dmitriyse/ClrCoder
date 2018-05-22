@@ -87,4 +87,10 @@
     <PackageReference Include="System.Memory" Version="4.5.0-rc1" />
     <ProjectReference Include="..\ClrCoder.UniformPath\ClrCoder.UniformPath.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>..\..\..\..\..\..\Users\user\.nuget\packages\microsoft.codeanalysis.csharp\1.3.0\lib\netstandard1.3\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
