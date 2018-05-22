@@ -22,6 +22,15 @@ namespace ClrCoder.Threading.Channels
     public interface IChannelWriter<T> : IDisposable
     {
         /// <summary>
+        /// Gets a <see cref="ValueTask"/> that completes when no more data will ever
+        /// be possible to write to the channel.
+        /// </summary>
+        /// <remarks>
+        /// Task is slow, we needs IValueTaskSource everywhere !
+        /// </remarks>
+        ValueTask Completion { get; }
+
+        /// <summary>
         /// Mark the channel as being complete, meaning no more items will be written to it.
         /// </summary>
         /// <param name="error">Optional Exception indicating a failure that's causing the channel to complete.</param>

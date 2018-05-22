@@ -48,6 +48,8 @@ namespace ClrCoder.Threading.Channels
                 GC.SuppressFinalize(this);
             }
 
+            public ValueTask Completion  => throw new NotImplementedException();
+
             /// <inheritdoc/>
             public void Complete(Exception error = null)
             {

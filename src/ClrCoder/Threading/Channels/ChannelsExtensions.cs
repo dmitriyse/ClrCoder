@@ -31,54 +31,173 @@ namespace ClrCoder.Threading.Channels
         public static async Task Copy<T>(
             this IChannelReader<T> reader,
             IChannelWriter<T> writer,
-            bool allowDropLast = true,
             CancellationToken cancellationToken = default,
-            CancellationToken writeLastCancellationToken = default)
+            ChannelCompletionPassthroughProc producerCompletionPassthroughProc = null,
+            ChannelCompletionPassthroughProc consumerCompletionPassthroughProc = null,
+            Func<T, ValueTask> handleLostItemsProc = null)
         {
             VxArgs.NotNull(reader, nameof(reader));
             VxArgs.NotNull(writer, nameof(writer));
-            if (!allowDropLast && (cancellationToken == default))
-            {
-                throw new ArgumentException(
-                    "cancellationToken should be specified, if allowDropLast is false",
-                    nameof(cancellationToken));
-            }
-
-            if (allowDropLast && (writeLastCancellationToken != default))
-            {
-                throw new ArgumentException(
-                    "writeLastCancellationToken should be used only when allowDropLast is false.",
-                    nameof(writeLastCancellationToken));
-            }
 
             CancellationToken readCancellationToken = cancellationToken;
-            CancellationToken writeCancellationToken = allowDropLast ? cancellationToken : writeLastCancellationToken;
 
-            while (true)
+            if (producerCompletionPassthroughProc == null)
             {
-                // Once read successed. 
-                if (reader.TryRead(out var frame))
+                producerCompletionPassthroughProc = (error, isFromChannel) =>
+                    {
+                        writer.TryComplete(error);
+                        return new ValueTask();
+                    };
+            }
+
+            if (consumerCompletionPassthroughProc == null)
+            {
+                consumerCompletionPassthroughProc = (error, isFromChannel) =>
+                    {
+                        reader.TryComplete(error);
+                        return new ValueTask();
+                    };
+            }
+
+            Exception handlersError = null;
+            try
+            {
+                while (true)
                 {
+                    T item;
+                    try
+                    {
+                        if (!reader.TryRead(out item))
+                        {
+                            continue;
+                        }
+
+                        if (!await reader.WaitToReadAsync(readCancellationToken))
+                        {
+                            Exception error = null;
+                            try
+                            {
+                                await reader.Completion;
+                            }
+                            catch (Exception ex)
+                            {
+                                error = ex;
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    await producerCompletionPassthroughProc(error);
+                                }
+                                catch (Exception ex)
+                                {
+                                    handlersError = ex;
+                                }
+                            }
+
+                            return;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        try
+                        {
+                            await producerCompletionPassthroughProc(error, false);
+                        }
+                        catch (Exception ex)
+                        {
+                            handlersError = ex;
+                        }
+
+                        return;
+                    }
+
                     // Trying to write, until target closed, or cancellation raised.
                     while (true)
                     {
-                        if (writer.TryWrite(frame))
+                        try
                         {
-                            break;
-                        }
+                            if (writer.TryWrite(item))
+                            {
+                                break;
+                            }
 
-                        if (!await writer.WaitToWriteAsync(writeCancellationToken))
+                            if (!await writer.WaitToWriteAsync(readCancellationToken))
+                            {
+                                if (handleLostItemsProc != null)
+                                {
+                                    try
+                                    {
+                                        await handleLostItemsProc(item);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        handlersError = ex;
+                                    }
+                                }
+
+                                Exception error = null;
+                                try
+                                {
+                                    await writer.Completion;
+                                }
+                                catch (Exception ex)
+                                {
+                                    error = ex;
+                                }
+                                finally
+                                {
+                                    try
+                                    {
+                                        await consumerCompletionPassthroughProc(error);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        handlersError = ex;
+                                    }
+                                }
+
+                                return;
+                            }
+                        }
+                        catch (Exception error)
                         {
-                            throw new TargetWriterBecomesUnusableException();
+                            try
+                            {
+                                if (handleLostItemsProc != null)
+                                {
+                                    try
+                                    {
+                                        await handleLostItemsProc(item);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        handlersError = ex;
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    await consumerCompletionPassthroughProc(error, false);
+                                }
+                                catch (Exception ex)
+                                {
+                                    handlersError = ex;
+                                }
+                            }
+
+                            return;
                         }
                     }
                 }
-                else
+            }
+            finally
+            {
+                if (handlersError != null)
                 {
-                    if (!await reader.WaitToReadAsync(readCancellationToken))
-                    {
-                        return;
-                    }
+                    throw handlersError;
                 }
             }
         }

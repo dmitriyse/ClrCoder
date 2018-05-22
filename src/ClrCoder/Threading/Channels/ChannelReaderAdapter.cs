@@ -69,6 +69,18 @@ namespace ClrCoder.Threading.Channels
         }
 
         /// <inheritdoc/>
+        public void Complete(Exception error = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc/>
+        public bool TryComplete(Exception error = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc/>
         public ValueTask<ChannelReaderBufferSlice<T>> StartReadAsync(
             int count,
             CancellationToken cancellationToken = default)

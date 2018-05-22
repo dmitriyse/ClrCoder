@@ -31,6 +31,9 @@ namespace ClrCoder.Threading.Channels
             InnerWriter = innerWriter;
         }
 
+        /// <inheritdoc/>
+        public ValueTask Completion => throw new NotSupportedException();
+
         /// <summary>
         /// The inner BCL channel writer.
         /// </summary>

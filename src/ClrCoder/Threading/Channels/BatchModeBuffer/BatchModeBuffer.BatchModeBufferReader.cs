@@ -649,6 +649,18 @@ namespace ClrCoder.Threading.Channels
                 }
             }
 
+            /// <inheritdoc/>
+            public void Complete(Exception error = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc/>
+            public bool TryComplete(Exception error = null)
+            {
+                throw new NotImplementedException();
+            }
+
             private void EnsureSequentialUsage()
             {
                 if (_readInProgress)

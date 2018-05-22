@@ -20,6 +20,7 @@ namespace ClrCoder.Threading.Channels
     /// Specifies the type of data that may be read from the channel.
     /// </typeparam>
     [NoReorder]
+    [PublicAPI]
     public interface IChannelReader<T> : IDisposable
     {
         /// <summary>
@@ -127,6 +128,19 @@ namespace ClrCoder.Threading.Channels
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the read operation.</param>
         /// <returns>A <see cref="ValueTask{T}"/> that represents the asynchronous read operation.</returns>
         ValueTask<ArraySegment<T>> ReadAsync(int count, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Closes writes to the channel.
+        /// </summary>
+        /// <param name="error">The error to propagate to the writers.</param>
+        void Complete(Exception error = null);
+
+        /// <summary>
+        /// Tries to close writes to the channel.
+        /// </summary>
+        /// <param name="error">The error to propagate to the writers.</param>
+        /// <returns><see langword="true"/>, if this call has closed the writes, <see langword="false"/> otherwise.</returns>
+        bool TryComplete(Exception error = null);
 
         #endregion
     }

@@ -30,6 +30,9 @@ namespace ClrCoder.Threading.Channels
         }
 
         /// <inheritdoc/>
+        public ValueTask Completion => throw new NotImplementedException();
+
+        /// <inheritdoc/>
         public virtual void Complete(Exception error = null)
         {
             if (TryComplete(error))
@@ -158,7 +161,6 @@ namespace ClrCoder.Threading.Channels
 
                     return writtenCount;
                 }
-
 
                 return DoWrite();
             }
