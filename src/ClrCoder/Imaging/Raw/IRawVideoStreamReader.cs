@@ -18,6 +18,11 @@ namespace ClrCoder.Imaging.Raw
     public interface IRawVideoStreamReader : IChannelReader<IRawVideoFrame>, IAsyncDisposable
     {
         /// <summary>
+        /// The video stream format.
+        /// </summary>
+        RawVideoStreamFormat VideoFormat { get; }
+
+        /// <summary>
         /// Binding of the video stream to the real world.
         /// </summary>
         Instant? FirstFrameInstant { get; }
