@@ -19,7 +19,7 @@ namespace ClrCoder
     public static class CryptoUtils
     {
         [ThreadStatic]
-        private static Md5HashTheadVariables _md5Variables;
+        private static Md5HashThreadVariables _md5Variables;
 
         /// <summary>
         /// Calculates MD5 hash for a UTF-16(no BOM) representation of the specified string.
@@ -36,7 +36,7 @@ namespace ClrCoder
 
             if (_md5Variables == null)
             {
-                _md5Variables = new Md5HashTheadVariables();
+                _md5Variables = new Md5HashThreadVariables();
             }
 
             byte[] strBytes = EncodingEx.UnicodeNoBom.GetBytes(str);
@@ -58,11 +58,36 @@ namespace ClrCoder
 
             if (_md5Variables == null)
             {
-                _md5Variables = new Md5HashTheadVariables();
+                _md5Variables = new Md5HashThreadVariables();
             }
 
             return new Guid(_md5Variables.Md5.ComputeHash(data));
         }
+
+        /// <summary>
+        /// Calculates MD5 hash for the provided string and converts data to base64 string.
+        /// </summary>
+        /// <param name="str">The string to calculate hash.</param>
+        /// <returns>MD5 hash encoded in the base 64.</returns>
+        [PublicAPI]
+        public static string Md5HashBase64([CanBeNull]this string str)
+        {
+            if (str == null)
+            {
+                var zeroBytes = new byte[16];
+                return Convert.ToBase64String(zeroBytes);
+            }
+
+            if (_md5Variables == null)
+            {
+                _md5Variables = new Md5HashThreadVariables();
+            }
+
+            byte[] strBytes = EncodingEx.UnicodeNoBom.GetBytes(str);
+            byte[] hashBytes = _md5Variables.Md5.ComputeHash(strBytes);
+            return Convert.ToBase64String(hashBytes);
+        }
+
         /// <summary>
         /// Calculates MD5 hash for the provided binary data.
         /// </summary>
@@ -78,15 +103,15 @@ namespace ClrCoder
 
             if (_md5Variables == null)
             {
-                _md5Variables = new Md5HashTheadVariables();
+                _md5Variables = new Md5HashThreadVariables();
             }
 
             return _md5Variables.Md5.ComputeHash(data);
         }
 
-        private class Md5HashTheadVariables
+        private class Md5HashThreadVariables
         {
-            public Md5HashTheadVariables()
+            public Md5HashThreadVariables()
             {
                 Md5 = MD5.Create();
                 Md5.Initialize();
